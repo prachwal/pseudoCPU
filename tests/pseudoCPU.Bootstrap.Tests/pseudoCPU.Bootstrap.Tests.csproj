@@ -23,6 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\pseudoCPU.Cli\pseudoCPU.Cli.csproj" />
     <ProjectReference Include="..\..\src\pseudoCPU.Core\pseudoCPU.Core.csproj" />
   </ItemGroup>
 

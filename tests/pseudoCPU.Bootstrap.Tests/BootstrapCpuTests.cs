@@ -84,7 +84,7 @@ public class BootstrapCpuTests
 
         cpu.LoadProgram([0xA9, 0x01]);
 
-        var exception = Assert.Throws<InvalidOperationException>(() => cpu.Run(1));
+        var exception = Assert.Throws<BootstrapCpuStepLimitExceededException>(() => cpu.Run(1));
 
         Assert.Contains("did not halt", exception.Message);
         Assert.False(cpu.IsHalted);
@@ -174,7 +174,7 @@ public class BootstrapCpuTests
     {
         var cpu = new BootstrapCpu();
 
-        cpu.LoadProgram([0xA9, 0x03, 0xC9, 0x03, 0xF0, 0x02, 0xA9, 0xFF, 0x00], 0x0600);
+        cpu.LoadProgram([0x4C, 0x06, 0x06, 0xA9, 0xFF, 0x00, 0xA9, 0x03, 0xC9, 0x03, 0xF0, 0x02, 0xA9, 0xFF, 0x00], 0x0600);
 
         cpu.RunUntilHalt();
 
@@ -182,7 +182,24 @@ public class BootstrapCpuTests
         Assert.Equal(0x03, cpu.A);
         Assert.True(cpu.Zero);
         Assert.False(cpu.Negative);
-        Assert.Equal(0x0609, cpu.PC);
+        Assert.Equal(0x060F, cpu.PC);
+    }
+
+    [Trait("Category", "ControlFlow")]
+    [Fact]
+    public void BeqDoesNotBranchWhenZeroFlagIsClear()
+    {
+        var cpu = new BootstrapCpu();
+
+        cpu.LoadProgram([0xA9, 0x01, 0xC9, 0x02, 0xF0, 0x02, 0xA9, 0xFF, 0x00], 0x0700);
+
+        cpu.RunUntilHalt();
+
+        Assert.True(cpu.IsHalted);
+        Assert.Equal(0xFF, cpu.A);
+        Assert.False(cpu.Zero);
+        Assert.True(cpu.Negative);
+        Assert.Equal(0x0709, cpu.PC);
     }
 
     [Trait("Category", "ControlFlow")]
@@ -200,6 +217,39 @@ public class BootstrapCpuTests
         Assert.False(cpu.Zero);
         Assert.True(cpu.Negative);
         Assert.Equal(0x0709, cpu.PC);
+    }
+
+    [Trait("Category", "ControlFlow")]
+    [Fact]
+    public void BneDoesNotBranchWhenZeroFlagIsSet()
+    {
+        var cpu = new BootstrapCpu();
+
+        cpu.LoadProgram([0xA9, 0x01, 0xC9, 0x01, 0xD0, 0x02, 0xA9, 0xFF, 0x00], 0x0800);
+
+        cpu.RunUntilHalt();
+
+        Assert.True(cpu.IsHalted);
+        Assert.Equal(0xFF, cpu.A);
+        Assert.False(cpu.Zero);
+        Assert.True(cpu.Negative);
+        Assert.Equal(0x0809, cpu.PC);
+    }
+
+    [Trait("Category", "ControlFlow")]
+    [Fact]
+    public void BneBranchesBackwardWithNegativeOffset()
+    {
+        var cpu = new BootstrapCpu();
+
+        cpu.LoadProgram([0xA9, 0x01, 0xC9, 0x02, 0xD0, 0xFE, 0x00], 0x0900);
+
+        cpu.RunSteps(3);
+
+        Assert.False(cpu.IsHalted);
+        Assert.False(cpu.Zero);
+        Assert.True(cpu.Negative);
+        Assert.Equal(0x0904, cpu.PC);
     }
 
 }

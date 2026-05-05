@@ -66,7 +66,7 @@ public sealed class BootstrapCpu
 
         if (!IsHalted)
         {
-            throw new InvalidOperationException("Program did not halt within the configured step limit.");
+            throw new BootstrapCpuStepLimitExceededException("Program did not halt within the configured step limit.");
         }
 
         return executedSteps;
