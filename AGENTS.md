@@ -23,6 +23,11 @@
 - Kazdy task implementacyjny musi zawierac: cel, zakres, kryteria akceptacji, plan weryfikacji i zaleznosci.
 - Jesli wiedza powstaje w trakcie pracy, utrwal ja w issue body lub komentarzu i odwoluj sie do numerow issue w kolejnych zadaniach.
 
+## Shell And GitHub CLI Hygiene
+- W tym srodowisku uzywaj `python3`, nie `python`.
+- Przy wysylaniu dluzszych tresci do GitHub (`gh issue comment`, `gh issue edit`, `gh pr create`) unikaj inline shell stringow; zapisuj body do pliku i przekazuj przez `--body-file`, zeby backticki, cudzyslowy i nowe linie nie uszkadzaly wiadomosci.
+- Gdy pracujesz z JSON z `gh ... --json` lub innym CLI, preferuj `jq` do odczytu i transformacji zamiast parsowania tekstu wyjsciowego shellowymi hackami.
+
 ## .NET And Tests
 - Docelowy toolchain repo to `.NET 8` CLI; `global.json` preferuje SDK 8, ale moze roll-forward do nowszego lokalnie zainstalowanego SDK.
 - Dopoki repo nie ma solution/test projects, nie wymyslaj komend `dotnet new`, `dotnet build` ani `dotnet test`, chyba ze uzytkownik wyraznie zleci bootstrap kodu.
