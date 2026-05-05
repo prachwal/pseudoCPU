@@ -138,6 +138,19 @@ public class BootstrapCpuTests
 
     [Trait("Category", "InstructionSlice")]
     [Fact]
+    public void UnsupportedOpcodeThrowsAControlledError()
+    {
+        var cpu = new BootstrapCpu();
+
+        cpu.LoadProgram([0x02]);
+
+        var exception = Assert.Throws<NotSupportedException>(() => cpu.Step());
+
+        Assert.Contains("Unsupported bootstrap opcode", exception.Message);
+    }
+
+    [Trait("Category", "InstructionSlice")]
+    [Fact]
     public void RunStopsAtBrkAndPreservesFinalState()
     {
         var cpu = new BootstrapCpu();
