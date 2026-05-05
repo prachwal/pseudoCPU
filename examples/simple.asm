@@ -1,0 +1,4 @@
+LDA #$01
+TAX
+INX
+BRK

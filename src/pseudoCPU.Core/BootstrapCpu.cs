@@ -39,32 +39,37 @@ public sealed class BootstrapCpu
         RunUntilHalt(maxSteps);
     }
 
-    public void RunSteps(int stepCount)
+    public int RunSteps(int stepCount)
     {
         if (stepCount < 0)
         {
             throw new ArgumentOutOfRangeException(nameof(stepCount));
         }
 
-        for (var step = 0; step < stepCount && !IsHalted; step++)
+        var executedSteps = 0;
+        for (; executedSteps < stepCount && !IsHalted; executedSteps++)
         {
             Step();
         }
+
+        return executedSteps;
     }
 
-    public void RunUntilHalt(int maxSteps = 10_000)
+    public int RunUntilHalt(int maxSteps = 10_000)
     {
         if (maxSteps <= 0)
         {
             throw new ArgumentOutOfRangeException(nameof(maxSteps));
         }
 
-        RunSteps(maxSteps);
+        var executedSteps = RunSteps(maxSteps);
 
         if (!IsHalted)
         {
             throw new InvalidOperationException("Program did not halt within the configured step limit.");
         }
+
+        return executedSteps;
     }
 
     public void Step()
@@ -98,6 +103,22 @@ public sealed class BootstrapCpu
                     _memory[address] = A;
                     break;
                 }
+            case BootstrapOpcode.CmpImmediate:
+                CompareWithAccumulator(FetchByte());
+                break;
+            case BootstrapOpcode.JmpAbsolute:
+                {
+                    var lowByte = FetchByte();
+                    var highByte = FetchByte();
+                    PC = (ushort)(lowByte | (highByte << 8));
+                    break;
+                }
+            case BootstrapOpcode.BeqRelative:
+                BranchRelative(Zero, FetchByte());
+                break;
+            case BootstrapOpcode.BneRelative:
+                BranchRelative(!Zero, FetchByte());
+                break;
             case BootstrapOpcode.Brk:
                 IsHalted = true;
                 break;
@@ -116,5 +137,23 @@ public sealed class BootstrapCpu
     {
         Zero = value == 0;
         Negative = (value & 0x80) != 0;
+    }
+
+    private void CompareWithAccumulator(byte value)
+    {
+        var result = unchecked((byte)(A - value));
+        Zero = A == value;
+        Negative = (result & 0x80) != 0;
+    }
+
+    private void BranchRelative(bool condition, byte offsetByte)
+    {
+        if (!condition)
+        {
+            return;
+        }
+
+        var offset = unchecked((sbyte)offsetByte);
+        PC = unchecked((ushort)(PC + offset));
     }
 }

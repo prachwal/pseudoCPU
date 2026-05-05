@@ -10,6 +10,10 @@ public class BootstrapOpcodeDecoderTests
     [InlineData(0xAA, BootstrapOpcode.Tax)]
     [InlineData(0xE8, BootstrapOpcode.Inx)]
     [InlineData(0x8D, BootstrapOpcode.StaAbsolute)]
+    [InlineData(0xC9, BootstrapOpcode.CmpImmediate)]
+    [InlineData(0x4C, BootstrapOpcode.JmpAbsolute)]
+    [InlineData(0xF0, BootstrapOpcode.BeqRelative)]
+    [InlineData(0xD0, BootstrapOpcode.BneRelative)]
     [InlineData(0x00, BootstrapOpcode.Brk)]
     public void DecodesBootstrapSliceOpcodes(byte opcode, BootstrapOpcode expected)
     {
