@@ -8,14 +8,14 @@
 - Zrodlem prawdy dla planu, taskow, postepu i wynikow testow sa GitHub Issues, nie sam chat.
 - Do planowania uzywaj `/issue-plan`; do realizacji taska `/issue-execute`; do zsynchronizowania stanu issue z repo `/issue-sync`.
 - Planner ma utrzymywac strukture epic -> taski i zapisywac decyzje, kryteria akceptacji, zaleznosci oraz strategie weryfikacji bezposrednio w issue.
-- Executor ma dopisywac do issue komentarze startowe, postep, komendy weryfikacyjne i wynik koncowy z dokladnym statusem testow.
+- Executor ma dopisywac do issue komentarze startowe, postep, komendy weryfikacyjne, wynik koncowy i jawny sygnal zamkniecia taska.
 
 ## Git Branch Workflow
 - Kazda faza pracy startuje z nowego brancha roboczego utworzonego przed rozpoczeciem zmian.
-- Po kazdym passie zakonczonym pozytywna, waska weryfikacja wykonaj commit wszystkich zmian z tej fazy, wypchnij branch roboczy, zmerguj go do branchu bazowego i usun branch roboczy.
+- Po kazdym passie zakonczonym pozytywna, waska weryfikacja wykonaj commit wszystkich zmian z tej fazy, wypchnij branch roboczy, zmerguj go do branchu bazowego, usun branch roboczy i zamknij issue, jesli task jest zakonczony.
 - Jesli potrzebny jest kolejny pass lub kolejna faza, utworz nowy branch zamiast kontynuowac prace na poprzednim.
 - W pustym repo bez historii commitow pierwszy commit moze powstac na branchu roboczym; po weryfikacji potraktuj ustawienie `main` na ten commit jako merge inicjalizujacy i usun branch roboczy.
-- Nazwa brancha, wynik push/merge oraz moment zamkniecia issue po zakonczeniu prac trzeba odnotowac w issue lub komentarzu issue dla danej fazy.
+- Nazwa brancha, wynik push/merge i status zamkniecia issue trzeba odnotowac w issue lub komentarzu issue dla danej fazy.
 
 ## GitHub Issues
 - Zarzadzaj issue przez `gh issue ...`; nie zakladaj recznej pracy w przegladarce.

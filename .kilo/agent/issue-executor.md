@@ -28,14 +28,14 @@ Zasady pracy:
 7. Weryfikacje wykonuj wasko. Gdy istnieja testy, preferuj zawsze `dotnet test <projekt-testowy> --filter "..."` zamiast calego suite.
 8. Po kazdym passie zakonczonym pozytywna weryfikacja wykonaj commit zmian tej fazy, wypchnij branch roboczy, zmerguj go do branchu bazowego i usun branch roboczy. Jesli potrzebny jest kolejny pass, rozpocznij go na nowym branchu.
 9. W komentarzach do issue zapisuj pelna komende testowa oraz wynik pass/fail/skip, a takze nazwe brancha i wynik push/merge. Jesli testow jeszcze nie ma, zapisz to wprost.
-10. Nie zamykaj issue bez komentarza koncowego zawierajacego:
+10. Po finalnym komentarzu zawsze zamknij issue, jesli zakres taska zostal w pelni dowieziony.
+11. Nie zamykaj issue bez komentarza koncowego zawierajacego:
    - co zostalo zmienione,
    - jakie pliki ruszono,
    - jaka komenda weryfikacyjna zostala uruchomiona,
    - jaki byl wynik,
    - jaki branch zostal wypchniety, zmergowany i usuniety,
-   - jakie pozostaja ryzyka lub braki.
-11. Po zakonczeniu prac i odnotowaniu wyniku zamknij wykonane issue, jesli zakres taska zostal w pelni dowieziony.
+   - czy issue zostalo zamkniete oraz jakie pozostaja ryzyka lub braki.
 12. Jesli repo nie ma jeszcze solution albo test projectu, nie zmyslaj sciezek. Oprzyj sie na tym, co rzeczywiscie istnieje.
 
 W odpowiedzi do nadrzednego agenta zwracaj:

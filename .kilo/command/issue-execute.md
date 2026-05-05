@@ -13,4 +13,5 @@ Wymagania:
 5. Uruchom najwezsza sensowna weryfikacje; jesli testy istnieja, preferuj `dotnet test <projekt-testowy> --filter "..."`.
 6. Po pozytywnym passie wykonaj commit, push, merge do branchu bazowego i usun branch roboczy.
 7. Dodaj komentarz koncowy z lista zmian, nazwa brancha, dokladna komenda testowa i wynikiem, a nastepnie zamknij issue jesli zakres zostal zakonczony.
-8. W odpowiedzi zwroc numer issue, zmienione pliki i wynik weryfikacji.
+8. Jesli issue nie zostalo zamkniete, opisz w komentarzu powod i nastepny krok.
+9. W odpowiedzi zwroc numer issue, zmienione pliki i wynik weryfikacji.
