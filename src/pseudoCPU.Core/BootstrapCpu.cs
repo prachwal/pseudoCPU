@@ -36,15 +36,30 @@ public sealed class BootstrapCpu
 
     public void Run(int maxSteps = 10_000)
     {
+        RunUntilHalt(maxSteps);
+    }
+
+    public void RunSteps(int stepCount)
+    {
+        if (stepCount < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(stepCount));
+        }
+
+        for (var step = 0; step < stepCount && !IsHalted; step++)
+        {
+            Step();
+        }
+    }
+
+    public void RunUntilHalt(int maxSteps = 10_000)
+    {
         if (maxSteps <= 0)
         {
             throw new ArgumentOutOfRangeException(nameof(maxSteps));
         }
 
-        for (var step = 0; step < maxSteps && !IsHalted; step++)
-        {
-            Step();
-        }
+        RunSteps(maxSteps);
 
         if (!IsHalted)
         {

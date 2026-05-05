@@ -93,6 +93,22 @@ public class BootstrapCpuTests
 
     [Trait("Category", "InstructionSlice")]
     [Fact]
+    public void RunStepsExecutesFixedNumberOfInstructionsWithoutRequiringHalt()
+    {
+        var cpu = new BootstrapCpu();
+
+        cpu.LoadProgram([0xA9, 0x01, 0xAA, 0x00], 0x0400);
+
+        cpu.RunSteps(2);
+
+        Assert.False(cpu.IsHalted);
+        Assert.Equal(0x01, cpu.A);
+        Assert.Equal(0x01, cpu.X);
+        Assert.Equal(0x0403, cpu.PC);
+    }
+
+    [Trait("Category", "InstructionSlice")]
+    [Fact]
     public void LoadProgramRejectsProgramThatDoesNotFitInMemory()
     {
         var cpu = new BootstrapCpu();
@@ -128,7 +144,7 @@ public class BootstrapCpuTests
 
         cpu.LoadProgram([0xA9, 0x01, 0xAA, 0x8D, 0x00, 0x20, 0x00], 0x0400);
 
-        cpu.Run();
+        cpu.RunUntilHalt();
 
         Assert.True(cpu.IsHalted);
         Assert.Equal(0x01, cpu.A);
