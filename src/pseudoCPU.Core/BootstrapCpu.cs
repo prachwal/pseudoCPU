@@ -76,13 +76,13 @@ public sealed class BootstrapCpu
                 UpdateZeroAndNegative(X);
                 break;
             case BootstrapOpcode.StaAbsolute:
-            {
-                var lowByte = FetchByte();
-                var highByte = FetchByte();
-                var address = (ushort)(lowByte | (highByte << 8));
-                _memory[address] = A;
-                break;
-            }
+                {
+                    var lowByte = FetchByte();
+                    var highByte = FetchByte();
+                    var address = (ushort)(lowByte | (highByte << 8));
+                    _memory[address] = A;
+                    break;
+                }
             case BootstrapOpcode.Brk:
                 IsHalted = true;
                 break;

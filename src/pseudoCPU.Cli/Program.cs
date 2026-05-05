@@ -1,4 +1,4 @@
-﻿using pseudoCPU.Core;
+using pseudoCPU.Core;
 
 _ = typeof(BootstrapMarker);
 

@@ -1,8 +1,9 @@
 # AGENTS.md
 
 ## Repo State
-- Repo zawiera na razie tylko scaffolding workflow: `AGENTS.md`, `.kilo/`, `.github/ISSUE_TEMPLATE/` i `global.json`.
-- Nie ma jeszcze solution, projektow `.csproj`, kodu aplikacji ani testow. Nie zgaduj nazw projektow, sciezek ani komend build/test poza tym, co pojawi sie pozniej w repo.
+- Repo zawiera solution `pseudoCPU.sln` oraz projekty `src/pseudoCPU.Core`, `src/pseudoCPU.Cli` i `tests/pseudoCPU.Bootstrap.Tests`.
+- Bootstrap CPU obejmuje tylko slice `LDA #imm`, `TAX`, `INX`, `STA abs` i `BRK`; nie rozszerzaj zakresu bez osobnego issue.
+- Nie zgaduj dodatkowych projektow, sciezek ani komend build/test poza tym, co jest faktycznie obecne w repo.
 
 ## Primary Workflow
 - Zrodlem prawdy dla planu, taskow, postepu i wynikow testow sa GitHub Issues, nie sam chat.
@@ -30,9 +31,9 @@
 
 ## .NET And Tests
 - Docelowy toolchain repo to `.NET 8` CLI; `global.json` preferuje SDK 8, ale moze roll-forward do nowszego lokalnie zainstalowanego SDK.
-- Dopoki repo nie ma solution/test projects, nie wymyslaj komend `dotnet new`, `dotnet build` ani `dotnet test`, chyba ze uzytkownik wyraznie zleci bootstrap kodu.
-- Gdy testy juz istnieja, preferuj zawsze weryfikacje zawezona do zmienionej funkcjonalnosci: `dotnet test <projekt-testowy> --filter "..."`.
+- Gdy testy juz istnieja, preferuj zawsze weryfikacje zawezona do zmienionej funkcjonalnosci: `dotnet test tests/pseudoCPU.Bootstrap.Tests/pseudoCPU.Bootstrap.Tests.csproj --filter "..."`.
 - Nie uruchamiaj pelnego `dotnet test` dla calego repo bez wyraznej potrzeby; w issue zapisuj dokladna komende filtra uzytego do weryfikacji.
+- Dla zmian formatowania i konfiguracji utrzymuj `.editorconfig` jako zrodlo prawdy dla stylu C#.
 
 ## Domain Focus
 - Repo jest przygotowywane pod pseudo CPU inspirowane zgodnoscia opcode-level z 6502, ale wdrazane etapami w ograniczonym zakresie.
