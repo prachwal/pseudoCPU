@@ -41,6 +41,26 @@ public static class BootstrapAssembler
                     bytes.Add((byte)BootstrapOpcode.StaAbsolute);
                     bytes.AddRange(ParseWordLiteral(operand, mnemonic));
                     break;
+                case "CMP":
+                    RequireOperand(mnemonic, operand, '#');
+                    bytes.Add((byte)BootstrapOpcode.CmpImmediate);
+                    bytes.Add(ParseByteLiteral(operand[1..], mnemonic));
+                    break;
+                case "JMP":
+                    RequireOperand(mnemonic, operand);
+                    bytes.Add((byte)BootstrapOpcode.JmpAbsolute);
+                    bytes.AddRange(ParseWordLiteral(operand, mnemonic));
+                    break;
+                case "BEQ":
+                    RequireOperand(mnemonic, operand);
+                    bytes.Add((byte)BootstrapOpcode.BeqRelative);
+                    bytes.Add(unchecked((byte)ParseRelativeOffset(operand, mnemonic)));
+                    break;
+                case "BNE":
+                    RequireOperand(mnemonic, operand);
+                    bytes.Add((byte)BootstrapOpcode.BneRelative);
+                    bytes.Add(unchecked((byte)ParseRelativeOffset(operand, mnemonic)));
+                    break;
                 case "BRK":
                     RequireNoOperand(mnemonic, operand);
                     bytes.Add((byte)BootstrapOpcode.Brk);
@@ -122,6 +142,32 @@ public static class BootstrapAssembler
         var value = ParseUnsignedLiteral(literal, 0xFFFF, mnemonic);
         yield return (byte)(value & 0xFF);
         yield return (byte)(value >> 8);
+    }
+
+    private static sbyte ParseRelativeOffset(string literal, string mnemonic)
+    {
+        var trimmed = literal.Trim();
+
+        if (trimmed.Length == 0)
+        {
+            throw new FormatException($"Instruction '{mnemonic}' contains an invalid relative offset literal '{literal}'.");
+        }
+
+        if (trimmed.StartsWith("$", StringComparison.Ordinal))
+        {
+            trimmed = trimmed[1..];
+        }
+        else if (trimmed.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
+        {
+            trimmed = trimmed[2..];
+        }
+
+        if (!sbyte.TryParse(trimmed, NumberStyles.AllowHexSpecifier, CultureInfo.InvariantCulture, out var signedValue))
+        {
+            throw new FormatException($"Instruction '{mnemonic}' contains an invalid relative offset literal '{literal}'.");
+        }
+
+        return signedValue;
     }
 
     private static ushort ParseUnsignedLiteral(string literal, ushort maxValue, string mnemonic)

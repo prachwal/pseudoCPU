@@ -167,4 +167,39 @@ public class BootstrapCpuTests
         Assert.Equal(0x01, cpu.ReadByte(0x2000));
         Assert.Equal(0x0407, cpu.PC);
     }
+
+    [Trait("Category", "ControlFlow")]
+    [Fact]
+    public void JmpCmpBeqAndBneWorkTogetherForControlFlow()
+    {
+        var cpu = new BootstrapCpu();
+
+        cpu.LoadProgram([0xA9, 0x03, 0xC9, 0x03, 0xF0, 0x02, 0xA9, 0xFF, 0x00], 0x0600);
+
+        cpu.RunUntilHalt();
+
+        Assert.True(cpu.IsHalted);
+        Assert.Equal(0x03, cpu.A);
+        Assert.True(cpu.Zero);
+        Assert.False(cpu.Negative);
+        Assert.Equal(0x0609, cpu.PC);
+    }
+
+    [Trait("Category", "ControlFlow")]
+    [Fact]
+    public void BneBranchesWhenZeroFlagIsClear()
+    {
+        var cpu = new BootstrapCpu();
+
+        cpu.LoadProgram([0xA9, 0x01, 0xC9, 0x02, 0xD0, 0x02, 0xA9, 0xFF, 0x00], 0x0700);
+
+        cpu.RunUntilHalt();
+
+        Assert.True(cpu.IsHalted);
+        Assert.Equal(0x01, cpu.A);
+        Assert.False(cpu.Zero);
+        Assert.True(cpu.Negative);
+        Assert.Equal(0x0709, cpu.PC);
+    }
+
 }

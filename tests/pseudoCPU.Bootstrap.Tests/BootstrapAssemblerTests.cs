@@ -47,6 +47,25 @@ public class BootstrapAssemblerTests
         Assert.Equal(0x0408, cpu.PC);
     }
 
+
+    [Trait("Category", "ControlFlow")]
+    [Fact]
+    public void AssemblesControlFlowSliceToExpectedBytes()
+    {
+        const string source = """
+            LDA #$03
+            CMP #$03
+            BEQ $02
+            BNE $FE
+            JMP $1234
+            BRK
+            """;
+
+        var bytes = BootstrapAssembler.Assemble(source);
+
+        Assert.Equal([0xA9, 0x03, 0xC9, 0x03, 0xF0, 0x02, 0xD0, 0xFE, 0x4C, 0x34, 0x12, 0x00], bytes);
+    }
+
     [Trait("Category", "Assembler")]
     [Theory]
     [InlineData("LDA $01", typeof(FormatException), "requires an operand starting with '#'")]
