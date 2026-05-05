@@ -58,6 +58,70 @@ public class BootstrapCpuTests
 
     [Trait("Category", "InstructionSlice")]
     [Fact]
+    public void StepAfterHaltDoesNotAdvanceState()
+    {
+        var cpu = new BootstrapCpu();
+
+        cpu.LoadProgram([0x00, 0xA9, 0xFF], 0x0800);
+        cpu.Step();
+
+        Assert.True(cpu.IsHalted);
+        Assert.Equal(0x0801, cpu.PC);
+
+        cpu.Step();
+
+        Assert.True(cpu.IsHalted);
+        Assert.Equal(0x0801, cpu.PC);
+        Assert.Equal(0x00, cpu.A);
+        Assert.Equal(0x00, cpu.X);
+    }
+
+    [Trait("Category", "InstructionSlice")]
+    [Fact]
+    public void RunThrowsWhenProgramDoesNotHaltWithinStepLimit()
+    {
+        var cpu = new BootstrapCpu();
+
+        cpu.LoadProgram([0xA9, 0x01]);
+
+        var exception = Assert.Throws<InvalidOperationException>(() => cpu.Run(1));
+
+        Assert.Contains("did not halt", exception.Message);
+        Assert.False(cpu.IsHalted);
+        Assert.Equal(0x0002, cpu.PC);
+    }
+
+    [Trait("Category", "InstructionSlice")]
+    [Fact]
+    public void LoadProgramRejectsProgramThatDoesNotFitInMemory()
+    {
+        var cpu = new BootstrapCpu();
+
+        var program = new byte[] { 0xA9, 0x01 };
+
+        var exception = Assert.Throws<ArgumentOutOfRangeException>(() => cpu.LoadProgram(program, 0xFFFF));
+
+        Assert.Contains("does not fit in memory", exception.Message);
+    }
+
+    [Trait("Category", "InstructionSlice")]
+    [Theory]
+    [InlineData(0x0000)]
+    [InlineData(0xFFFF)]
+    public void StaAbsoluteSupportsBoundaryAddresses(ushort address)
+    {
+        var cpu = new BootstrapCpu();
+
+        cpu.LoadProgram([0xA9, 0x7E, 0x8D, (byte)(address & 0xFF), (byte)(address >> 8), 0x00]);
+
+        cpu.Run();
+
+        Assert.True(cpu.IsHalted);
+        Assert.Equal(0x7E, cpu.ReadByte(address));
+    }
+
+    [Trait("Category", "InstructionSlice")]
+    [Fact]
     public void RunStopsAtBrkAndPreservesFinalState()
     {
         var cpu = new BootstrapCpu();
