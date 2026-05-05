@@ -46,4 +46,20 @@ public class BootstrapAssemblerTests
         Assert.Equal(0x2A, cpu.ReadByte(0x2000));
         Assert.Equal(0x0408, cpu.PC);
     }
+
+    [Trait("Category", "Assembler")]
+    [Theory]
+    [InlineData("LDA $01", typeof(FormatException), "requires an operand starting with '#'")]
+    [InlineData("STA #$1234", typeof(FormatException), "invalid hexadecimal literal")]
+    [InlineData("LDA #$100", typeof(OverflowException), "does not fit in the expected size")]
+    [InlineData("STA $10000", typeof(FormatException), "invalid hexadecimal literal")]
+    [InlineData("NOP", typeof(NotSupportedException), "Unsupported bootstrap mnemonic")]
+    [InlineData("LDA #", typeof(FormatException), "invalid hexadecimal literal")]
+    [InlineData("STA", typeof(FormatException), "requires an operand")]
+    public void RejectsInvalidBootstrapAssembly(string source, Type expectedException, string messageFragment)
+    {
+        var exception = Assert.Throws(expectedException, () => BootstrapAssembler.Assemble(source));
+
+        Assert.Contains(messageFragment, exception.Message);
+    }
 }
