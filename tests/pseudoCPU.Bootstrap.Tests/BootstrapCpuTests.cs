@@ -1048,6 +1048,87 @@ public class BootstrapCpuTests
     }
 
     [Trait("Category", "ControlFlow")]
+    [Theory]
+    [InlineData(0x90, false, false, false, false, 0x0704)]
+    [InlineData(0xB0, true, false, false, false, 0x0704)]
+    [InlineData(0x30, false, false, false, true, 0x0704)]
+    [InlineData(0x10, false, false, false, false, 0x0704)]
+    [InlineData(0x50, false, false, false, false, 0x0704)]
+    [InlineData(0x70, false, false, true, false, 0x0704)]
+    public void RemainingFlagDrivenBranchesUseTheExpectedStatusBits(byte opcode, bool carry, bool zero, bool overflow, bool negative, ushort expectedPc)
+    {
+        var cpu = new BootstrapCpu();
+
+        cpu.LoadProgram([opcode, 0x02, 0x00, 0xA9, 0xFF, 0x00], 0x0700);
+        cpu.Status.Carry = carry;
+        cpu.Status.Zero = zero;
+        cpu.Status.Overflow = overflow;
+        cpu.Status.Negative = negative;
+
+        cpu.Step();
+
+        Assert.Equal(expectedPc, cpu.PC);
+        Assert.False(cpu.IsHalted);
+    }
+
+    [Trait("Category", "ControlFlow")]
+    [Fact]
+    public void AdcCanFeedBcsWithRelativeBranchOffset()
+    {
+        var cpu = new BootstrapCpu();
+
+        cpu.LoadProgram([0xA9, 0xFF, 0x69, 0x01, 0xB0, 0x02, 0xA9, 0x00, 0x00], 0x0600);
+
+        cpu.RunSteps(3);
+
+        Assert.Equal(0x00, cpu.A);
+        Assert.True(cpu.Carry);
+        Assert.True(cpu.Zero);
+        Assert.False(cpu.Negative);
+        Assert.Equal(0x0608, cpu.PC);
+        Assert.False(cpu.IsHalted);
+
+        cpu.Step();
+
+        Assert.True(cpu.IsHalted);
+        Assert.Equal(0x0609, cpu.PC);
+        Assert.Equal(0x00, cpu.A);
+    }
+
+    [Trait("Category", "ControlFlow")]
+    [Fact]
+    public void BitCanFeedBvcAndBmiWithRelativeBranchOffsets()
+    {
+        var cpu = new BootstrapCpu();
+
+        cpu.LoadProgram([0xA9, 0x00, 0x24, 0x10, 0x50, 0x02, 0x30, 0x02, 0xA9, 0xFF, 0x00], 0x0600);
+        cpu.WriteByte(0x0010, 0xC0);
+
+        cpu.RunSteps(2);
+
+        Assert.True(cpu.Zero);
+        Assert.True(cpu.Status.Overflow);
+        Assert.True(cpu.Negative);
+        Assert.Equal(0x0604, cpu.PC);
+
+        cpu.Step();
+
+        Assert.Equal(0x0606, cpu.PC);
+        Assert.False(cpu.IsHalted);
+
+        cpu.Step();
+
+        Assert.Equal(0x060A, cpu.PC);
+        Assert.False(cpu.IsHalted);
+
+        cpu.Step();
+
+        Assert.True(cpu.IsHalted);
+        Assert.Equal(0x060B, cpu.PC);
+        Assert.Equal(0x00, cpu.A);
+    }
+
+    [Trait("Category", "ControlFlow")]
     [Fact]
     public void BeqDoesNotBranchWhenZeroFlagIsClear()
     {
