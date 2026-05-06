@@ -12,8 +12,15 @@ public class BootstrapCpuTests
 
         cpu.LoadProgram([0x00], 0x0600);
 
+        Assert.Equal(0x00, cpu.A);
+        Assert.Equal(0x00, cpu.X);
+        Assert.Equal(0x00, cpu.Y);
         Assert.Equal(0xFF, cpu.SP);
         Assert.Equal(0x0600, cpu.PC);
+        Assert.False(cpu.Zero);
+        Assert.False(cpu.Negative);
+        Assert.False(cpu.Carry);
+        Assert.False(cpu.IsHalted);
     }
 
     [Trait("Category", "InstructionSlice")]

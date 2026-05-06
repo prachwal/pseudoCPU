@@ -12,6 +12,8 @@ public sealed class BootstrapCpu
 
     public byte X { get; private set; }
 
+    public byte Y { get; private set; }
+
     public ushort PC { get; private set; }
 
     public byte SP { get; private set; }
@@ -36,6 +38,7 @@ public sealed class BootstrapCpu
 
         A = 0;
         X = 0;
+        Y = 0;
         PC = startAddress;
         SP = 0xFF;
         Zero = false;
