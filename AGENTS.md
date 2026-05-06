@@ -47,6 +47,7 @@
 ## Git Branch Workflow
 - Kazda faza pracy startuje z nowego brancha roboczego utworzonego przed rozpoczeciem zmian.
 - Po kazdym passie zakonczonym pozytywna, waska weryfikacja wykonaj commit wszystkich zmian z tej fazy, wypchnij branch roboczy, zmerguj go do branchu bazowego, usun branch roboczy i zamknij issue, jesli task jest zakonczony.
+- Finalizacja ma twardy limit prob: jesli cleanup/merge/close po limicie sesji nie domyka sie po ograniczonej liczbie finalization passow, zapisz task jako `failed` albo `blocked` z nastepnym krokiem zamiast odpalac ta sama petle ponownie.
 - Jesli potrzebny jest kolejny pass lub kolejna faza, utworz nowy branch zamiast kontynuowac prace na poprzednim.
 - W pustym repo bez historii commitow pierwszy commit moze powstac na branchu roboczym; po weryfikacji potraktuj ustawienie `main` na ten commit jako merge inicjalizujacy i usun branch roboczy.
 - Nazwa brancha, wynik push/merge i status zamkniecia issue trzeba odnotowac w issue lub komentarzu issue dla danej fazy.

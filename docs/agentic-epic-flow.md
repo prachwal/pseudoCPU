@@ -107,9 +107,9 @@ Wymaga:
 3. Dodaje komentarz startowy do issue przez plik body.
 4. Implementuje tylko zakres issue.
 5. Uruchamia waskie testy z issue.
-6. Dopisuje postep i wyniki do issue.
-7. Po pozytywnej weryfikacji wykonuje commit, push, merge i usuwa branch.
-8. Dodaje finalny komentarz do issue.
+6. Przed finalizacja robi jawny finalization checkpoint: zapisuje postep, potwierdza wynik testow i dzieli prace na osobny pass finalizacyjny, jesli istnieje ryzyko utraty koncowki przez limit sesji.
+7. Finalization pass obejmuje tylko commit, push, merge, cleanup brancha, finalny komentarz i ewentualne zamkniecie issue.
+8. Jeśli finalizacja nie domyka sie w ograniczonej liczbie prob, executor przestaje powtarzac ta sama petle i zapisuje task jako `failed` albo `blocked` z konkretnym nastepnym ruchem.
 9. Zamyka issue tylko wtedy, gdy Definition of Done jest spelnione.
 
 ## QC Flow

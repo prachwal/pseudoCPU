@@ -28,6 +28,8 @@ Small-task mode wymaga:
 - bez chaptera,
 - bez `docs/current-epic.md`, chyba ze task nalezy do aktywnego epica.
 
+Gdy task ma ryzyko utraty koncowki przez limit sesji, podziel go na dwa passy: implementacyjny i finalizacyjny. Finalizacyjny pass ma wykonywac tylko cleanup/commit/push/merge/comment/close i ma twardy limit prob; po jego przekroczeniu task ma zostac oznaczony jako `failed` albo `blocked` z nastepnym krokiem zamiast powtarzania tej samej petli.
+
 ### Epic mode
 
 Uzywaj dla zmian, ktore:
