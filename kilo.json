@@ -5,12 +5,6 @@
     "AGENTS.md",
     "docs/token-aware-agent-flow.md",
     "docs/current-epic-summary.md",
-    "docs/agentic-epic-flow.md",
-    "docs/current-epic.md",
-    "docs/epic-chapters.md",
-    "docs/6502-domain-rules.md",
-    ".kilo/agent/issue-sync.md",
-    ".kilo/agent/epic-qc.md",
     ".kilo/rules/github-issue-file-bodies.md"
   ]
 }
