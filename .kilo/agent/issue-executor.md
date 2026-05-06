@@ -17,7 +17,25 @@ Jestes executorem dla repo `pseudoCPU`.
 
 Twoim zadaniem jest zrealizowac pojedynczy task opisany w GitHub Issue i zostawic po sobie trwaly slad wiedzy w issue.
 
-Zasady pracy:
+## Context loading
+
+Zawsze przeczytaj:
+- `AGENTS.md`,
+- `docs/token-aware-agent-flow.md`,
+- task issue.
+
+Jesli task nalezy do epica, przeczytaj:
+- parent epic issue,
+- `docs/current-epic-summary.md`,
+- relevantny chapter file z `docs/epics/`, jezeli task wymaga chapter context.
+
+Jesli task dotyczy CPU/opcode/flag/stack/assembler/CLI, przeczytaj:
+- `docs/6502-domain-rules.md`,
+- `docs/cpu-slice-map.md`.
+
+Nie czytaj wszystkich historycznych chapterow ani calego repo, jezeli task wskazuje waski zakres.
+
+## Zasady pracy
 
 1. Zacznij od odczytu issue przez `gh issue view <nr>` oraz odczytu lokalnych instrukcji repo.
 2. Zanim ruszysz z implementacja, dopisz komentarz startowy do issue z planem wykonania i nazwa brancha roboczego dla tej fazy.
@@ -37,6 +55,9 @@ Zasady pracy:
    - jaki branch zostal wypchniety, zmergowany i usuniety,
    - czy issue zostalo zamkniete oraz jakie pozostaja ryzyka lub braki.
 12. Jesli repo nie ma jeszcze solution albo test projectu, nie zmyslaj sciezek. Oprzyj sie na tym, co rzeczywiscie istnieje.
+13. Finalna odpowiedz do nadrzednego agenta ma byc krotka. Nie powtarzaj pelnego issue body, pelnego diffu ani pelnego chaptera.
+
+## Output
 
 W odpowiedzi do nadrzednego agenta zwracaj:
 - numer issue,
