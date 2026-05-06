@@ -221,6 +221,25 @@ public class BootstrapCpuTests
     [Theory]
     [InlineData(0x00, true, false)]
     [InlineData(0x80, false, true)]
+    public void LdyImmediateUpdatesZeroAndNegativeFlags(byte value, bool expectedZero, bool expectedNegative)
+    {
+        var cpu = new BootstrapCpu();
+
+        cpu.LoadProgram([0xA0, value, 0x00]);
+
+        cpu.Step();
+
+        Assert.Equal(value, cpu.Y);
+        Assert.Equal(expectedZero, cpu.Zero);
+        Assert.Equal(expectedNegative, cpu.Negative);
+        Assert.False(cpu.Carry);
+        Assert.False(cpu.IsHalted);
+    }
+
+    [Trait("Category", "InstructionSlice")]
+    [Theory]
+    [InlineData(0x00, false, false)]
+    [InlineData(0x80, false, true)]
     public void LdxImmediateUpdatesZeroAndNegativeFlags(byte value, bool expectedZero, bool expectedNegative)
     {
         var cpu = new BootstrapCpu();
@@ -254,6 +273,86 @@ public class BootstrapCpuTests
         Assert.Equal(expectedZero, cpu.Zero);
         Assert.Equal(expectedNegative, cpu.Negative);
         Assert.Equal(expectedCarry, cpu.Carry);
+        Assert.False(cpu.IsHalted);
+    }
+
+    [Trait("Category", "InstructionSlice")]
+    [Theory]
+    [InlineData(0x00, false, false)]
+    [InlineData(0x80, false, true)]
+    public void InyUpdatesZeroAndNegativeFlags(byte value, bool expectedZero, bool expectedNegative)
+    {
+        var cpu = new BootstrapCpu();
+
+        cpu.LoadProgram([0xA0, value, 0xC8, 0x00]);
+
+        cpu.Step();
+        cpu.Step();
+
+        Assert.Equal((byte)(value + 1), cpu.Y);
+        Assert.Equal(expectedZero, cpu.Zero);
+        Assert.Equal(expectedNegative, cpu.Negative);
+        Assert.False(cpu.Carry);
+        Assert.False(cpu.IsHalted);
+    }
+
+    [Trait("Category", "InstructionSlice")]
+    [Fact]
+    public void InyWrapsFromFfTo00AndPreservesCarry()
+    {
+        var cpu = new BootstrapCpu();
+
+        cpu.LoadProgram([0xA9, 0x01, 0xC9, 0x00, 0xA0, 0xFF, 0xC8, 0x00]);
+
+        cpu.Step();
+        cpu.Step();
+        cpu.Step();
+        cpu.Step();
+
+        Assert.Equal(0x00, cpu.Y);
+        Assert.True(cpu.Zero);
+        Assert.False(cpu.Negative);
+        Assert.True(cpu.Carry);
+        Assert.False(cpu.IsHalted);
+    }
+
+    [Trait("Category", "InstructionSlice")]
+    [Theory]
+    [InlineData(0x01, true, false)]
+    [InlineData(0x80, false, false)]
+    public void DeyUpdatesZeroAndNegativeFlags(byte value, bool expectedZero, bool expectedNegative)
+    {
+        var cpu = new BootstrapCpu();
+
+        cpu.LoadProgram([0xA0, value, 0x88, 0x00]);
+
+        cpu.Step();
+        cpu.Step();
+
+        Assert.Equal((byte)(value - 1), cpu.Y);
+        Assert.Equal(expectedZero, cpu.Zero);
+        Assert.Equal(expectedNegative, cpu.Negative);
+        Assert.False(cpu.Carry);
+        Assert.False(cpu.IsHalted);
+    }
+
+    [Trait("Category", "InstructionSlice")]
+    [Fact]
+    public void DeyWrapsFrom00ToFfAndPreservesCarry()
+    {
+        var cpu = new BootstrapCpu();
+
+        cpu.LoadProgram([0xA0, 0x00, 0xA9, 0x00, 0xC9, 0x01, 0x88, 0x00]);
+
+        cpu.Step();
+        cpu.Step();
+        cpu.Step();
+        cpu.Step();
+
+        Assert.Equal(0xFF, cpu.Y);
+        Assert.False(cpu.Zero);
+        Assert.True(cpu.Negative);
+        Assert.False(cpu.Carry);
         Assert.False(cpu.IsHalted);
     }
 

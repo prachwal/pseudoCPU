@@ -130,9 +130,21 @@ public sealed class BootstrapCpu
                 A = FetchByte();
                 UpdateZeroAndNegative(A);
                 break;
+            case BootstrapOpcode.LdyImmediate:
+                Y = FetchByte();
+                UpdateZeroAndNegative(Y);
+                break;
             case BootstrapOpcode.LdxImmediate:
                 X = FetchByte();
                 UpdateZeroAndNegative(X);
+                break;
+            case BootstrapOpcode.Iny:
+                Y++;
+                UpdateZeroAndNegative(Y);
+                break;
+            case BootstrapOpcode.Dey:
+                Y--;
+                UpdateZeroAndNegative(Y);
                 break;
             case BootstrapOpcode.Tax:
                 X = A;
