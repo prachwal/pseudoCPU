@@ -127,8 +127,48 @@ public class CliTests
             Assert.Contains("CPX #$00", output);
             Assert.Contains("BNE $FB", output);
             Assert.Contains("STX $2000", output);
+            Assert.Contains("Y: 0x00", output);
             Assert.Contains("Status: Halted", output);
             Assert.Contains("Carry: true", output);
+        }
+        finally
+        {
+            Console.SetOut(originalOut);
+            Console.SetError(originalError);
+        }
+    }
+
+    [Trait("Category", "Cli")]
+    [Fact]
+    public void RunAsmEmitsTraceForYCounterLoopInstructions()
+    {
+        var examplePath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "examples", "y-counter-loop.asm"));
+        var originalOut = Console.Out;
+        var originalError = Console.Error;
+
+        try
+        {
+            Assert.True(File.Exists(examplePath), examplePath);
+
+            using var standardOut = new StringWriter();
+            using var standardError = new StringWriter();
+            Console.SetOut(standardOut);
+            Console.SetError(standardError);
+
+            var exitCode = CliApplication.Run(["run-asm", "--source", examplePath, "--start", "0x0600", "--max-steps", "100", "--trace"]);
+
+            Assert.Equal(0, exitCode);
+            Assert.Empty(standardError.ToString());
+            var output = standardOut.ToString();
+            Assert.Contains("LDY #$03", output);
+            Assert.Contains("INY", output);
+            Assert.Contains("DEY", output);
+            Assert.Contains("CPY #$00", output);
+            Assert.Contains("BNE $FB", output);
+            Assert.Contains("STY $2000", output);
+            Assert.Contains("Y=0x03", output);
+            Assert.Contains("Y: 0x00", output);
+            Assert.Contains("Status: Halted", output);
         }
         finally
         {

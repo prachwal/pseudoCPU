@@ -7,7 +7,7 @@ internal static class CliTraceFormatter
     public static string FormatStep(int stepNumber, ushort pc, byte opcode, BootstrapCpu cpu)
     {
         var mnemonic = DescribeInstruction(pc, opcode, cpu);
-        return $"#{stepNumber:D4} PC=0x{pc:X4} OPC=0x{opcode:X2} {mnemonic} A=0x{cpu.A:X2} X=0x{cpu.X:X2} Z={cpu.Zero.ToString().ToLowerInvariant()} N={cpu.Negative.ToString().ToLowerInvariant()} C={cpu.Carry.ToString().ToLowerInvariant()}";
+        return $"#{stepNumber:D4} PC=0x{pc:X4} OPC=0x{opcode:X2} {mnemonic} A=0x{cpu.A:X2} X=0x{cpu.X:X2} Y=0x{cpu.Y:X2} Z={cpu.Zero.ToString().ToLowerInvariant()} N={cpu.Negative.ToString().ToLowerInvariant()} C={cpu.Carry.ToString().ToLowerInvariant()}";
     }
 
     private static string DescribeInstruction(ushort pc, byte opcode, BootstrapCpu cpu)
@@ -21,11 +21,16 @@ internal static class CliTraceFormatter
             (byte)BootstrapOpcode.JsrAbsolute => $"JSR ${ReadWord(cpu, (ushort)(pc + 1)):X4}",
             (byte)BootstrapOpcode.Rts => "RTS",
             (byte)BootstrapOpcode.LdaImmediate => $"LDA #${cpu.ReadByte((ushort)(pc + 1)):X2}",
+            (byte)BootstrapOpcode.LdyImmediate => $"LDY #${cpu.ReadByte((ushort)(pc + 1)):X2}",
             (byte)BootstrapOpcode.LdxImmediate => $"LDX #${cpu.ReadByte((ushort)(pc + 1)):X2}",
+            (byte)BootstrapOpcode.CpyImmediate => $"CPY #${cpu.ReadByte((ushort)(pc + 1)):X2}",
             (byte)BootstrapOpcode.Tax => "TAX",
             (byte)BootstrapOpcode.Inx => "INX",
+            (byte)BootstrapOpcode.Iny => "INY",
             (byte)BootstrapOpcode.Dex => "DEX",
+            (byte)BootstrapOpcode.Dey => "DEY",
             (byte)BootstrapOpcode.StaAbsolute => $"STA ${ReadWord(cpu, (ushort)(pc + 1)):X4}",
+            (byte)BootstrapOpcode.StyAbsolute => $"STY ${ReadWord(cpu, (ushort)(pc + 1)):X4}",
             (byte)BootstrapOpcode.StxAbsolute => $"STX ${ReadWord(cpu, (ushort)(pc + 1)):X4}",
             (byte)BootstrapOpcode.CmpImmediate => $"CMP #${cpu.ReadByte((ushort)(pc + 1)):X2}",
             (byte)BootstrapOpcode.CpxImmediate => $"CPX #${cpu.ReadByte((ushort)(pc + 1)):X2}",
