@@ -1,19 +1,19 @@
 # Current Epic Summary
 
 ## State
-- Current active epic: #56
-- Current active epic status: qc
-- Last completed epic: #46
+- Current active epic: none
+- Current active epic status: idle
+- Last completed epic: #56
 - Last QC verdict: PASS
-- Follow-up from last epic: #55 completed
+- Follow-up from last epic: none
 
 ## Active Epic
-- Epic: #56 - Phase 7: full status register and core flag/arithmetic completion
-- Chapter file: `docs/epics/0056-status-alu-branches.md`
-- Tasks: #60-#67 complete, #68 pending
-- Status: qc
-- QC state: pending (#68)
-- Follow-up: TBD
+- Epic: none
+- Chapter file: n/a
+- Tasks: issue-sync complete, next planning pending for #57
+- Status: idle
+- QC state: PASS
+- Follow-up: none
 
 ## Planned Epic Queue
 - #57 - Phase 8: addressing modes, memory bus and indirect flow completion
@@ -28,8 +28,8 @@
 - Phase 10 remains the dedicated phase for labels/directives/tooling per ADR-0001.
 
 ## Next Action
-- Start QC gate #68 on a fresh work branch via `issue-executor`.
-- Keep #57-#59 planned until #56 reaches QC and sync.
+- Start planning #57 on a fresh work branch via `issue-planner`.
+- Keep #57-#59 planned until routed.
 - Before CPU/opcode/flag/stack/assembler/CLI work: read `docs/6502-domain-rules.md`.
 
 ## Context Files

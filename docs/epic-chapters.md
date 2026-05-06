@@ -23,7 +23,7 @@ Tylko issue z labelem `epic` moze byc opisane jako `Epic <nr>`. Taski, QC taski 
 
 | Done | Chapter | Epic Issue | Status | QC Verdict | Follow-up | File | Notes |
 |---|---|---:|---|---|---|---|---|
-| [ ] | Phase 7: full status register and core flag/arithmetic completion | #56 | qc | TBD | TBD | `docs/epics/0056-status-alu-branches.md` | Full status register, ALU flags, `ADC`/`SBC`, `BIT`, accumulator shifts/rotates, flag branches. |
+| [x] | Phase 7: full status register and core flag/arithmetic completion | #56 | done | PASS | none | `docs/epics/0056-status-alu-branches.md` | Full status register, ALU flags, `ADC`/`SBC`, `BIT`, accumulator shifts/rotates, flag branches. |
 | [ ] | Phase 8: addressing modes, memory bus and indirect flow completion | #57 | planned | TBD | TBD | `docs/epics/0057-addressing-bus-indirect.md` | Memory bus foundation, zero page, indexed and indirect addressing slice. |
 | [ ] | Phase 9: reset, interrupts and timing model completion | #58 | planned | TBD | TBD | `docs/epics/0058-reset-interrupts-timing.md` | Reset vectors, `BRK`, `IRQ`, `NMI`, `RTI`, timing foundation. |
 | [ ] | Phase 10: assembler, loader and developer tooling completion | #59 | planned | TBD | TBD | `docs/epics/0059-assembler-loader-tooling.md` | Labels, directives, loader format, inspection/disassembly, minimal debugger flow. |
@@ -41,7 +41,7 @@ Tylko issue z labelem `epic` moze byc opisane jako `Epic <nr>`. Taski, QC taski 
 
 | Chapter | Epic Issue | Status | File | Scope |
 |---|---:|---|---|---|
-| Phase 7: full status register and core flag/arithmetic completion | #56 | qc | `docs/epics/0056-status-alu-branches.md` | Full status register, control flags, `ADC`/`SBC`, `BIT`, accumulator shifts/rotates, flag branches, assembler/CLI/docs |
+| Phase 7: full status register and core flag/arithmetic completion | #56 | done | `docs/epics/0056-status-alu-branches.md` | Full status register, control flags, `ADC`/`SBC`, `BIT`, accumulator shifts/rotates, flag branches, assembler/CLI/docs |
 | Phase 8: addressing modes, memory bus and indirect flow completion | #57 | planned | `docs/epics/0057-addressing-bus-indirect.md` | Bus foundation, zero page, indexed and indirect forms, assembler/docs |
 | Phase 9: reset, interrupts and timing model completion | #58 | planned | `docs/epics/0058-reset-interrupts-timing.md` | Reset vectors, `BRK`, `IRQ`, `NMI`, `RTI`, timing foundation, CLI/docs |
 | Phase 10: assembler, loader and developer tooling completion | #59 | planned | `docs/epics/0059-assembler-loader-tooling.md` | Labels, `.org`/`.byte`/`.word`, loader format, disassembly, minimal debugger flow |

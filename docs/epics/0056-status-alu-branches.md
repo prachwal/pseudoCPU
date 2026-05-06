@@ -2,18 +2,18 @@
 
 ## Epic Issue
 - Epic: #56
-- Status: qc
-- Owner agent: `issue-planner`
+- Status: done
+- Owner agent: `issue-sync`
 - Execution agent: `issue-executor`
 - Quality gate agent: `epic-qc`
 
 ## Completion Checklist Entry
-- Done: [ ]
+- Done: [x]
 - Chapter: Phase 7: full status register and core flag/arithmetic completion
 - Epic issue: #56
-- Status: qc
-- QC verdict: TBD
-- Follow-up: TBD
+- Status: done
+- QC verdict: PASS
+- Follow-up: none
 
 ## Outcome
 Repo ma przejść z bootstrapowego modelu `Carry` / `Zero` / `Negative` do znacznie pełniejszej semantyki status register i kluczowych opcodes ALU oraz branchy zależnych od flag.
@@ -47,16 +47,16 @@ ADR-0005 utrwala canonical layout status byte `N V - B D I Z C` oraz bootstrapow
 - [x] #65 - implement remaining flag-driven branches and regression coverage.
 - [x] #66 - align assembler and CLI trace with status and arithmetic slice.
 - [x] #67 - update slice map and chapter docs for phase 7 core completion.
-- [ ] #68 - QC gate przez `epic-qc`.
+- [x] #68 - QC gate przez `epic-qc`.
 
 ## Acceptance Criteria
-- [ ] Full status register contract is explicit and reflected in core/state/stack behavior.
-- [ ] Planned status, ALU and branch opcodes are decoded, executed and tested.
-- [ ] Flag semantics remain explicit for `C`, `Z`, `N`, `V`, `D`, `I`, `B` within the planned scope.
-- [ ] Branch offset semantics remain tested relative to `PC` after operand fetch.
-- [ ] Assembler, trace/CLI and docs remain aligned with the delivered semantics.
-- [ ] Epic passes `epic-qc`, and any follow-up issues are linked before closure.
-- [ ] `issue-sync` confirms synced epic body and workflow docs before epic closure.
+- [x] Full status register contract is explicit and reflected in core/state/stack behavior.
+- [x] Planned status, ALU and branch opcodes are decoded, executed and tested.
+- [x] Flag semantics remain explicit for `C`, `Z`, `N`, `V`, `D`, `I`, `B` within the planned scope.
+- [x] Branch offset semantics remain tested relative to `PC` after operand fetch.
+- [x] Assembler, trace/CLI and docs remain aligned with the delivered semantics.
+- [x] Epic passes `epic-qc`, and any follow-up issues are linked before closure.
+- [x] `issue-sync` confirms synced epic body and workflow docs before epic closure.
 
 ## Verification Strategy
 - Narrow tests:
@@ -76,12 +76,12 @@ ADR-0005 utrwala canonical layout status byte `N V - B D I Z C` oraz bootstrapow
 - [x] `docs/current-epic.md`, `docs/current-epic-summary.md` i `docs/epic-chapters.md` dla stanu plan -> qc.
 
 ## QC Gate
-- QC issue/comment: TBD
-- Verdict: TBD
+- QC issue/comment: https://github.com/prachwal/pseudoCPU/issues/56#issuecomment-4391199298
+- Verdict: PASS
 - Follow-up issues:
-  - TBD
+  - none
 
 ## Final Notes
-- Final status: qc
-- Remaining risks: brak znanych blockerów przed #68; QC może jeszcze ujawnić drift dokumentacji względem implementacji.
+- Final status: done
+- Remaining risks: none
 - Permanent decisions: status register jest jawny i testowalny, a phase 7 domyka core status/ALU/branch slice bez wchodzenia w interrupt flow.
