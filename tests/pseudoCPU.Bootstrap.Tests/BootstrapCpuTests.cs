@@ -317,6 +317,139 @@ public class BootstrapCpuTests
         Assert.False(cpu.IsHalted);
     }
 
+    public enum ZeroPageRegister
+    {
+        A,
+        X,
+        Y,
+    }
+
+    private static byte ReadRegister(BootstrapCpu cpu, ZeroPageRegister register)
+    {
+        return register switch
+        {
+            ZeroPageRegister.A => cpu.A,
+            ZeroPageRegister.X => cpu.X,
+            ZeroPageRegister.Y => cpu.Y,
+            _ => throw new ArgumentOutOfRangeException(nameof(register), register, null),
+        };
+    }
+
+    [Trait("Category", "InstructionSlice")]
+    [Theory]
+    [InlineData(0xA5, 0x10, 0x00, ZeroPageRegister.A)]
+    [InlineData(0xA6, 0x11, 0x80, ZeroPageRegister.X)]
+    [InlineData(0xA4, 0x12, 0x42, ZeroPageRegister.Y)]
+    public void ZeroPageLoadsReadResolvedAddressAndUpdateTargetRegister(byte opcode, byte zeroPageAddress, byte memoryValue, ZeroPageRegister targetRegister)
+    {
+        var cpu = new BootstrapCpu();
+
+        cpu.LoadProgram([opcode, zeroPageAddress, 0x00], 0x0600);
+        cpu.WriteByte(zeroPageAddress, memoryValue);
+        cpu.Status.Carry = true;
+        cpu.Status.Decimal = true;
+
+        cpu.Step();
+
+        Assert.Equal(memoryValue, ReadRegister(cpu, targetRegister));
+        Assert.Equal(memoryValue == 0, cpu.Zero);
+        Assert.Equal((memoryValue & 0x80) != 0, cpu.Negative);
+        Assert.True(cpu.Carry);
+        Assert.True(cpu.Status.Decimal);
+        Assert.Equal(0x0602, cpu.PC);
+        Assert.False(cpu.IsHalted);
+    }
+
+    [Trait("Category", "InstructionSlice")]
+    [Theory]
+    [InlineData(0xA2, 0x01, 0xB5, 0xFF, 0x5A, ZeroPageRegister.A)]
+    [InlineData(0xA0, 0x02, 0xB6, 0xFE, 0x80, ZeroPageRegister.X)]
+    [InlineData(0xA2, 0x03, 0xB4, 0xFD, 0x00, ZeroPageRegister.Y)]
+    public void ZeroPageIndexedLoadsWrapAroundAndUpdateTargetRegister(byte indexLoadOpcode, byte indexLoadValue, byte opcode, byte zeroPageAddress, byte memoryValue, ZeroPageRegister targetRegister)
+    {
+        var cpu = new BootstrapCpu();
+
+        cpu.LoadProgram([indexLoadOpcode, indexLoadValue, opcode, zeroPageAddress, 0x00], 0x0600);
+        cpu.WriteByte((ushort)(byte)(zeroPageAddress + indexLoadValue), memoryValue);
+        cpu.WriteByte(zeroPageAddress, 0x99);
+
+        cpu.Step();
+        cpu.Status.Carry = true;
+        cpu.Status.Decimal = true;
+        cpu.Step();
+
+        Assert.Equal(memoryValue, ReadRegister(cpu, targetRegister));
+        Assert.Equal(memoryValue == 0, cpu.Zero);
+        Assert.Equal((memoryValue & 0x80) != 0, cpu.Negative);
+        Assert.True(cpu.Carry);
+        Assert.True(cpu.Status.Decimal);
+        Assert.Equal(0x0604, cpu.PC);
+        Assert.False(cpu.IsHalted);
+    }
+
+    [Trait("Category", "InstructionSlice")]
+    [Theory]
+    [InlineData(0xA9, 0x3C, 0x85, 0x20, ZeroPageRegister.A)]
+    [InlineData(0xA2, 0x7E, 0x86, 0x21, ZeroPageRegister.X)]
+    [InlineData(0xA0, 0x55, 0x84, 0x22, ZeroPageRegister.Y)]
+    public void ZeroPageStoresWriteResolvedAddressWithoutChangingFlags(byte preloadOpcode, byte preloadValue, byte storeOpcode, byte zeroPageAddress, ZeroPageRegister sourceRegister)
+    {
+        var cpu = new BootstrapCpu();
+
+        cpu.LoadProgram([preloadOpcode, preloadValue, storeOpcode, zeroPageAddress, 0x00], 0x0600);
+
+        cpu.Step();
+        cpu.Status.Carry = true;
+        cpu.Status.Zero = true;
+        cpu.Status.Negative = true;
+        cpu.Status.Decimal = true;
+        cpu.Status.Overflow = true;
+        cpu.Step();
+
+        Assert.Equal(preloadValue, cpu.ReadByte(zeroPageAddress));
+        Assert.Equal(preloadValue, ReadRegister(cpu, sourceRegister));
+        Assert.True(cpu.Carry);
+        Assert.True(cpu.Zero);
+        Assert.True(cpu.Negative);
+        Assert.True(cpu.Status.Decimal);
+        Assert.True(cpu.Status.Overflow);
+        Assert.Equal(0x0604, cpu.PC);
+        Assert.False(cpu.IsHalted);
+    }
+
+    [Trait("Category", "InstructionSlice")]
+    [Theory]
+    [InlineData(0xA2, 0x01, 0xA9, 0x11, 0x95, 0xFF, ZeroPageRegister.A)]
+    [InlineData(0xA0, 0x02, 0xA2, 0x22, 0x96, 0xFE, ZeroPageRegister.X)]
+    [InlineData(0xA2, 0x03, 0xA0, 0x33, 0x94, 0xFD, ZeroPageRegister.Y)]
+    public void ZeroPageIndexedStoresWrapAroundAndDoNotChangeFlags(byte indexLoadOpcode, byte indexLoadValue, byte sourceLoadOpcode, byte sourceLoadValue, byte storeOpcode, byte zeroPageAddress, ZeroPageRegister sourceRegister)
+    {
+        var cpu = new BootstrapCpu();
+
+        cpu.LoadProgram([indexLoadOpcode, indexLoadValue, sourceLoadOpcode, sourceLoadValue, storeOpcode, zeroPageAddress, 0x00], 0x0600);
+
+        cpu.Step();
+        cpu.Step();
+        cpu.Status.Carry = true;
+        cpu.Status.Zero = true;
+        cpu.Status.Negative = true;
+        cpu.Status.Decimal = true;
+        cpu.Status.Overflow = true;
+        cpu.Step();
+
+        var resolvedAddress = (ushort)(byte)(zeroPageAddress + indexLoadValue);
+
+        Assert.Equal(sourceLoadValue, cpu.ReadByte(resolvedAddress));
+        Assert.Equal(sourceLoadValue, ReadRegister(cpu, sourceRegister));
+        Assert.True(cpu.Carry);
+        Assert.True(cpu.Zero);
+        Assert.True(cpu.Negative);
+        Assert.True(cpu.Status.Decimal);
+        Assert.True(cpu.Status.Overflow);
+        Assert.Equal(0x0606, cpu.PC);
+        Assert.False(cpu.IsHalted);
+    }
+
     [Trait("Category", "InstructionSlice")]
     [Theory]
     [InlineData(0x81, 0x02, true, false, false)]

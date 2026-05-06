@@ -11,6 +11,18 @@ Bootstrap assembler accepts raw branch offsets only; labels and `.org` remain un
 | BRK | 00 | done | done | done | done | done | halts CPU |
 | CMP #imm | C9 | done | done | done | done | done | Z/N/C now |
 | JMP abs | 4C | done | done | done | done | done | absolute jump |
+| STY zp | 84 | done | done | n/a | done | n/a | zero-page data slice, no flag updates |
+| STA zp | 85 | done | done | n/a | done | n/a | zero-page data slice, no flag updates |
+| STX zp | 86 | done | done | n/a | done | n/a | zero-page data slice, no flag updates |
+| LDY zp,X | B4 | done | done | n/a | done | n/a | wraps zero page, updates Z/N |
+| LDA zp,X | B5 | done | done | n/a | done | n/a | wraps zero page, updates Z/N |
+| LDX zp,Y | B6 | done | done | n/a | done | n/a | wraps zero page, updates Z/N |
+| STY zp,X | 94 | done | done | n/a | done | n/a | zero-page indexed data slice, no flag updates |
+| STA zp,X | 95 | done | done | n/a | done | n/a | zero-page indexed data slice, no flag updates |
+| STX zp,Y | 96 | done | done | n/a | done | n/a | zero-page indexed data slice, no flag updates |
+| LDY zp | A4 | done | done | n/a | done | n/a | zero-page data slice, updates Z/N |
+| LDA zp | A5 | done | done | n/a | done | n/a | zero-page data slice, updates Z/N |
+| LDX zp | A6 | done | done | n/a | done | n/a | zero-page data slice, updates Z/N |
 | BEQ rel | F0 | done | done | done | done | done | branch on Zero |
 | BNE rel | D0 | done | done | done | done | done | branch on !Zero |
 | LDX #imm | A2 | done | done | done | done | done | phase 3 |

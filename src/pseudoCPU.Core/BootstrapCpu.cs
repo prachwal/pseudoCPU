@@ -92,6 +92,42 @@ public sealed class BootstrapCpu
             case BootstrapOpcode.BitZeroPage:
                 BitZeroPage(FetchByte());
                 break;
+            case BootstrapOpcode.LdaZeroPage:
+                LoadAFromZeroPage(FetchByte());
+                break;
+            case BootstrapOpcode.LdaZeroPageX:
+                LoadAFromZeroPageIndexedX(FetchByte());
+                break;
+            case BootstrapOpcode.LdxZeroPage:
+                LoadXFromZeroPage(FetchByte());
+                break;
+            case BootstrapOpcode.LdxZeroPageY:
+                LoadXFromZeroPageIndexedY(FetchByte());
+                break;
+            case BootstrapOpcode.LdyZeroPage:
+                LoadYFromZeroPage(FetchByte());
+                break;
+            case BootstrapOpcode.LdyZeroPageX:
+                LoadYFromZeroPageIndexedX(FetchByte());
+                break;
+            case BootstrapOpcode.StaZeroPage:
+                StoreAIntoZeroPage(FetchByte());
+                break;
+            case BootstrapOpcode.StaZeroPageX:
+                StoreAIntoZeroPageIndexedX(FetchByte());
+                break;
+            case BootstrapOpcode.StxZeroPage:
+                StoreXIntoZeroPage(FetchByte());
+                break;
+            case BootstrapOpcode.StxZeroPageY:
+                StoreXIntoZeroPageIndexedY(FetchByte());
+                break;
+            case BootstrapOpcode.StyZeroPage:
+                StoreYIntoZeroPage(FetchByte());
+                break;
+            case BootstrapOpcode.StyZeroPageX:
+                StoreYIntoZeroPageIndexedX(FetchByte());
+                break;
             case BootstrapOpcode.AslAccumulator:
                 ShiftAccumulatorLeft();
                 break;
@@ -304,6 +340,54 @@ public sealed class BootstrapCpu
         Status.Overflow = (value & 0x40) != 0;
         Status.Negative = (value & 0x80) != 0;
     }
+
+    private void LoadAFromZeroPage(byte zeroPageAddress)
+    {
+        A = MemoryBus.ReadByte(MemoryBus.ResolveZeroPageAddress(zeroPageAddress));
+        UpdateZeroAndNegative(A);
+    }
+
+    private void LoadAFromZeroPageIndexedX(byte zeroPageAddress)
+    {
+        A = MemoryBus.ReadByte(MemoryBus.ResolveZeroPageIndexedAddress(zeroPageAddress, X));
+        UpdateZeroAndNegative(A);
+    }
+
+    private void LoadXFromZeroPage(byte zeroPageAddress)
+    {
+        X = MemoryBus.ReadByte(MemoryBus.ResolveZeroPageAddress(zeroPageAddress));
+        UpdateZeroAndNegative(X);
+    }
+
+    private void LoadXFromZeroPageIndexedY(byte zeroPageAddress)
+    {
+        X = MemoryBus.ReadByte(MemoryBus.ResolveZeroPageIndexedAddress(zeroPageAddress, Y));
+        UpdateZeroAndNegative(X);
+    }
+
+    private void LoadYFromZeroPage(byte zeroPageAddress)
+    {
+        Y = MemoryBus.ReadByte(MemoryBus.ResolveZeroPageAddress(zeroPageAddress));
+        UpdateZeroAndNegative(Y);
+    }
+
+    private void LoadYFromZeroPageIndexedX(byte zeroPageAddress)
+    {
+        Y = MemoryBus.ReadByte(MemoryBus.ResolveZeroPageIndexedAddress(zeroPageAddress, X));
+        UpdateZeroAndNegative(Y);
+    }
+
+    private void StoreAIntoZeroPage(byte zeroPageAddress) => MemoryBus.WriteByte(MemoryBus.ResolveZeroPageAddress(zeroPageAddress), A);
+
+    private void StoreAIntoZeroPageIndexedX(byte zeroPageAddress) => MemoryBus.WriteByte(MemoryBus.ResolveZeroPageIndexedAddress(zeroPageAddress, X), A);
+
+    private void StoreXIntoZeroPage(byte zeroPageAddress) => MemoryBus.WriteByte(MemoryBus.ResolveZeroPageAddress(zeroPageAddress), X);
+
+    private void StoreXIntoZeroPageIndexedY(byte zeroPageAddress) => MemoryBus.WriteByte(MemoryBus.ResolveZeroPageIndexedAddress(zeroPageAddress, Y), X);
+
+    private void StoreYIntoZeroPage(byte zeroPageAddress) => MemoryBus.WriteByte(MemoryBus.ResolveZeroPageAddress(zeroPageAddress), Y);
+
+    private void StoreYIntoZeroPageIndexedX(byte zeroPageAddress) => MemoryBus.WriteByte(MemoryBus.ResolveZeroPageIndexedAddress(zeroPageAddress, X), Y);
 
     private void ShiftAccumulatorLeft()
     {
