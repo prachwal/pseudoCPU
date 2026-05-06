@@ -15,10 +15,14 @@ internal static class CliTraceFormatter
         return opcode switch
         {
             (byte)BootstrapOpcode.LdaImmediate => $"LDA #${cpu.ReadByte((ushort)(pc + 1)):X2}",
+            (byte)BootstrapOpcode.LdxImmediate => $"LDX #${cpu.ReadByte((ushort)(pc + 1)):X2}",
             (byte)BootstrapOpcode.Tax => "TAX",
             (byte)BootstrapOpcode.Inx => "INX",
+            (byte)BootstrapOpcode.Dex => "DEX",
             (byte)BootstrapOpcode.StaAbsolute => $"STA ${ReadWord(cpu, (ushort)(pc + 1)):X4}",
+            (byte)BootstrapOpcode.StxAbsolute => $"STX ${ReadWord(cpu, (ushort)(pc + 1)):X4}",
             (byte)BootstrapOpcode.CmpImmediate => $"CMP #${cpu.ReadByte((ushort)(pc + 1)):X2}",
+            (byte)BootstrapOpcode.CpxImmediate => $"CPX #${cpu.ReadByte((ushort)(pc + 1)):X2}",
             (byte)BootstrapOpcode.JmpAbsolute => $"JMP ${ReadWord(cpu, (ushort)(pc + 1)):X4}",
             (byte)BootstrapOpcode.BeqRelative => $"BEQ {FormatRelativeOffset(cpu.ReadByte((ushort)(pc + 1)))}",
             (byte)BootstrapOpcode.BneRelative => $"BNE {FormatRelativeOffset(cpu.ReadByte((ushort)(pc + 1)))}",

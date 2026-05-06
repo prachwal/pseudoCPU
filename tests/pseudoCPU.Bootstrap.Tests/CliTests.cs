@@ -99,4 +99,40 @@ public class CliTests
             File.Delete(sourcePath);
         }
     }
+
+    [Trait("Category", "Cli")]
+    [Fact]
+    public void RunAsmExampleEmitsTraceForXCounterLoopInstructions()
+    {
+        var examplePath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "examples", "x-counter-loop.asm"));
+        var originalOut = Console.Out;
+        var originalError = Console.Error;
+
+        try
+        {
+            Assert.True(File.Exists(examplePath), examplePath);
+
+            using var standardOut = new StringWriter();
+            using var standardError = new StringWriter();
+            Console.SetOut(standardOut);
+            Console.SetError(standardError);
+
+            var exitCode = CliApplication.Run(["run-asm", "--source", examplePath, "--start", "0x0600", "--max-steps", "100", "--trace"]);
+
+            Assert.Equal(0, exitCode);
+            Assert.Empty(standardError.ToString());
+            var output = standardOut.ToString();
+            Assert.Contains("LDX #$03", output);
+            Assert.Contains("DEX", output);
+            Assert.Contains("CPX #$00", output);
+            Assert.Contains("BNE -5", output);
+            Assert.Contains("STX $2000", output);
+            Assert.Contains("Status: Halted", output);
+        }
+        finally
+        {
+            Console.SetOut(originalOut);
+            Console.SetError(originalError);
+        }
+    }
 }

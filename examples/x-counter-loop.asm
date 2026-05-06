@@ -1,0 +1,6 @@
+LDX #$03
+DEX
+CPX #$00
+BNE $FB
+STX $2000
+BRK
