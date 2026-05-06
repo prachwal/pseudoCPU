@@ -4,7 +4,7 @@
   "instructions": [
     "AGENTS.md",
     "docs/current-epic.md",
-    ".kilo/agents/epic-qc.md",
+    ".kilo/agent/epic-qc.md",
     ".kilo/rules/github-issue-file-bodies.md"
   ]
 }
