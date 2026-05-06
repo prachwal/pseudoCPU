@@ -3,6 +3,7 @@
 ## Repo State
 - Repo zawiera solution `pseudoCPU.sln` oraz projekty `src/pseudoCPU.Core`, `src/pseudoCPU.Cli` i `tests/pseudoCPU.Bootstrap.Tests`.
 - Bootstrap CPU obejmuje slice `LDA #imm`, `TAX`, `INX`, `STA abs`, `BRK`, `CMP #imm`, `JMP abs`, `BEQ rel` i `BNE rel`; nie rozszerzaj zakresu bez osobnego issue.
+- Następny planowany zakres fazy 3 to rozszerzenie slice o `Carry` i licznikową pętlę na `X`.
 - Bootstrapowy assembler nie wspiera etykiet ani dyrektywy `.org`; branch offsety podawaj jawnie jako relatywny bajt.
 - `CMP #imm` aktualizuje tylko `Zero` i `Negative`; brak modelu `Carry` jest świadomym ograniczeniem tego etapu.
 - Nie zgaduj dodatkowych projektow, sciezek ani komend build/test poza tym, co jest faktycznie obecne w repo.

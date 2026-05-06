@@ -18,6 +18,54 @@ public class CliTests
 
     [Trait("Category", "Cli")]
     [Fact]
+    public void ParserRejectsMissingOptionValue()
+    {
+        var exception = Assert.Throws<ArgumentException>(() => CliOptionsParser.Parse(["--source"]));
+
+        Assert.Equal("Missing value for option '--source'.", exception.Message);
+    }
+
+    [Trait("Category", "Cli")]
+    [Fact]
+    public void RequireOptionRejectsMissingSource()
+    {
+        var exception = Assert.Throws<ArgumentException>(() => CliOptionsParser.RequireOption(new Dictionary<string, string>(), "source"));
+
+        Assert.Equal("Missing required option '--source'.", exception.Message);
+    }
+
+    [Trait("Category", "Cli")]
+    [Fact]
+    public void ParseHexUShortRejectsInvalidStartValue()
+    {
+        Assert.Throws<FormatException>(() => CliOptionsParser.ParseHexUShort("not-a-hex-value"));
+    }
+
+    [Trait("Category", "Cli")]
+    [Fact]
+    public void HelpMentionsSourceOption()
+    {
+        var originalOut = Console.Out;
+
+        try
+        {
+            using var standardOut = new StringWriter();
+            Console.SetOut(standardOut);
+
+            var exitCode = CliApplication.Run(["--help"]);
+
+            Assert.Equal(0, exitCode);
+            Assert.Contains("--source <file.asm>", standardOut.ToString());
+            Assert.Contains("--source <file.bin>", standardOut.ToString());
+        }
+        finally
+        {
+            Console.SetOut(originalOut);
+        }
+    }
+
+    [Trait("Category", "Cli")]
+    [Fact]
     public void RunAsmEmitsPerStepTraceAndFinalStatus()
     {
         var sourcePath = Path.GetTempFileName();
