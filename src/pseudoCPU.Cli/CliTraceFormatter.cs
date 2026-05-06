@@ -7,7 +7,7 @@ internal static class CliTraceFormatter
     public static string FormatStep(int stepNumber, ushort pc, byte opcode, BootstrapCpu cpu)
     {
         var mnemonic = DescribeInstruction(pc, opcode, cpu);
-        return $"#{stepNumber:D4} PC=0x{pc:X4} OPC=0x{opcode:X2} {mnemonic} A=0x{cpu.A:X2} X=0x{cpu.X:X2} Z={cpu.Zero.ToString().ToLowerInvariant()} N={cpu.Negative.ToString().ToLowerInvariant()}";
+        return $"#{stepNumber:D4} PC=0x{pc:X4} OPC=0x{opcode:X2} {mnemonic} A=0x{cpu.A:X2} X=0x{cpu.X:X2} Z={cpu.Zero.ToString().ToLowerInvariant()} N={cpu.Negative.ToString().ToLowerInvariant()} C={cpu.Carry.ToString().ToLowerInvariant()}";
     }
 
     private static string DescribeInstruction(ushort pc, byte opcode, BootstrapCpu cpu)

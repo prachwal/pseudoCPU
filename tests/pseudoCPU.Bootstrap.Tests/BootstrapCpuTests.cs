@@ -19,7 +19,45 @@ public class BootstrapCpuTests
         Assert.Equal(value, cpu.A);
         Assert.Equal(expectedZero, cpu.Zero);
         Assert.Equal(expectedNegative, cpu.Negative);
+        Assert.False(cpu.Carry);
         Assert.False(cpu.IsHalted);
+    }
+
+    [Trait("Category", "InstructionSlice")]
+    [Theory]
+    [InlineData(0x03, 0x03, true, false, true)]
+    [InlineData(0x04, 0x03, false, false, true)]
+    [InlineData(0x02, 0x03, false, true, false)]
+    public void CmpImmediateUpdatesZeroNegativeAndCarryFlags(byte accumulator, byte operand, bool expectedZero, bool expectedNegative, bool expectedCarry)
+    {
+        var cpu = new BootstrapCpu();
+
+        cpu.LoadProgram([0xA9, accumulator, 0xC9, operand, 0x00]);
+
+        cpu.Step();
+        cpu.Step();
+
+        Assert.Equal(accumulator, cpu.A);
+        Assert.Equal(expectedZero, cpu.Zero);
+        Assert.Equal(expectedNegative, cpu.Negative);
+        Assert.Equal(expectedCarry, cpu.Carry);
+        Assert.False(cpu.IsHalted);
+    }
+
+    [Trait("Category", "InstructionSlice")]
+    [Fact]
+    public void LoadProgramResetsCarryFlag()
+    {
+        var cpu = new BootstrapCpu();
+
+        cpu.LoadProgram([0xA9, 0x03, 0xC9, 0x01, 0x00]);
+        cpu.RunSteps(2);
+
+        Assert.True(cpu.Carry);
+
+        cpu.LoadProgram([0x00]);
+
+        Assert.False(cpu.Carry);
     }
 
     [Trait("Category", "InstructionSlice")]
@@ -164,6 +202,7 @@ public class BootstrapCpuTests
         Assert.Equal(0x01, cpu.X);
         Assert.False(cpu.Zero);
         Assert.False(cpu.Negative);
+        Assert.False(cpu.Carry);
         Assert.Equal(0x01, cpu.ReadByte(0x2000));
         Assert.Equal(0x0407, cpu.PC);
     }
@@ -182,6 +221,7 @@ public class BootstrapCpuTests
         Assert.Equal(0x03, cpu.A);
         Assert.True(cpu.Zero);
         Assert.False(cpu.Negative);
+        Assert.True(cpu.Carry);
         Assert.Equal(0x060F, cpu.PC);
     }
 
@@ -199,6 +239,7 @@ public class BootstrapCpuTests
         Assert.Equal(0xFF, cpu.A);
         Assert.False(cpu.Zero);
         Assert.True(cpu.Negative);
+        Assert.False(cpu.Carry);
         Assert.Equal(0x0709, cpu.PC);
     }
 
@@ -216,6 +257,7 @@ public class BootstrapCpuTests
         Assert.Equal(0x01, cpu.A);
         Assert.False(cpu.Zero);
         Assert.True(cpu.Negative);
+        Assert.False(cpu.Carry);
         Assert.Equal(0x0709, cpu.PC);
     }
 
@@ -233,6 +275,7 @@ public class BootstrapCpuTests
         Assert.Equal(0xFF, cpu.A);
         Assert.False(cpu.Zero);
         Assert.True(cpu.Negative);
+        Assert.False(cpu.Carry);
         Assert.Equal(0x0809, cpu.PC);
     }
 
@@ -249,6 +292,7 @@ public class BootstrapCpuTests
         Assert.False(cpu.IsHalted);
         Assert.False(cpu.Zero);
         Assert.True(cpu.Negative);
+        Assert.False(cpu.Carry);
         Assert.Equal(0x0904, cpu.PC);
     }
 

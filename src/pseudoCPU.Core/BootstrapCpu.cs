@@ -14,6 +14,8 @@ public sealed class BootstrapCpu
 
     public bool Negative { get; private set; }
 
+    public bool Carry { get; private set; }
+
     public bool IsHalted { get; private set; }
 
     public void LoadProgram(ReadOnlySpan<byte> program, ushort startAddress = 0x0000)
@@ -31,6 +33,7 @@ public sealed class BootstrapCpu
         PC = startAddress;
         Zero = false;
         Negative = false;
+        Carry = false;
         IsHalted = false;
     }
 
@@ -144,6 +147,7 @@ public sealed class BootstrapCpu
         var result = unchecked((byte)(A - value));
         Zero = A == value;
         Negative = (result & 0x80) != 0;
+        Carry = A >= value;
     }
 
     private void BranchRelative(bool condition, byte offsetByte)

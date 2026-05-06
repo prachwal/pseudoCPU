@@ -87,6 +87,7 @@ public class CliTests
             Assert.Empty(standardError.ToString());
             var output = standardOut.ToString();
             Assert.Contains("#0001 PC=0x0400 OPC=0xA9 LDA #$01", output);
+            Assert.Contains("C=false", output);
             Assert.Contains("#0002 PC=0x0402 OPC=0x00 BRK", output);
             Assert.Contains("Status: Halted", output);
             Assert.Contains("Steps: 2", output);

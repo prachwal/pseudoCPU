@@ -7,7 +7,7 @@
 | INX | E8 | done | done | done | done | done | updates Z/N |
 | STA abs | 8D | done | done | done | done | done | no flag updates |
 | BRK | 00 | done | done | done | done | done | halts CPU |
-| CMP #imm | C9 | partial | done | done | done | done | Z/N now; Carry later |
+| CMP #imm | C9 | done | done | done | done | done | Z/N/C now |
 | JMP abs | 4C | done | done | done | done | done | absolute jump |
 | BEQ rel | F0 | done | done | done | done | done | branch on Zero |
 | BNE rel | D0 | done | done | done | done | done | branch on !Zero |
