@@ -452,6 +452,60 @@ public class BootstrapCpuTests
 
     [Trait("Category", "InstructionSlice")]
     [Theory]
+    [InlineData(0xA2, 0x03, 0xBD, 0xFD, 0x12, 0x1300, ZeroPageRegister.A)]
+    [InlineData(0xA0, 0x04, 0xB9, 0xFC, 0x12, 0x1300, ZeroPageRegister.A)]
+    [InlineData(0xA0, 0x05, 0xBE, 0xFB, 0x12, 0x1300, ZeroPageRegister.X)]
+    [InlineData(0xA2, 0x06, 0xBC, 0xFA, 0x12, 0x1300, ZeroPageRegister.Y)]
+    public void AbsoluteIndexedLoadsReadLittleEndianOperandsAndUpdateTargetRegister(byte indexLoadOpcode, byte indexLoadValue, byte opcode, byte lowByte, byte highByte, ushort resolvedAddress, ZeroPageRegister targetRegister)
+    {
+        var cpu = new BootstrapCpu();
+
+        cpu.LoadProgram([indexLoadOpcode, indexLoadValue, opcode, lowByte, highByte, 0x00], 0x0600);
+        cpu.WriteByte(resolvedAddress, 0x5A);
+        cpu.WriteByte((ushort)((highByte << 8) | lowByte), 0x99);
+
+        cpu.Step();
+        cpu.Step();
+
+        Assert.Equal(0x5A, ReadRegister(cpu, targetRegister));
+        Assert.Equal(0x5A == 0, cpu.Zero);
+        Assert.False(cpu.Negative);
+        Assert.Equal(0x0605, cpu.PC);
+        Assert.False(cpu.IsHalted);
+    }
+
+    [Trait("Category", "InstructionSlice")]
+    [Theory]
+    [InlineData(0xA2, 0x03, 0xA9, 0x3C, 0x9D, 0xFD, 0x12, 0x1300)]
+    [InlineData(0xA0, 0x04, 0xA9, 0x7E, 0x99, 0xFC, 0x12, 0x1300)]
+    public void AbsoluteIndexedStoresWriteLittleEndianOperandsWithoutChangingFlags(byte indexLoadOpcode, byte indexLoadValue, byte sourceLoadOpcode, byte sourceLoadValue, byte storeOpcode, byte lowByte, byte highByte, ushort resolvedAddress)
+    {
+        var cpu = new BootstrapCpu();
+
+        cpu.LoadProgram([indexLoadOpcode, indexLoadValue, sourceLoadOpcode, sourceLoadValue, storeOpcode, lowByte, highByte, 0x00], 0x0600);
+
+        cpu.Step();
+        cpu.Step();
+        cpu.Status.Carry = true;
+        cpu.Status.Zero = true;
+        cpu.Status.Negative = true;
+        cpu.Status.Decimal = true;
+        cpu.Status.Overflow = true;
+        cpu.Step();
+
+        Assert.Equal(sourceLoadValue, cpu.ReadByte(resolvedAddress));
+        Assert.Equal(sourceLoadValue, cpu.A);
+        Assert.True(cpu.Carry);
+        Assert.True(cpu.Zero);
+        Assert.True(cpu.Negative);
+        Assert.True(cpu.Status.Decimal);
+        Assert.True(cpu.Status.Overflow);
+        Assert.Equal(0x0607, cpu.PC);
+        Assert.False(cpu.IsHalted);
+    }
+
+    [Trait("Category", "InstructionSlice")]
+    [Theory]
     [InlineData(0x81, 0x02, true, false, false)]
     [InlineData(0x00, 0x00, false, true, false)]
     public void AslAUpdatesCarryZeroAndNegativeFlags(byte accumulator, byte expectedResult, bool expectedCarry, bool expectedZero, bool expectedNegative)

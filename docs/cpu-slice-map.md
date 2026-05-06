@@ -23,6 +23,12 @@ Bootstrap assembler accepts raw branch offsets only; labels and `.org` remain un
 | LDY zp | A4 | done | done | n/a | done | n/a | zero-page data slice, updates Z/N |
 | LDA zp | A5 | done | done | n/a | done | n/a | zero-page data slice, updates Z/N |
 | LDX zp | A6 | done | done | n/a | done | n/a | zero-page data slice, updates Z/N |
+| LDA abs,X | BD | done | done | n/a | done | n/a | absolute indexed data slice, updates Z/N |
+| LDA abs,Y | B9 | done | done | n/a | done | n/a | absolute indexed data slice, updates Z/N |
+| LDX abs,Y | BE | done | done | n/a | done | n/a | absolute indexed data slice, updates Z/N |
+| LDY abs,X | BC | done | done | n/a | done | n/a | absolute indexed data slice, updates Z/N |
+| STA abs,X | 9D | done | done | n/a | done | n/a | absolute indexed data slice, no flag updates |
+| STA abs,Y | 99 | done | done | n/a | done | n/a | absolute indexed data slice, no flag updates |
 | BEQ rel | F0 | done | done | done | done | done | branch on Zero |
 | BNE rel | D0 | done | done | done | done | done | branch on !Zero |
 | LDX #imm | A2 | done | done | done | done | done | phase 3 |

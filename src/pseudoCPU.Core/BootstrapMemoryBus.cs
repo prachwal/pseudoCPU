@@ -22,4 +22,6 @@ public sealed class BootstrapMemoryBus
     public ushort ResolveZeroPageAddress(byte zeroPageAddress) => zeroPageAddress;
 
     public ushort ResolveZeroPageIndexedAddress(byte zeroPageAddress, byte index) => (ushort)(byte)(zeroPageAddress + index);
+
+    public ushort ResolveAbsoluteIndexedAddress(ushort baseAddress, byte index) => unchecked((ushort)(baseAddress + index));
 }

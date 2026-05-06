@@ -98,11 +98,20 @@ public sealed class BootstrapCpu
             case BootstrapOpcode.LdaZeroPageX:
                 LoadAFromZeroPageIndexedX(FetchByte());
                 break;
+            case BootstrapOpcode.LdaAbsoluteX:
+                LoadAFromAbsoluteIndexedX(FetchWord());
+                break;
+            case BootstrapOpcode.LdaAbsoluteY:
+                LoadAFromAbsoluteIndexedY(FetchWord());
+                break;
             case BootstrapOpcode.LdxZeroPage:
                 LoadXFromZeroPage(FetchByte());
                 break;
             case BootstrapOpcode.LdxZeroPageY:
                 LoadXFromZeroPageIndexedY(FetchByte());
+                break;
+            case BootstrapOpcode.LdxAbsoluteY:
+                LoadXFromAbsoluteIndexedY(FetchWord());
                 break;
             case BootstrapOpcode.LdyZeroPage:
                 LoadYFromZeroPage(FetchByte());
@@ -110,11 +119,20 @@ public sealed class BootstrapCpu
             case BootstrapOpcode.LdyZeroPageX:
                 LoadYFromZeroPageIndexedX(FetchByte());
                 break;
+            case BootstrapOpcode.LdyAbsoluteX:
+                LoadYFromAbsoluteIndexedX(FetchWord());
+                break;
             case BootstrapOpcode.StaZeroPage:
                 StoreAIntoZeroPage(FetchByte());
                 break;
             case BootstrapOpcode.StaZeroPageX:
                 StoreAIntoZeroPageIndexedX(FetchByte());
+                break;
+            case BootstrapOpcode.StaAbsoluteX:
+                StoreAIntoAbsoluteIndexedX(FetchWord());
+                break;
+            case BootstrapOpcode.StaAbsoluteY:
+                StoreAIntoAbsoluteIndexedY(FetchWord());
                 break;
             case BootstrapOpcode.StxZeroPage:
                 StoreXIntoZeroPage(FetchByte());
@@ -353,6 +371,18 @@ public sealed class BootstrapCpu
         UpdateZeroAndNegative(A);
     }
 
+    private void LoadAFromAbsoluteIndexedX(ushort baseAddress)
+    {
+        A = MemoryBus.ReadByte(MemoryBus.ResolveAbsoluteIndexedAddress(baseAddress, X));
+        UpdateZeroAndNegative(A);
+    }
+
+    private void LoadAFromAbsoluteIndexedY(ushort baseAddress)
+    {
+        A = MemoryBus.ReadByte(MemoryBus.ResolveAbsoluteIndexedAddress(baseAddress, Y));
+        UpdateZeroAndNegative(A);
+    }
+
     private void LoadXFromZeroPage(byte zeroPageAddress)
     {
         X = MemoryBus.ReadByte(MemoryBus.ResolveZeroPageAddress(zeroPageAddress));
@@ -362,6 +392,12 @@ public sealed class BootstrapCpu
     private void LoadXFromZeroPageIndexedY(byte zeroPageAddress)
     {
         X = MemoryBus.ReadByte(MemoryBus.ResolveZeroPageIndexedAddress(zeroPageAddress, Y));
+        UpdateZeroAndNegative(X);
+    }
+
+    private void LoadXFromAbsoluteIndexedY(ushort baseAddress)
+    {
+        X = MemoryBus.ReadByte(MemoryBus.ResolveAbsoluteIndexedAddress(baseAddress, Y));
         UpdateZeroAndNegative(X);
     }
 
@@ -377,9 +413,19 @@ public sealed class BootstrapCpu
         UpdateZeroAndNegative(Y);
     }
 
+    private void LoadYFromAbsoluteIndexedX(ushort baseAddress)
+    {
+        Y = MemoryBus.ReadByte(MemoryBus.ResolveAbsoluteIndexedAddress(baseAddress, X));
+        UpdateZeroAndNegative(Y);
+    }
+
     private void StoreAIntoZeroPage(byte zeroPageAddress) => MemoryBus.WriteByte(MemoryBus.ResolveZeroPageAddress(zeroPageAddress), A);
 
     private void StoreAIntoZeroPageIndexedX(byte zeroPageAddress) => MemoryBus.WriteByte(MemoryBus.ResolveZeroPageIndexedAddress(zeroPageAddress, X), A);
+
+    private void StoreAIntoAbsoluteIndexedX(ushort baseAddress) => MemoryBus.WriteByte(MemoryBus.ResolveAbsoluteIndexedAddress(baseAddress, X), A);
+
+    private void StoreAIntoAbsoluteIndexedY(ushort baseAddress) => MemoryBus.WriteByte(MemoryBus.ResolveAbsoluteIndexedAddress(baseAddress, Y), A);
 
     private void StoreXIntoZeroPage(byte zeroPageAddress) => MemoryBus.WriteByte(MemoryBus.ResolveZeroPageAddress(zeroPageAddress), X);
 
