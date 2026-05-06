@@ -238,7 +238,7 @@ public class BootstrapCpuTests
 
     [Trait("Category", "InstructionSlice")]
     [Theory]
-    [InlineData(0x00, false, false)]
+    [InlineData(0x00, true, false)]
     [InlineData(0x80, false, true)]
     public void LdxImmediateUpdatesZeroAndNegativeFlags(byte value, bool expectedZero, bool expectedNegative)
     {
