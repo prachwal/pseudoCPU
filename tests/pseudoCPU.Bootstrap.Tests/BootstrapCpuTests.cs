@@ -4,6 +4,14 @@ namespace pseudoCPU.Bootstrap.Tests;
 
 public class BootstrapCpuTests
 {
+    public enum StatusFlag
+    {
+        Carry,
+        InterruptDisable,
+        Decimal,
+        Overflow,
+    }
+
     [Trait("Category", "InstructionSlice")]
     [Fact]
     public void LoadProgramInitializesStackPointerToFf()
@@ -25,6 +33,73 @@ public class BootstrapCpuTests
         Assert.False(cpu.Status.Decimal);
         Assert.False(cpu.Status.InterruptDisable);
         Assert.False(cpu.IsHalted);
+    }
+
+    [Trait("Category", "InstructionSlice")]
+    [Theory]
+    [InlineData(0x18, StatusFlag.Carry, true, false)]
+    [InlineData(0x38, StatusFlag.Carry, false, true)]
+    [InlineData(0x58, StatusFlag.InterruptDisable, true, false)]
+    [InlineData(0x78, StatusFlag.InterruptDisable, false, true)]
+    [InlineData(0xD8, StatusFlag.Decimal, true, false)]
+    [InlineData(0xF8, StatusFlag.Decimal, false, true)]
+    [InlineData(0xB8, StatusFlag.Overflow, true, false)]
+    public void FlagControlOpcodesOnlyMutateTheirTargetFlag(byte opcode, StatusFlag flag, bool initialValue, bool expectedValue)
+    {
+        var cpu = new BootstrapCpu();
+
+        cpu.LoadProgram([opcode, 0x00], 0x0600);
+        cpu.Status.Carry = true;
+        cpu.Status.Zero = true;
+        cpu.Status.InterruptDisable = true;
+        cpu.Status.Decimal = true;
+        cpu.Status.Break = true;
+        cpu.Status.Overflow = true;
+        cpu.Status.Negative = true;
+        SetFlag(cpu.Status, flag, initialValue);
+
+        cpu.Step();
+
+        Assert.Equal(0x0601, cpu.PC);
+        Assert.False(cpu.IsHalted);
+        Assert.Equal(0x00, cpu.A);
+        Assert.Equal(0x00, cpu.X);
+        Assert.Equal(0x00, cpu.Y);
+        Assert.Equal(0xFF, cpu.SP);
+        Assert.Equal(expectedValue, GetFlag(cpu.Status, flag));
+        Assert.True(cpu.Status.Zero);
+        Assert.True(cpu.Status.Break);
+        Assert.True(cpu.Status.Negative);
+
+        switch (flag)
+        {
+            case StatusFlag.Carry:
+                Assert.Equal(expectedValue, cpu.Status.Carry);
+                Assert.True(cpu.Status.InterruptDisable);
+                Assert.True(cpu.Status.Decimal);
+                Assert.True(cpu.Status.Overflow);
+                break;
+            case StatusFlag.InterruptDisable:
+                Assert.True(cpu.Status.Carry);
+                Assert.Equal(expectedValue, cpu.Status.InterruptDisable);
+                Assert.True(cpu.Status.Decimal);
+                Assert.True(cpu.Status.Overflow);
+                break;
+            case StatusFlag.Decimal:
+                Assert.True(cpu.Status.Carry);
+                Assert.True(cpu.Status.InterruptDisable);
+                Assert.Equal(expectedValue, cpu.Status.Decimal);
+                Assert.True(cpu.Status.Overflow);
+                break;
+            case StatusFlag.Overflow:
+                Assert.True(cpu.Status.Carry);
+                Assert.True(cpu.Status.InterruptDisable);
+                Assert.True(cpu.Status.Decimal);
+                Assert.Equal(expectedValue, cpu.Status.Overflow);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(flag), flag, null);
+        }
     }
 
     [Trait("Category", "InstructionSlice")]
@@ -107,6 +182,39 @@ public class BootstrapCpuTests
         Assert.True(restored.Break);
         Assert.True(restored.Overflow);
         Assert.True(restored.Negative);
+    }
+
+    private static void SetFlag(BootstrapStatusRegister status, StatusFlag flag, bool value)
+    {
+        switch (flag)
+        {
+            case StatusFlag.Carry:
+                status.Carry = value;
+                break;
+            case StatusFlag.InterruptDisable:
+                status.InterruptDisable = value;
+                break;
+            case StatusFlag.Decimal:
+                status.Decimal = value;
+                break;
+            case StatusFlag.Overflow:
+                status.Overflow = value;
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(flag), flag, null);
+        }
+    }
+
+    private static bool GetFlag(BootstrapStatusRegister status, StatusFlag flag)
+    {
+        return flag switch
+        {
+            StatusFlag.Carry => status.Carry,
+            StatusFlag.InterruptDisable => status.InterruptDisable,
+            StatusFlag.Decimal => status.Decimal,
+            StatusFlag.Overflow => status.Overflow,
+            _ => throw new ArgumentOutOfRangeException(nameof(flag), flag, null),
+        };
     }
 
     [Trait("Category", "InstructionSlice")]

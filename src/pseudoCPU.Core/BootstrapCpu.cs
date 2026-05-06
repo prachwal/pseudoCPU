@@ -93,6 +93,27 @@ public sealed class BootstrapCpu
 
         switch (BootstrapOpcodeDecoder.Decode(opcode))
         {
+            case BootstrapOpcode.Clc:
+                Status.Carry = false;
+                break;
+            case BootstrapOpcode.Sec:
+                Status.Carry = true;
+                break;
+            case BootstrapOpcode.Cli:
+                Status.InterruptDisable = false;
+                break;
+            case BootstrapOpcode.Sei:
+                Status.InterruptDisable = true;
+                break;
+            case BootstrapOpcode.Cld:
+                Status.Decimal = false;
+                break;
+            case BootstrapOpcode.Sed:
+                Status.Decimal = true;
+                break;
+            case BootstrapOpcode.Clv:
+                Status.Overflow = false;
+                break;
             case BootstrapOpcode.Php:
                 PushByte(CreateStatusSnapshot());
                 break;

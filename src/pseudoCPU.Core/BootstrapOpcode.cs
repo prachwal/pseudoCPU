@@ -2,10 +2,14 @@ namespace pseudoCPU.Core;
 
 public enum BootstrapOpcode : byte
 {
+    Clc = 0x18,
     Php = 0x08,
     Plp = 0x28,
     Pha = 0x48,
     Pla = 0x68,
+    Sec = 0x38,
+    Cli = 0x58,
+    Sei = 0x78,
     JsrAbsolute = 0x20,
     Rts = 0x60,
     LdaImmediate = 0xA9,
@@ -25,6 +29,9 @@ public enum BootstrapOpcode : byte
     JmpAbsolute = 0x4C,
     BeqRelative = 0xF0,
     BneRelative = 0xD0,
+    Cld = 0xD8,
+    Clv = 0xB8,
+    Sed = 0xF8,
     Brk = 0x00,
 }
 
@@ -32,10 +39,14 @@ public static class BootstrapOpcodeDecoder
 {
     public static BootstrapOpcode Decode(byte opcode) => opcode switch
     {
+        0x18 => BootstrapOpcode.Clc,
         0x08 => BootstrapOpcode.Php,
         0x28 => BootstrapOpcode.Plp,
         0x48 => BootstrapOpcode.Pha,
         0x68 => BootstrapOpcode.Pla,
+        0x38 => BootstrapOpcode.Sec,
+        0x58 => BootstrapOpcode.Cli,
+        0x78 => BootstrapOpcode.Sei,
         0x20 => BootstrapOpcode.JsrAbsolute,
         0x60 => BootstrapOpcode.Rts,
         0xA9 => BootstrapOpcode.LdaImmediate,
@@ -55,6 +66,9 @@ public static class BootstrapOpcodeDecoder
         0x4C => BootstrapOpcode.JmpAbsolute,
         0xF0 => BootstrapOpcode.BeqRelative,
         0xD0 => BootstrapOpcode.BneRelative,
+        0xD8 => BootstrapOpcode.Cld,
+        0xB8 => BootstrapOpcode.Clv,
+        0xF8 => BootstrapOpcode.Sed,
         0x00 => BootstrapOpcode.Brk,
         _ => throw new NotSupportedException($"Unsupported bootstrap opcode '0x{opcode:X2}'."),
     };
