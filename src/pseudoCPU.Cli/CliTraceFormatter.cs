@@ -38,5 +38,5 @@ internal static class CliTraceFormatter
         return (ushort)(lowByte | (highByte << 8));
     }
 
-    private static string FormatRelativeOffset(byte offset) => ((sbyte)offset).ToString(System.Globalization.CultureInfo.InvariantCulture);
+    private static string FormatRelativeOffset(byte offset) => $"${offset:X2}";
 }

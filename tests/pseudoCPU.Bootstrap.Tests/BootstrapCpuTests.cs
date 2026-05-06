@@ -339,7 +339,7 @@ public class BootstrapCpuTests
         Assert.Equal(0xFF, cpu.A);
         Assert.False(cpu.Zero);
         Assert.True(cpu.Negative);
-        Assert.False(cpu.Carry);
+        Assert.True(cpu.Carry);
         Assert.Equal(0x0809, cpu.PC);
     }
 

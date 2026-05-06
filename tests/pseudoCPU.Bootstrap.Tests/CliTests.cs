@@ -125,9 +125,10 @@ public class CliTests
             Assert.Contains("LDX #$03", output);
             Assert.Contains("DEX", output);
             Assert.Contains("CPX #$00", output);
-            Assert.Contains("BNE -5", output);
+            Assert.Contains("BNE $FB", output);
             Assert.Contains("STX $2000", output);
             Assert.Contains("Status: Halted", output);
+            Assert.Contains("Carry: true", output);
         }
         finally
         {

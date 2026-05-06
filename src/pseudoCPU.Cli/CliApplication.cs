@@ -95,5 +95,6 @@ internal static class CliApplication
         Console.WriteLine($"X: 0x{cpu.X:X2}");
         Console.WriteLine($"Zero: {cpu.Zero.ToString().ToLowerInvariant()}");
         Console.WriteLine($"Negative: {cpu.Negative.ToString().ToLowerInvariant()}");
+        Console.WriteLine($"Carry: {cpu.Carry.ToString().ToLowerInvariant()}");
     }
 }
