@@ -474,28 +474,74 @@ public class BootstrapCpuTests
 
     [Trait("Category", "InstructionSlice")]
     [Fact]
-    public void StyAbsoluteStoresYWithoutChangingFlags()
+    public void YSequencePreservesAccumulatorIndexAndStackWhileStyStoresUpdatedY()
     {
         var cpu = new BootstrapCpu();
 
-        cpu.LoadProgram([0xA0, 0x7B, 0xA9, 0x00, 0xC9, 0x01, 0x8C, 0x34, 0x12, 0x00], 0x0600);
+        cpu.LoadProgram([0xA9, 0x11, 0xAA, 0xA0, 0x7F, 0xC8, 0x88, 0xC0, 0x7F, 0x8C, 0x34, 0x12, 0x00], 0x0600);
+        cpu.PushByte(0xAB);
 
         cpu.Step();
-        cpu.Step();
-        cpu.Step();
+        Assert.Equal(0x11, cpu.A);
+        Assert.Equal(0x00, cpu.X);
+        Assert.Equal(0xFE, cpu.SP);
+        Assert.Equal(0xAB, cpu.ReadByte(0x01FF));
+        Assert.False(cpu.Zero);
+        Assert.False(cpu.Negative);
+        Assert.False(cpu.Carry);
 
-        Assert.Equal(0x7B, cpu.Y);
+        cpu.Step();
+        Assert.Equal(0x11, cpu.A);
+        Assert.Equal(0x11, cpu.X);
+        Assert.Equal(0xFE, cpu.SP);
+        Assert.Equal(0xAB, cpu.ReadByte(0x01FF));
+        Assert.False(cpu.Zero);
+        Assert.False(cpu.Negative);
+        Assert.False(cpu.Carry);
+
+        cpu.Step();
+        Assert.Equal(0x7F, cpu.Y);
+        Assert.Equal(0x11, cpu.A);
+        Assert.Equal(0x11, cpu.X);
+        Assert.False(cpu.Zero);
+        Assert.False(cpu.Negative);
+        Assert.False(cpu.Carry);
+
+        cpu.Step();
+        Assert.Equal(0x80, cpu.Y);
+        Assert.Equal(0x11, cpu.A);
+        Assert.Equal(0x11, cpu.X);
         Assert.False(cpu.Zero);
         Assert.True(cpu.Negative);
         Assert.False(cpu.Carry);
 
         cpu.Step();
-
-        Assert.Equal(0x7B, cpu.ReadByte(0x1234));
-        Assert.Equal(0x7B, cpu.Y);
+        Assert.Equal(0x7F, cpu.Y);
+        Assert.Equal(0x11, cpu.A);
+        Assert.Equal(0x11, cpu.X);
         Assert.False(cpu.Zero);
-        Assert.True(cpu.Negative);
+        Assert.False(cpu.Negative);
         Assert.False(cpu.Carry);
+
+        cpu.Step();
+        Assert.Equal(0x7F, cpu.Y);
+        Assert.Equal(0x11, cpu.A);
+        Assert.Equal(0x11, cpu.X);
+        Assert.True(cpu.Zero);
+        Assert.False(cpu.Negative);
+        Assert.True(cpu.Carry);
+
+        cpu.Step();
+
+        Assert.Equal(0x7F, cpu.ReadByte(0x1234));
+        Assert.Equal(0x7F, cpu.Y);
+        Assert.Equal(0x11, cpu.A);
+        Assert.Equal(0x11, cpu.X);
+        Assert.Equal(0xFE, cpu.SP);
+        Assert.Equal(0xAB, cpu.ReadByte(0x01FF));
+        Assert.True(cpu.Zero);
+        Assert.False(cpu.Negative);
+        Assert.True(cpu.Carry);
         Assert.False(cpu.IsHalted);
     }
 
