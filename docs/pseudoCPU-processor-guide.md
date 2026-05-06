@@ -196,6 +196,26 @@ Aktualnie poza zakresem są:
 
 Nie należy dodawać tych flag przy okazji zwykłych tasków opcode, jeżeli nie są wymienione w issue.
 
+### 5.5. Bootstrapowy bajt statusu dla `PHP` / `PLP`
+
+Do czasu osobnego epica na pełny status register 6502 bootstrapowy snapshot statusu obejmuje tylko aktualnie wspierane flagi:
+
+```text
+bit 0 = Carry
+bit 1 = Zero
+bit 7 = Negative
+bit 2-6 = reserved / ignored
+```
+
+Kontrakt dla przyszłej implementacji:
+
+- `PHP` zapisuje na stack jedynie ten bootstrapowy snapshot.
+- `PHP` ustawia bity `2-6` na `0`.
+- `PLP` odtwarza tylko `Carry`, `Zero` i `Negative` z tego snapshotu.
+- `PLP` ignoruje bity `2-6`; nie są one traktowane jako pełna semantyka status register 6502.
+
+Ten kontrakt nie wprowadza jeszcze `Overflow`, `Interrupt Disable`, `Decimal` ani `Break` jako aktywnych flag procesora.
+
 ---
 
 ## 6. Pamięć i adresowanie

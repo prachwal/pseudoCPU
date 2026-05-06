@@ -20,6 +20,7 @@ Ten plik przechowuje stan biezacego epica i informacje fazowe, ktorych nie nalez
 - Task #35 jest obowiazkowa bramka `epic-qc`; epic nie moze zostac zamkniety bez komentarza `Epic QC Gate`.
 - Task #34 ma zamknac aktualizacje `docs/cpu-slice-map.md`, chaptera oraz snapshotu tego pliku po implementacji.
 - Implementacja taskow #27-#34 i QC gate #35 sa zakonczone; epic ma werdykt PASS i moze zostac zamkniety.
+- Task #37 dla epica #36 zapisuje bootstrapowy kontrakt status byte: `Carry` = bit 0, `Zero` = bit 1, `Negative` = bit 7, a bity 2-6 sa zarezerwowane / ignorowane; `PHP` zapisuje tylko ten snapshot, a `PLP` odtwarza wylacznie wspierane flagi.
 
 ## QC Feedback Loop
 1. `issue-planner` utrzymuje strukture epic -> taski.
