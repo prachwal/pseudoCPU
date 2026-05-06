@@ -235,6 +235,24 @@ Kontrakt dla bootstrapowego snapshotu:
 
 Ten kontrakt pozostaje oddzielony od jawnego `P` używanego przez phase 7 slice.
 
+### 5.6. Matrix kontraktu flag dla aktualnego modelu
+
+Poniższa tabela jest regresyjną referencją dla dalszych faz CPU. Jeżeli nowy task nie mówi inaczej, instrukcja może zmieniać wyłącznie wymienione flagi; pozostałe flagi mają pozostać stabilne.
+
+| Klasa instrukcji / przykłady | Flagi aktualizowane | Flagi, których nie zmieniać bez jawnego kontraktu |
+|---|---|---|
+| Load / transfer / increment / decrement: `LDA #imm`, `LDX #imm`, `LDY #imm`, `TAX`, `INX`, `DEX`, `INY`, `DEY`, `PLA` | `Z`, `N` | `C`, `V`, `D`, `I`, `B` |
+| Compare: `CMP #imm`, `CPX #imm`, `CPY #imm` | `C`, `Z`, `N` | `V`, `D`, `I`, `B` |
+| Arithmetic phase 7: `ADC #imm`, `SBC #imm` | `C`, `Z`, `N`, `V` | `D`, `I`, `B` |
+| Bit test phase 7: `BIT zp` | `Z`, `N`, `V` | `C`, `D`, `I`, `B` |
+| Accumulator shifts / rotates: `ASL A`, `LSR A`, `ROL A`, `ROR A` | `C`, `Z`, `N` | `V`, `D`, `I`, `B` |
+| Flag-control: `CLC`, `SEC`, `CLI`, `SEI`, `CLD`, `SED`, `CLV` | tylko flaga docelowa instrukcji | wszystkie pozostałe flagi |
+| Stores / stack data movement: `STA abs`, `STX abs`, `STY abs`, `PHA` | brak zmian flag | wszystkie flagi |
+| Branch / jump flow: `BEQ`, `BNE`, `BCC`, `BCS`, `BMI`, `BPL`, `BVC`, `BVS`, `JMP`, `JSR`, `RTS` | brak zmian flag; tylko odczyt warunku | wszystkie flagi |
+| Bootstrap stack status snapshot: `PHP`, `PLP` | `PHP`: brak live mutation; `PLP`: tylko `C`, `Z`, `N` | `V`, `D`, `I`, `B` pozostają poza bootstrap restore |
+
+Ta tabela nie zastępuje task-level contractów. Służy do wykrywania regresji i sprzecznych oczekiwań testowych między slice'ami.
+
 ---
 
 ## 6. Pamięć i adresowanie

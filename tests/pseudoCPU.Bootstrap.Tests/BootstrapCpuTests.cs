@@ -185,6 +185,115 @@ public class BootstrapCpuTests
     }
 
     [Trait("Category", "InstructionSlice")]
+    [Fact]
+    public void StatusRegisterRegressionMatrixKeepsUntouchedFlagsStableAcrossOpcodeClasses()
+    {
+        var scenarios = new[]
+        {
+            new
+            {
+                Name = "LDA #imm updates only Zero and Negative",
+                Program = new byte[] { 0xA9, 0x00, 0x00 },
+                Setup = (Action<BootstrapCpu>)(_ => { }),
+                AssertStatus = (Action<BootstrapCpu, BootstrapStatusRegister>)((cpu, before) =>
+                {
+                    Assert.True(cpu.Status.Zero);
+                    Assert.False(cpu.Status.Negative);
+                    Assert.Equal(before.Carry, cpu.Status.Carry);
+                    Assert.Equal(before.Overflow, cpu.Status.Overflow);
+                    Assert.Equal(before.Decimal, cpu.Status.Decimal);
+                    Assert.Equal(before.InterruptDisable, cpu.Status.InterruptDisable);
+                    Assert.Equal(before.Break, cpu.Status.Break);
+                }),
+            },
+            new
+            {
+                Name = "CMP #imm updates Carry Zero Negative and preserves Overflow Decimal Interrupt Break",
+                Program = new byte[] { 0xA9, 0x03, 0xC9, 0x03, 0x00 },
+                Setup = (Action<BootstrapCpu>)(_ => { }),
+                AssertStatus = (Action<BootstrapCpu, BootstrapStatusRegister>)((cpu, before) =>
+                {
+                    Assert.True(cpu.Status.Carry);
+                    Assert.True(cpu.Status.Zero);
+                    Assert.False(cpu.Status.Negative);
+                    Assert.Equal(before.Overflow, cpu.Status.Overflow);
+                    Assert.Equal(before.Decimal, cpu.Status.Decimal);
+                    Assert.Equal(before.InterruptDisable, cpu.Status.InterruptDisable);
+                    Assert.Equal(before.Break, cpu.Status.Break);
+                }),
+            },
+            new
+            {
+                Name = "ADC #imm updates Carry Zero Negative Overflow and preserves Decimal Interrupt Break",
+                Program = new byte[] { 0xA9, 0x7F, 0x69, 0x01, 0x00 },
+                Setup = (Action<BootstrapCpu>)(cpu => cpu.Status.Carry = false),
+                AssertStatus = (Action<BootstrapCpu, BootstrapStatusRegister>)((cpu, before) =>
+                {
+                    Assert.False(cpu.Status.Carry);
+                    Assert.False(cpu.Status.Zero);
+                    Assert.True(cpu.Status.Negative);
+                    Assert.True(cpu.Status.Overflow);
+                    Assert.Equal(before.Decimal, cpu.Status.Decimal);
+                    Assert.Equal(before.InterruptDisable, cpu.Status.InterruptDisable);
+                    Assert.Equal(before.Break, cpu.Status.Break);
+                }),
+            },
+            new
+            {
+                Name = "BIT zp updates Zero Negative Overflow and preserves Carry Decimal Interrupt Break",
+                Program = new byte[] { 0xA9, 0xF0, 0x24, 0x10, 0x00 },
+                Setup = (Action<BootstrapCpu>)(cpu => cpu.WriteByte(0x0010, 0xC0)),
+                AssertStatus = (Action<BootstrapCpu, BootstrapStatusRegister>)((cpu, before) =>
+                {
+                    Assert.False(cpu.Status.Zero);
+                    Assert.True(cpu.Status.Negative);
+                    Assert.True(cpu.Status.Overflow);
+                    Assert.Equal(before.Carry, cpu.Status.Carry);
+                    Assert.Equal(before.Decimal, cpu.Status.Decimal);
+                    Assert.Equal(before.InterruptDisable, cpu.Status.InterruptDisable);
+                    Assert.Equal(before.Break, cpu.Status.Break);
+                }),
+            },
+            new
+            {
+                Name = "BCS consumes Carry without mutating status bits",
+                Program = new byte[] { 0xB0, 0x02, 0x00, 0xA9, 0xFF, 0x00 },
+                Setup = (Action<BootstrapCpu>)(cpu => cpu.Status.Carry = true),
+                AssertStatus = (Action<BootstrapCpu, BootstrapStatusRegister>)((cpu, before) =>
+                {
+                    Assert.Equal(before.Carry, cpu.Status.Carry);
+                    Assert.Equal(before.Zero, cpu.Status.Zero);
+                    Assert.Equal(before.Negative, cpu.Status.Negative);
+                    Assert.Equal(before.Overflow, cpu.Status.Overflow);
+                    Assert.Equal(before.Decimal, cpu.Status.Decimal);
+                    Assert.Equal(before.InterruptDisable, cpu.Status.InterruptDisable);
+                    Assert.Equal(before.Break, cpu.Status.Break);
+                }),
+            },
+        };
+
+        foreach (var scenario in scenarios)
+        {
+            var cpu = new BootstrapCpu();
+            cpu.LoadProgram(scenario.Program, 0x0600);
+            cpu.Status.Carry = true;
+            cpu.Status.Zero = false;
+            cpu.Status.InterruptDisable = true;
+            cpu.Status.Decimal = true;
+            cpu.Status.Break = true;
+            cpu.Status.Overflow = false;
+            cpu.Status.Negative = true;
+            scenario.Setup(cpu);
+
+            var before = BootstrapStatusRegister.FromByte(cpu.Status.ToByte());
+
+            cpu.RunSteps(scenario.Name.Contains("BCS") ? 1 : 2);
+
+            scenario.AssertStatus(cpu, before);
+        }
+    }
+
+    [Trait("Category", "InstructionSlice")]
     [Theory]
     [InlineData(0xF0, 0xC0, false, false, true, true)]
     [InlineData(0x0F, 0x30, true, true, false, false)]
