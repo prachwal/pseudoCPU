@@ -53,6 +53,53 @@ public class BootstrapCpuTests
     }
 
     [Trait("Category", "InstructionSlice")]
+    [Fact]
+    public void PhaPushesAccumulatorWithoutChangingFlags()
+    {
+        var cpu = new BootstrapCpu();
+
+        cpu.LoadProgram([0xA9, 0x03, 0xC9, 0x01, 0x48, 0x00], 0x0600);
+
+        cpu.Step();
+        cpu.Step();
+
+        Assert.Equal(0x03, cpu.A);
+        Assert.False(cpu.Zero);
+        Assert.False(cpu.Negative);
+        Assert.True(cpu.Carry);
+
+        cpu.Step();
+
+        Assert.Equal(0x03, cpu.A);
+        Assert.Equal(0xFE, cpu.SP);
+        Assert.Equal(0x03, cpu.ReadByte(0x01FF));
+        Assert.False(cpu.Zero);
+        Assert.False(cpu.Negative);
+        Assert.True(cpu.Carry);
+        Assert.False(cpu.IsHalted);
+    }
+
+    [Trait("Category", "InstructionSlice")]
+    [Theory]
+    [InlineData(0x00, true, false)]
+    [InlineData(0x80, false, true)]
+    public void PlaPopsAccumulatorAndUpdatesZeroAndNegativeFlags(byte value, bool expectedZero, bool expectedNegative)
+    {
+        var cpu = new BootstrapCpu();
+
+        cpu.LoadProgram([0x68, 0x00], 0x0600);
+        cpu.PushByte(value);
+
+        cpu.Step();
+
+        Assert.Equal(value, cpu.A);
+        Assert.Equal(expectedZero, cpu.Zero);
+        Assert.Equal(expectedNegative, cpu.Negative);
+        Assert.Equal(0xFF, cpu.SP);
+        Assert.False(cpu.IsHalted);
+    }
+
+    [Trait("Category", "InstructionSlice")]
     [Theory]
     [InlineData(0x00, true, false)]
     [InlineData(0x80, false, true)]

@@ -6,6 +6,8 @@ public class BootstrapOpcodeDecoderTests
 {
     [Trait("Category", "OpcodeDecoder")]
     [Theory]
+    [InlineData(0x48, BootstrapOpcode.Pha)]
+    [InlineData(0x68, BootstrapOpcode.Pla)]
     [InlineData(0x20, BootstrapOpcode.JsrAbsolute)]
     [InlineData(0x60, BootstrapOpcode.Rts)]
     [InlineData(0xA9, BootstrapOpcode.LdaImmediate)]

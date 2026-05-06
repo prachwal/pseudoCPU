@@ -90,6 +90,13 @@ public sealed class BootstrapCpu
 
         switch (BootstrapOpcodeDecoder.Decode(opcode))
         {
+            case BootstrapOpcode.Pha:
+                PushByte(A);
+                break;
+            case BootstrapOpcode.Pla:
+                A = PopByte();
+                UpdateZeroAndNegative(A);
+                break;
             case BootstrapOpcode.JsrAbsolute:
                 {
                     var targetAddress = FetchWord();
