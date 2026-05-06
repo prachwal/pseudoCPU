@@ -378,6 +378,27 @@ public class BootstrapCpuTests
     }
 
     [Trait("Category", "InstructionSlice")]
+    [Theory]
+    [InlineData(0x03, 0x03, true, false, true)]
+    [InlineData(0x04, 0x03, false, false, true)]
+    [InlineData(0x02, 0x03, false, true, false)]
+    public void CpyImmediateUpdatesZeroNegativeAndCarryFlags(byte index, byte operand, bool expectedZero, bool expectedNegative, bool expectedCarry)
+    {
+        var cpu = new BootstrapCpu();
+
+        cpu.LoadProgram([0xA0, index, 0xC0, operand, 0x00]);
+
+        cpu.Step();
+        cpu.Step();
+
+        Assert.Equal(index, cpu.Y);
+        Assert.Equal(expectedZero, cpu.Zero);
+        Assert.Equal(expectedNegative, cpu.Negative);
+        Assert.Equal(expectedCarry, cpu.Carry);
+        Assert.False(cpu.IsHalted);
+    }
+
+    [Trait("Category", "InstructionSlice")]
     [Fact]
     public void LoadProgramResetsCarryFlag()
     {
@@ -448,6 +469,33 @@ public class BootstrapCpuTests
         cpu.Step();
 
         Assert.Equal(0xFF, cpu.ReadByte(0x5678));
+        Assert.False(cpu.IsHalted);
+    }
+
+    [Trait("Category", "InstructionSlice")]
+    [Fact]
+    public void StyAbsoluteStoresYWithoutChangingFlags()
+    {
+        var cpu = new BootstrapCpu();
+
+        cpu.LoadProgram([0xA0, 0x7B, 0xA9, 0x00, 0xC9, 0x01, 0x8C, 0x34, 0x12, 0x00], 0x0600);
+
+        cpu.Step();
+        cpu.Step();
+        cpu.Step();
+
+        Assert.Equal(0x7B, cpu.Y);
+        Assert.False(cpu.Zero);
+        Assert.True(cpu.Negative);
+        Assert.False(cpu.Carry);
+
+        cpu.Step();
+
+        Assert.Equal(0x7B, cpu.ReadByte(0x1234));
+        Assert.Equal(0x7B, cpu.Y);
+        Assert.False(cpu.Zero);
+        Assert.True(cpu.Negative);
+        Assert.False(cpu.Carry);
         Assert.False(cpu.IsHalted);
     }
 

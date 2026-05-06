@@ -174,11 +174,22 @@ public sealed class BootstrapCpu
                     _memory[address] = X;
                     break;
                 }
+            case BootstrapOpcode.StyAbsolute:
+                {
+                    var lowByte = FetchByte();
+                    var highByte = FetchByte();
+                    var address = (ushort)(lowByte | (highByte << 8));
+                    _memory[address] = Y;
+                    break;
+                }
             case BootstrapOpcode.CmpImmediate:
                 CompareWithAccumulator(FetchByte());
                 break;
             case BootstrapOpcode.CpxImmediate:
                 CompareWithX(FetchByte());
+                break;
+            case BootstrapOpcode.CpyImmediate:
+                CompareWithY(FetchByte());
                 break;
             case BootstrapOpcode.JmpAbsolute:
                 {
@@ -246,6 +257,14 @@ public sealed class BootstrapCpu
         Zero = X == value;
         Negative = (result & 0x80) != 0;
         Carry = X >= value;
+    }
+
+    private void CompareWithY(byte value)
+    {
+        var result = unchecked((byte)(Y - value));
+        Zero = Y == value;
+        Negative = (result & 0x80) != 0;
+        Carry = Y >= value;
     }
 
     private void BranchRelative(bool condition, byte offsetByte)
