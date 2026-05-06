@@ -184,6 +184,124 @@ public class BootstrapCpuTests
         Assert.True(restored.Negative);
     }
 
+    [Trait("Category", "InstructionSlice")]
+    [Theory]
+    [InlineData(0xF0, 0xC0, false, false, true, true)]
+    [InlineData(0x0F, 0x30, true, true, false, false)]
+    public void BitZeroPageUpdatesZeroNegativeAndOverflowFlags(byte accumulator, byte memoryValue, bool initialCarry, bool expectedZero, bool expectedNegative, bool expectedOverflow)
+    {
+        var cpu = new BootstrapCpu();
+
+        cpu.LoadProgram([0xA9, accumulator, 0x24, 0x10, 0x00], 0x0600);
+        cpu.WriteByte(0x0010, memoryValue);
+
+        cpu.Step();
+        cpu.Status.Carry = initialCarry;
+        cpu.Step();
+
+        Assert.Equal(accumulator, cpu.A);
+        Assert.Equal(expectedZero, cpu.Zero);
+        Assert.Equal(expectedNegative, cpu.Negative);
+        Assert.Equal(expectedOverflow, cpu.Status.Overflow);
+        Assert.Equal(initialCarry, cpu.Carry);
+        Assert.Equal(0x0604, cpu.PC);
+        Assert.False(cpu.IsHalted);
+    }
+
+    [Trait("Category", "InstructionSlice")]
+    [Theory]
+    [InlineData(0x81, 0x02, true, false, false)]
+    [InlineData(0x00, 0x00, false, true, false)]
+    public void AslAUpdatesCarryZeroAndNegativeFlags(byte accumulator, byte expectedResult, bool expectedCarry, bool expectedZero, bool expectedNegative)
+    {
+        var cpu = new BootstrapCpu();
+
+        cpu.LoadProgram([0xA9, accumulator, 0x0A, 0x00], 0x0600);
+
+        cpu.Step();
+        cpu.Status.Overflow = true;
+        cpu.Step();
+
+        Assert.Equal(expectedResult, cpu.A);
+        Assert.Equal(expectedCarry, cpu.Carry);
+        Assert.Equal(expectedZero, cpu.Zero);
+        Assert.Equal(expectedNegative, cpu.Negative);
+        Assert.True(cpu.Status.Overflow);
+        Assert.Equal(0x0603, cpu.PC);
+        Assert.False(cpu.IsHalted);
+    }
+
+    [Trait("Category", "InstructionSlice")]
+    [Theory]
+    [InlineData(0x01, 0x00, true, true, false)]
+    [InlineData(0x80, 0x40, false, false, false)]
+    public void LsrAUpdatesCarryZeroAndNegativeFlags(byte accumulator, byte expectedResult, bool expectedCarry, bool expectedZero, bool expectedNegative)
+    {
+        var cpu = new BootstrapCpu();
+
+        cpu.LoadProgram([0xA9, accumulator, 0x4A, 0x00], 0x0600);
+
+        cpu.Step();
+        cpu.Status.Overflow = true;
+        cpu.Step();
+
+        Assert.Equal(expectedResult, cpu.A);
+        Assert.Equal(expectedCarry, cpu.Carry);
+        Assert.Equal(expectedZero, cpu.Zero);
+        Assert.Equal(expectedNegative, cpu.Negative);
+        Assert.True(cpu.Status.Overflow);
+        Assert.Equal(0x0603, cpu.PC);
+        Assert.False(cpu.IsHalted);
+    }
+
+    [Trait("Category", "InstructionSlice")]
+    [Theory]
+    [InlineData(0x80, true, 0x01, true, false, false)]
+    [InlineData(0x00, false, 0x00, false, true, false)]
+    public void RolAUsesCarryInAndUpdatesCarryZeroAndNegativeFlags(byte accumulator, bool initialCarry, byte expectedResult, bool expectedCarry, bool expectedZero, bool expectedNegative)
+    {
+        var cpu = new BootstrapCpu();
+
+        cpu.LoadProgram([0xA9, accumulator, 0x2A, 0x00], 0x0600);
+
+        cpu.Step();
+        cpu.Status.Carry = initialCarry;
+        cpu.Status.Overflow = true;
+        cpu.Step();
+
+        Assert.Equal(expectedResult, cpu.A);
+        Assert.Equal(expectedCarry, cpu.Carry);
+        Assert.Equal(expectedZero, cpu.Zero);
+        Assert.Equal(expectedNegative, cpu.Negative);
+        Assert.True(cpu.Status.Overflow);
+        Assert.Equal(0x0603, cpu.PC);
+        Assert.False(cpu.IsHalted);
+    }
+
+    [Trait("Category", "InstructionSlice")]
+    [Theory]
+    [InlineData(0x01, true, 0x80, true, false, true)]
+    [InlineData(0x00, false, 0x00, false, true, false)]
+    public void RorAUsesCarryInAndUpdatesCarryZeroAndNegativeFlags(byte accumulator, bool initialCarry, byte expectedResult, bool expectedCarry, bool expectedZero, bool expectedNegative)
+    {
+        var cpu = new BootstrapCpu();
+
+        cpu.LoadProgram([0xA9, accumulator, 0x6A, 0x00], 0x0600);
+
+        cpu.Step();
+        cpu.Status.Carry = initialCarry;
+        cpu.Status.Overflow = true;
+        cpu.Step();
+
+        Assert.Equal(expectedResult, cpu.A);
+        Assert.Equal(expectedCarry, cpu.Carry);
+        Assert.Equal(expectedZero, cpu.Zero);
+        Assert.Equal(expectedNegative, cpu.Negative);
+        Assert.True(cpu.Status.Overflow);
+        Assert.Equal(0x0603, cpu.PC);
+        Assert.False(cpu.IsHalted);
+    }
+
     private static void SetFlag(BootstrapStatusRegister status, StatusFlag flag, bool value)
     {
         switch (flag)

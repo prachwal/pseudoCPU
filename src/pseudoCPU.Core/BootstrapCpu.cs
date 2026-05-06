@@ -93,6 +93,12 @@ public sealed class BootstrapCpu
 
         switch (BootstrapOpcodeDecoder.Decode(opcode))
         {
+            case BootstrapOpcode.BitZeroPage:
+                BitZeroPage(FetchByte());
+                break;
+            case BootstrapOpcode.AslAccumulator:
+                ShiftAccumulatorLeft();
+                break;
             case BootstrapOpcode.Clc:
                 Status.Carry = false;
                 break;
@@ -144,6 +150,12 @@ public sealed class BootstrapCpu
                     PC = unchecked((ushort)(returnAddress + 1));
                     break;
                 }
+            case BootstrapOpcode.LsrAccumulator:
+                ShiftAccumulatorRight();
+                break;
+            case BootstrapOpcode.RolAccumulator:
+                RotateAccumulatorLeft();
+                break;
             case BootstrapOpcode.LdaImmediate:
                 A = FetchByte();
                 UpdateZeroAndNegative(A);
@@ -209,6 +221,9 @@ public sealed class BootstrapCpu
             case BootstrapOpcode.SbcImmediate:
                 SubtractWithBorrow(FetchByte());
                 break;
+            case BootstrapOpcode.RorAccumulator:
+                RotateAccumulatorRight();
+                break;
             case BootstrapOpcode.CpxImmediate:
                 CompareWithX(FetchByte());
                 break;
@@ -265,6 +280,47 @@ public sealed class BootstrapCpu
     {
         Status.Zero = value == 0;
         Status.Negative = (value & 0x80) != 0;
+    }
+
+    private void BitZeroPage(byte zeroPageAddress)
+    {
+        var value = ReadByte(zeroPageAddress);
+
+        Status.Zero = (A & value) == 0;
+        Status.Overflow = (value & 0x40) != 0;
+        Status.Negative = (value & 0x80) != 0;
+    }
+
+    private void ShiftAccumulatorLeft()
+    {
+        Status.Carry = (A & 0x80) != 0;
+        A = (byte)(A << 1);
+        UpdateZeroAndNegative(A);
+    }
+
+    private void ShiftAccumulatorRight()
+    {
+        Status.Carry = (A & 0x01) != 0;
+        A = (byte)(A >> 1);
+        UpdateZeroAndNegative(A);
+    }
+
+    private void RotateAccumulatorLeft()
+    {
+        var carryIn = Status.Carry ? 1 : 0;
+
+        Status.Carry = (A & 0x80) != 0;
+        A = (byte)((A << 1) | carryIn);
+        UpdateZeroAndNegative(A);
+    }
+
+    private void RotateAccumulatorRight()
+    {
+        var carryIn = Status.Carry ? 0x80 : 0;
+
+        Status.Carry = (A & 0x01) != 0;
+        A = (byte)((A >> 1) | carryIn);
+        UpdateZeroAndNegative(A);
     }
 
     private void AddWithCarry(byte value)
