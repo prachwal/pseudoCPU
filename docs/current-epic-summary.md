@@ -1,7 +1,8 @@
 # Current Epic Summary
 
 ## State
-- Current active epic: none
+- Current active epic: #46
+- Current epic status: qc
 - Last completed epic: #36
 - Last QC verdict: PASS_WITH_FOLLOW_UP
 - Follow-up from last epic: #45 completed
@@ -12,6 +13,13 @@
 - Tasks: #37-#44
 - Follow-up: #45 completed
 - Status: done
+
+## Active Epic
+- Epic: #46 - Phase 6: 6502 Y register foundation and Y-counter instruction slice
+- Chapter file: `docs/epics/0046-y-register-slice.md`
+- Tasks: #47-#53 done, #54 pending
+- QC state: pending
+- Follow-up: none
 
 ## Key Domain Decisions
 - Stack page: `$0100-$01FF`
@@ -24,8 +32,8 @@
   - bits 2-6 reserved / ignored
 
 ## Next Action
-- For a new small bug: use small-task mode.
-- For a new multi-task feature, domain change, contract change or architecture change: use epic mode.
+- Finish QC gate #54 for epic #46.
+- Then run issue sync before closure.
 - Before any CPU/opcode/flag/stack/assembler/CLI work: read `docs/6502-domain-rules.md`.
 
 ## Context Files

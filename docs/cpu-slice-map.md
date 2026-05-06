@@ -23,5 +23,10 @@ Bootstrap assembler accepts raw branch offsets only; labels and `.org` remain un
 | PLA | 68 | done | done | done | done | done | pulls into A and updates Z/N |
 | PHP | 08 | done | done | done | done | done | pushes bootstrap status snapshot |
 | PLP | 28 | done | done | done | done | done | restores Carry/Zero/Negative only |
+| LDY #imm | A0 | done | done | done | done | done | updates Z/N |
+| INY | C8 | done | done | done | done | done | updates Z/N |
+| DEY | 88 | done | done | done | done | done | updates Z/N |
+| CPY #imm | C0 | done | done | done | done | done | updates C/Z/N without mutating Y |
+| STY abs | 8C | done | done | done | done | done | no flag updates |
 
 Maintain this map after each opcode phase.

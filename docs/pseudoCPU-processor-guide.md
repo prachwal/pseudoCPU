@@ -60,6 +60,7 @@ Procesor posiada:
 - pamięć liniową 64 KB,
 - rejestr akumulatora `A`,
 - rejestr indeksowy `X`,
+- rejestr indeksowy `Y`,
 - licznik programu `PC`,
 - flagi `Zero`, `Negative` i `Carry`,
 - bootstrapowy model stosu oparty na stronie `$0100-$01FF` i 8-bitowym `SP`,
@@ -69,7 +70,6 @@ Procesor posiada:
 Aktualny model nie posiada jeszcze:
 
 - pełnego rejestru statusu jako bajtu,
-- rejestru `Y`,
 - przerwań,
 - wektorów resetu/NMI/IRQ,
 - licznika cykli,
@@ -121,6 +121,18 @@ Typowy przebieg:
 
 W przypadku instrukcji branch relative offset jest liczony względem `PC` po pobraniu bajtu offsetu. To jest kluczowe dla poprawnego liczenia ręcznych offsetów w assemblerze bootstrapowym.
 
+### 4.4. Rejestr `Y`
+
+`Y` jest rejestrem indeksowym. W aktualnym bootstrapowym slice jest 8-bitowym rejestrem używanym przez instrukcje:
+
+- `LDY #imm`,
+- `INY`,
+- `DEY`,
+- `CPY #imm`,
+- `STY abs`.
+
+`Y` zachowuje się jak bajt. Operacje inkrementacji, dekrementacji i porównania działają z wraparoundem `0xFF -> 0x00` albo `0x00 -> 0xFF` zgodnie z 8-bitowym modelem CPU.
+
 ---
 
 ## 5. Flagi procesora
@@ -134,6 +146,9 @@ Przykładowe instrukcje aktualizujące `Zero`:
 - `LDA #imm`,
 - `TAX`,
 - `INX`,
+- `LDY #imm`,
+- `INY`,
+- `DEY`,
 - `CMP #imm`,
 - planowane `LDX #imm`,
 - planowane `DEX`,
@@ -328,7 +343,17 @@ Dla bezpieczeństwa każdy dłuższy przebieg powinien mieć limit kroków. Prog
 | `PHP` | `0x08` | Implied | Implemented |
 | `PLP` | `0x28` | Implied | Implemented |
 
-### 8.3. Planowany phase 3 slice
+### 8.3. Aktualny Y slice
+
+| Instrukcja | Opcode | Tryb | Status |
+|---|---:|---|---|
+| `LDY #imm` | `0xA0` | Immediate | Implemented |
+| `INY` | `0xC8` | Implied | Implemented |
+| `DEY` | `0x88` | Implied | Implemented |
+| `CPY #imm` | `0xC0` | Immediate | Implemented |
+| `STY abs` | `0x8C` | Absolute | Implemented |
+
+### 8.4. Planowany phase 3 slice
 
 | Instrukcja | Opcode | Tryb | Status |
 |---|---:|---|---|
@@ -345,7 +370,6 @@ Poza aktualnym zakresem są m.in.:
 - `AND`, `ORA`, `EOR`,
 - `ASL`, `LSR`, `ROL`, `ROR`,
 - `RTI`,
-- `LDY`, `STY`, `CPY`,
 - `BIT`,
 - `CLC`, `SEC`, `CLI`, `SEI`, `CLV`, `CLD`, `SED`,
 - pełne warianty adresowania dla istniejących instrukcji.
@@ -666,6 +690,17 @@ Carry = X >= operand
 
 `CPX` nie zmienia wartości `X`.
 
+Dla `CPY #imm` analogicznie:
+
+```text
+CPY #imm:
+Carry = Y >= operand
+Zero = Y == operand
+Negative = bit7(Y - operand)
+```
+
+`CPY` nie zmienia wartości `Y`.
+
 ### 9.13. Planowane `STX abs`
 
 Opcode:
@@ -687,6 +722,119 @@ memory[address] = X
 ```
 
 Instrukcja nie powinna zmieniać flag.
+
+### 9.14. `LDY #imm`
+
+Opcode:
+
+```text
+A0
+```
+
+Format:
+
+```asm
+LDY #$NN
+```
+
+Działanie:
+
+```text
+Y = operand
+Zero = Y == 0
+Negative = bit7(Y) == 1
+```
+
+### 9.15. `INY`
+
+Opcode:
+
+```text
+C8
+```
+
+Format:
+
+```asm
+INY
+```
+
+Działanie:
+
+```text
+Y = (Y + 1) & 0xFF
+Zero = Y == 0
+Negative = bit7(Y) == 1
+```
+
+### 9.16. `DEY`
+
+Opcode:
+
+```text
+88
+```
+
+Format:
+
+```asm
+DEY
+```
+
+Działanie:
+
+```text
+Y = (Y - 1) & 0xFF
+Zero = Y == 0
+Negative = bit7(Y) == 1
+```
+
+### 9.17. `CPY #imm`
+
+Opcode:
+
+```text
+C0
+```
+
+Format:
+
+```asm
+CPY #$NN
+```
+
+Działanie:
+
+```text
+result = Y - operand
+Zero = Y == operand
+Negative = bit7(result) == 1
+Carry = Y >= operand
+```
+
+`CPY` nie zmienia wartości `Y`.
+
+### 9.18. `STY abs`
+
+Opcode:
+
+```text
+8C
+```
+
+Format:
+
+```asm
+STY $HHLL
+```
+
+Działanie:
+
+```text
+memory[address] = Y
+```
+
+Instrukcja nie zmienia flag.
 
 ---
 
@@ -971,7 +1119,22 @@ Zakres:
 - strona stosu `$0100-$01FF`,
 - bootstrapowy snapshot statusu dla `PHP` / `PLP` oparty o `Carry`, `Zero` i `Negative`.
 
-### 14.6. Potencjalna kolejna faza: MMIO
+### 14.6. Zrealizowana faza: Y register foundation and Y-counter instruction slice
+
+Cel: dodać bootstrapowy rejestr `Y` jako drugi licznik / rejestr indeksowy dla pionowego slice instrukcji.
+
+Zakres:
+
+- `Y`,
+- `LDY #imm`,
+- `INY`,
+- `DEY`,
+- `CPY #imm`,
+- `STY abs`,
+- testy rejestru, flag `Zero` / `Negative` / `Carry`, assembler i trace/CLI visibility,
+- aktualizacja dokumentacji i mapy slice.
+
+### 14.7. Potencjalna kolejna faza: MMIO
 
 Cel: umożliwić komunikację z urządzeniami.
 
@@ -992,7 +1155,6 @@ Aktualne ograniczenia są świadome:
 - brak pełnej zgodności 6502,
 - brak cycle accuracy,
 - brak przerwań,
-- brak rejestru `Y`,
 - brak pełnego status register,
 - brak etykiet w assemblerze,
 - brak `.org`,
