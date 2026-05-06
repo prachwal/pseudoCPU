@@ -45,7 +45,7 @@ Podstawowe założenia są następujące:
 3. GitHub Issues są źródłem prawdy dla zakresu, kryteriów akceptacji i wyników weryfikacji.
 4. Nowe instrukcje nie powinny być dodawane przypadkowo. Każda grupa opcode powinna mieć uzasadnienie funkcjonalne.
 5. W pierwszych fazach brak pełnego modelu 6502 jest świadomym ograniczeniem, a nie błędem.
-6. Zgodność cyklowa, przerwania, stos, tryb dziesiętny i pełny rejestr statusu są odkładane do osobnych faz.
+6. Zgodność cyklowa, przerwania, tryb dziesiętny i pełny rejestr statusu są odkładane do osobnych faz; bootstrapowy stack slice jest już częścią bieżącego modelu.
 
 Najważniejsza zasada brzmi: procesor ma zawsze pozostawać w stanie testowalnym. Jeżeli dodanie instrukcji wymaga większej przebudowy, należy rozdzielić ją na osobny task architektoniczny i osobny task funkcjonalny.
 
@@ -61,7 +61,8 @@ Procesor posiada:
 - rejestr akumulatora `A`,
 - rejestr indeksowy `X`,
 - licznik programu `PC`,
-- flagi `Zero` i `Negative`,
+- flagi `Zero`, `Negative` i `Carry`,
+- bootstrapowy model stosu oparty na stronie `$0100-$01FF` i 8-bitowym `SP`,
 - stan zatrzymania `IsHalted`,
 - publiczne API do ładowania programu, wykonywania pojedynczego kroku, wykonywania limitowanej liczby kroków i wykonywania do zatrzymania.
 
@@ -69,7 +70,6 @@ Aktualny model nie posiada jeszcze:
 
 - pełnego rejestru statusu jako bajtu,
 - rejestru `Y`,
-- stosu,
 - przerwań,
 - wektorów resetu/NMI/IRQ,
 - licznika cykli,
@@ -161,7 +161,7 @@ Zero = false
 
 ### 5.3. `Carry`
 
-`Carry` jest planowaną flagą fazy 3. Powinna zostać dodana jako jawna publiczna właściwość procesora.
+`Carry` jest aktywną flagą bootstrapowego modelu procesora i jest ekspozycją publiczną obok `Zero` oraz `Negative`.
 
 Minimalna semantyka dla porównania 6502-style:
 
@@ -181,7 +181,7 @@ Zero = X == operand
 Negative = bit7(X - operand)
 ```
 
-Na tym etapie `Carry` nie musi jeszcze obsługiwać `ADC`, `SBC`, rotacji ani przesunięć bitowych. Te instrukcje wymagają osobnych tasków.
+Na tym etapie `Carry` wspiera już kontrakty `CMP #imm` i `CPX #imm`, ale nie rozszerza jeszcze modelu o `ADC`, `SBC`, rotacje ani przesunięcia bitowe. Te instrukcje wymagają osobnych tasków.
 
 ### 5.4. Flagi poza aktualnym zakresem
 
@@ -192,7 +192,7 @@ Aktualnie poza zakresem są:
 - `Decimal`,
 - `Break`,
 - pełne mapowanie status register do jednego bajtu,
-- wpływ stosu na status register.
+- rozszerzenie bootstrapowego snapshotu statusu poza `Carry`, `Zero` i `Negative`.
 
 Nie należy dodawać tych flag przy okazji zwykłych tasków opcode, jeżeli nie są wymienione w issue.
 
@@ -314,12 +314,21 @@ Dla bezpieczeństwa każdy dłuższy przebieg powinien mieć limit kroków. Prog
 | `INX` | `0xE8` | Implied | Implemented |
 | `STA abs` | `0x8D` | Absolute | Implemented |
 | `BRK` | `0x00` | Implied | Implemented |
-| `CMP #imm` | `0xC9` | Immediate | Implemented, `Carry` planned in phase 3 |
+| `CMP #imm` | `0xC9` | Immediate | Implemented, `Carry` active in the bootstrap status model |
 | `JMP abs` | `0x4C` | Absolute | Implemented |
 | `BEQ rel` | `0xF0` | Relative | Implemented |
 | `BNE rel` | `0xD0` | Relative | Implemented |
 
-### 8.2. Planowany phase 3 slice
+### 8.2. Aktualny bootstrapowy stack slice
+
+| Instrukcja | Opcode | Tryb | Status |
+|---|---:|---|---|
+| `PHA` | `0x48` | Implied | Implemented |
+| `PLA` | `0x68` | Implied | Implemented |
+| `PHP` | `0x08` | Implied | Implemented |
+| `PLP` | `0x28` | Implied | Implemented |
+
+### 8.3. Planowany phase 3 slice
 
 | Instrukcja | Opcode | Tryb | Status |
 |---|---:|---|---|
@@ -328,15 +337,14 @@ Dla bezpieczeństwa każdy dłuższy przebieg powinien mieć limit kroków. Prog
 | `CPX #imm` | `0xE0` | Immediate | Planned |
 | `STX abs` | `0x8E` | Absolute | Planned |
 
-### 8.3. Instrukcje poza zakresem
+### 8.4. Instrukcje poza zakresem
 
 Poza aktualnym zakresem są m.in.:
 
 - `ADC`, `SBC`,
 - `AND`, `ORA`, `EOR`,
 - `ASL`, `LSR`, `ROL`, `ROR`,
-- `JSR`, `RTS`, `RTI`,
-- `PHA`, `PLA`, `PHP`, `PLP`,
+- `RTI`,
 - `LDY`, `STY`, `CPY`,
 - `BIT`,
 - `CLC`, `SEC`, `CLI`, `SEI`, `CLV`, `CLD`, `SED`,
@@ -947,19 +955,21 @@ Możliwy zakres:
 - diagnostyka nieznanej etykiety,
 - testy branch forward/backward.
 
-### 14.5. Potencjalna kolejna faza: stos i podprogramy
+### 14.5. Zrealizowana faza: stos, podprogramy i bootstrapowy stack slice
 
-Cel: umożliwić wywołania funkcji.
+Cel: umożliwić wywołania funkcji oraz operacje na stosie w bootstrapowym modelu.
 
-Możliwy zakres:
+Zakres:
 
 - `JSR`,
 - `RTS`,
 - `PHA`,
 - `PLA`,
-- `TXS`,
-- `TSX`,
-- prosty model stosu.
+- `PHP`,
+- `PLP`,
+- 8-bitowy `SP`,
+- strona stosu `$0100-$01FF`,
+- bootstrapowy snapshot statusu dla `PHP` / `PLP` oparty o `Carry`, `Zero` i `Negative`.
 
 ### 14.6. Potencjalna kolejna faza: MMIO
 
@@ -981,7 +991,6 @@ Aktualne ograniczenia są świadome:
 
 - brak pełnej zgodności 6502,
 - brak cycle accuracy,
-- brak stosu,
 - brak przerwań,
 - brak rejestru `Y`,
 - brak pełnego status register,
