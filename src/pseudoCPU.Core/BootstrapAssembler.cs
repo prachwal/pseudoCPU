@@ -58,13 +58,26 @@ public static class BootstrapAssembler
                     bytes.Add((byte)BootstrapOpcode.LdxImmediate);
                     bytes.Add(ParseByteLiteral(operand[1..], mnemonic));
                     break;
+                case "LDY":
+                    RequireOperand(mnemonic, operand, '#');
+                    bytes.Add((byte)BootstrapOpcode.LdyImmediate);
+                    bytes.Add(ParseByteLiteral(operand[1..], mnemonic));
+                    break;
                 case "TAX":
                     RequireNoOperand(mnemonic, operand);
                     bytes.Add((byte)BootstrapOpcode.Tax);
                     break;
+                case "INY":
+                    RequireNoOperand(mnemonic, operand);
+                    bytes.Add((byte)BootstrapOpcode.Iny);
+                    break;
                 case "INX":
                     RequireNoOperand(mnemonic, operand);
                     bytes.Add((byte)BootstrapOpcode.Inx);
+                    break;
+                case "DEY":
+                    RequireNoOperand(mnemonic, operand);
+                    bytes.Add((byte)BootstrapOpcode.Dey);
                     break;
                 case "DEX":
                     RequireNoOperand(mnemonic, operand);
@@ -80,9 +93,19 @@ public static class BootstrapAssembler
                     bytes.Add((byte)BootstrapOpcode.StxAbsolute);
                     bytes.AddRange(ParseWordLiteral(operand, mnemonic));
                     break;
+                case "STY":
+                    RequireOperand(mnemonic, operand);
+                    bytes.Add((byte)BootstrapOpcode.StyAbsolute);
+                    bytes.AddRange(ParseWordLiteral(operand, mnemonic));
+                    break;
                 case "CMP":
                     RequireOperand(mnemonic, operand, '#');
                     bytes.Add((byte)BootstrapOpcode.CmpImmediate);
+                    bytes.Add(ParseByteLiteral(operand[1..], mnemonic));
+                    break;
+                case "CPY":
+                    RequireOperand(mnemonic, operand, '#');
+                    bytes.Add((byte)BootstrapOpcode.CpyImmediate);
                     bytes.Add(ParseByteLiteral(operand[1..], mnemonic));
                     break;
                 case "CPX":

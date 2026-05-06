@@ -167,6 +167,25 @@ public class BootstrapAssemblerTests
         Assert.Equal([0xA2, 0x03, 0xCA, 0xE0, 0x00, 0xD0, 0xFB, 0x8E, 0x00, 0x20, 0x00], bytes);
     }
 
+    [Trait("Category", "Assembler")]
+    [Fact]
+    public void AssemblesYSliceProgramToExpectedBytes()
+    {
+        const string source = """
+            LDY #$03
+            INY
+            DEY
+            CPY #$00
+            BNE $FB
+            STY $2000
+            BRK
+            """;
+
+        var bytes = BootstrapAssembler.Assemble(source);
+
+        Assert.Equal([0xA0, 0x03, 0xC8, 0x88, 0xC0, 0x00, 0xD0, 0xFB, 0x8C, 0x00, 0x20, 0x00], bytes);
+    }
+
     [Trait("Category", "AsmExecution")]
     [Fact]
     public void AssemblesAndRunsXCounterProgramToExpectedCpuState()
@@ -192,6 +211,26 @@ public class BootstrapAssemblerTests
         Assert.True(cpu.Carry);
         Assert.Equal(0x00, cpu.ReadByte(0x2000));
         Assert.Equal(0x040B, cpu.PC);
+    }
+
+    [Trait("Category", "AsmExecution")]
+    [Fact]
+    public void AssemblesAndRunsYSliceProgramToExpectedCpuState()
+    {
+        var examplePath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "examples", "y-counter-loop.asm"));
+        var source = File.ReadAllText(examplePath);
+
+        var cpu = new BootstrapCpu();
+        cpu.LoadProgram(BootstrapAssembler.Assemble(source), 0x0400);
+        cpu.Run();
+
+        Assert.True(cpu.IsHalted);
+        Assert.Equal(0x00, cpu.Y);
+        Assert.True(cpu.Zero);
+        Assert.False(cpu.Negative);
+        Assert.True(cpu.Carry);
+        Assert.Equal(0x00, cpu.ReadByte(0x2000));
+        Assert.Equal(0x040C, cpu.PC);
     }
 
     [Trait("Category", "Assembler")]

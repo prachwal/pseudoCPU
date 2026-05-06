@@ -1,0 +1,7 @@
+LDY #$03
+INY
+DEY
+CPY #$00
+BNE $FB
+STY $2000
+BRK
