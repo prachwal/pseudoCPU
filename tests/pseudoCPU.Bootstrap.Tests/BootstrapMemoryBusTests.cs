@@ -34,6 +34,47 @@ public class BootstrapMemoryBusTests
 
     [Trait("Category", "InstructionSlice")]
     [Fact]
+    public void IndexedIndirectAddressResolutionWrapsZeroPageBeforeDereference()
+    {
+        var bus = new BootstrapMemoryBus();
+
+        bus.WriteByte(0x0000, 0x34);
+        bus.WriteByte(0x0001, 0x12);
+        bus.WriteByte(0x00FC, 0x78);
+        bus.WriteByte(0x00FD, 0x56);
+
+        Assert.Equal(0x1234, bus.ResolveIndexedIndirectAddress(0xFC, 0x04));
+    }
+
+    [Trait("Category", "InstructionSlice")]
+    [Fact]
+    public void IndirectIndexedAddressResolutionReadsZeroPagePointerThenAddsIndex()
+    {
+        var bus = new BootstrapMemoryBus();
+
+        bus.WriteByte(0x00FE, 0x34);
+        bus.WriteByte(0x00FF, 0x12);
+        bus.WriteByte(0x0002, 0x78);
+        bus.WriteByte(0x0003, 0x56);
+
+        Assert.Equal(0x1238, bus.ResolveIndirectIndexedAddress(0xFE, 0x04));
+    }
+
+    [Trait("Category", "InstructionSlice")]
+    [Fact]
+    public void IndirectJumpAddressResolutionWrapsPointerHighByteWithinPage()
+    {
+        var bus = new BootstrapMemoryBus();
+
+        bus.WriteByte(0x10FF, 0x34);
+        bus.WriteByte(0x1000, 0x12);
+        bus.WriteByte(0x1100, 0x56);
+
+        Assert.Equal(0x1234, bus.ResolveIndirectJumpAddress(0x10FF));
+    }
+
+    [Trait("Category", "InstructionSlice")]
+    [Fact]
     public void CpuUsesRamOnlyMemoryBusFoundationForDirectAccess()
     {
         var cpu = new BootstrapCpu();

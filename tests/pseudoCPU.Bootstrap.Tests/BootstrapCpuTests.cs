@@ -505,6 +505,134 @@ public class BootstrapCpuTests
     }
 
     [Trait("Category", "InstructionSlice")]
+    [Fact]
+    public void JmpIndirectUsesPointerPageWrapAtBoundary()
+    {
+        var cpu = new BootstrapCpu();
+
+        cpu.LoadProgram([0x6C, 0xFF, 0x10, 0x00], 0x0600);
+        cpu.WriteByte(0x10FF, 0x34);
+        cpu.WriteByte(0x1000, 0x12);
+        cpu.WriteByte(0x1100, 0x56);
+
+        cpu.Step();
+
+        Assert.Equal(0x1234, cpu.PC);
+        Assert.False(cpu.IsHalted);
+    }
+
+    [Trait("Category", "InstructionSlice")]
+    [Fact]
+    public void IndexedIndirectLoadsReadWrappedZeroPagePointerAndUpdateAccumulator()
+    {
+        var cpu = new BootstrapCpu();
+
+        cpu.LoadProgram([0xA2, 0x04, 0xA1, 0xFC, 0x00], 0x0600);
+        cpu.WriteByte(0x0000, 0x34);
+        cpu.WriteByte(0x0001, 0x12);
+        cpu.WriteByte(0x00FC, 0x78);
+        cpu.WriteByte(0x00FD, 0x56);
+        cpu.WriteByte(0x1234, 0x7A);
+        cpu.WriteByte(0x5678, 0xCC);
+
+        cpu.Step();
+        cpu.Step();
+
+        Assert.Equal(0x7A, cpu.A);
+        Assert.False(cpu.Zero);
+        Assert.False(cpu.Negative);
+        Assert.Equal(0x0604, cpu.PC);
+        Assert.False(cpu.IsHalted);
+    }
+
+    [Trait("Category", "InstructionSlice")]
+    [Fact]
+    public void IndexedIndirectStoresWriteResolvedAddressWithoutChangingFlags()
+    {
+        var cpu = new BootstrapCpu();
+
+        cpu.LoadProgram([0xA2, 0x04, 0xA9, 0x5A, 0x81, 0xFC, 0x00], 0x0600);
+        cpu.WriteByte(0x0000, 0x34);
+        cpu.WriteByte(0x0001, 0x12);
+        cpu.WriteByte(0x00FC, 0x78);
+        cpu.WriteByte(0x00FD, 0x56);
+        cpu.WriteByte(0x5678, 0xCC);
+
+        cpu.Step();
+        cpu.Step();
+        cpu.Status.Carry = true;
+        cpu.Status.Zero = true;
+        cpu.Status.Negative = true;
+        cpu.Status.Decimal = true;
+        cpu.Status.Overflow = true;
+        cpu.Step();
+
+        Assert.Equal(0x5A, cpu.A);
+        Assert.Equal(0x5A, cpu.ReadByte(0x1234));
+        Assert.Equal(0xCC, cpu.ReadByte(0x5678));
+        Assert.True(cpu.Carry);
+        Assert.True(cpu.Zero);
+        Assert.True(cpu.Negative);
+        Assert.True(cpu.Status.Decimal);
+        Assert.True(cpu.Status.Overflow);
+        Assert.Equal(0x0606, cpu.PC);
+        Assert.False(cpu.IsHalted);
+    }
+
+    [Trait("Category", "InstructionSlice")]
+    [Fact]
+    public void IndirectIndexedLoadsReadPointerThenAddYAndUpdateAccumulator()
+    {
+        var cpu = new BootstrapCpu();
+
+        cpu.LoadProgram([0xA0, 0x04, 0xB1, 0xFE, 0x00], 0x0600);
+        cpu.WriteByte(0x00FE, 0x34);
+        cpu.WriteByte(0x00FF, 0x12);
+        cpu.WriteByte(0x1234, 0x99);
+        cpu.WriteByte(0x1238, 0x3C);
+
+        cpu.Step();
+        cpu.Step();
+
+        Assert.Equal(0x3C, cpu.A);
+        Assert.False(cpu.Zero);
+        Assert.False(cpu.Negative);
+        Assert.Equal(0x0604, cpu.PC);
+        Assert.False(cpu.IsHalted);
+    }
+
+    [Trait("Category", "InstructionSlice")]
+    [Fact]
+    public void IndirectIndexedStoresWritePointerPlusYWithoutChangingFlags()
+    {
+        var cpu = new BootstrapCpu();
+
+        cpu.LoadProgram([0xA0, 0x04, 0xA9, 0x5A, 0x91, 0xFE, 0x00], 0x0600);
+        cpu.WriteByte(0x00FE, 0x34);
+        cpu.WriteByte(0x00FF, 0x12);
+        cpu.WriteByte(0x1238, 0xCC);
+
+        cpu.Step();
+        cpu.Step();
+        cpu.Status.Carry = true;
+        cpu.Status.Zero = true;
+        cpu.Status.Negative = true;
+        cpu.Status.Decimal = true;
+        cpu.Status.Overflow = true;
+        cpu.Step();
+
+        Assert.Equal(0x5A, cpu.A);
+        Assert.Equal(0x5A, cpu.ReadByte(0x1238));
+        Assert.True(cpu.Carry);
+        Assert.True(cpu.Zero);
+        Assert.True(cpu.Negative);
+        Assert.True(cpu.Status.Decimal);
+        Assert.True(cpu.Status.Overflow);
+        Assert.Equal(0x0606, cpu.PC);
+        Assert.False(cpu.IsHalted);
+    }
+
+    [Trait("Category", "InstructionSlice")]
     [Theory]
     [InlineData(0x81, 0x02, true, false, false)]
     [InlineData(0x00, 0x00, false, true, false)]

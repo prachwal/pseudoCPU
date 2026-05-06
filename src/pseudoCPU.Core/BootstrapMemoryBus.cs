@@ -24,4 +24,31 @@ public sealed class BootstrapMemoryBus
     public ushort ResolveZeroPageIndexedAddress(byte zeroPageAddress, byte index) => (ushort)(byte)(zeroPageAddress + index);
 
     public ushort ResolveAbsoluteIndexedAddress(ushort baseAddress, byte index) => unchecked((ushort)(baseAddress + index));
+
+    public ushort ResolveIndexedIndirectAddress(byte zeroPageAddress, byte index)
+    {
+        var pointerAddress = (byte)(zeroPageAddress + index);
+        var lowByte = ReadByte(pointerAddress);
+        var highByte = ReadByte((byte)(pointerAddress + 1));
+
+        return (ushort)(lowByte | (highByte << 8));
+    }
+
+    public ushort ResolveIndirectIndexedAddress(byte zeroPageAddress, byte index)
+    {
+        var lowByte = ReadByte(zeroPageAddress);
+        var highByte = ReadByte((byte)(zeroPageAddress + 1));
+        var baseAddress = (ushort)(lowByte | (highByte << 8));
+
+        return unchecked((ushort)(baseAddress + index));
+    }
+
+    public ushort ResolveIndirectJumpAddress(ushort pointerAddress)
+    {
+        var lowByte = ReadByte(pointerAddress);
+        var highByteAddress = (ushort)((pointerAddress & 0xFF00) | (byte)(pointerAddress + 1));
+        var highByte = ReadByte(highByteAddress);
+
+        return (ushort)(lowByte | (highByte << 8));
+    }
 }

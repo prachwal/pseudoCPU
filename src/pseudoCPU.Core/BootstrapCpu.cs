@@ -134,6 +134,21 @@ public sealed class BootstrapCpu
             case BootstrapOpcode.StaAbsoluteY:
                 StoreAIntoAbsoluteIndexedY(FetchWord());
                 break;
+            case BootstrapOpcode.JmpIndirect:
+                PC = MemoryBus.ResolveIndirectJumpAddress(FetchWord());
+                break;
+            case BootstrapOpcode.LdaIndexedIndirect:
+                LoadAFromIndexedIndirect(FetchByte());
+                break;
+            case BootstrapOpcode.StaIndexedIndirect:
+                StoreAIntoIndexedIndirect(FetchByte());
+                break;
+            case BootstrapOpcode.LdaIndirectIndexed:
+                LoadAFromIndirectIndexed(FetchByte());
+                break;
+            case BootstrapOpcode.StaIndirectIndexed:
+                StoreAIntoIndirectIndexed(FetchByte());
+                break;
             case BootstrapOpcode.StxZeroPage:
                 StoreXIntoZeroPage(FetchByte());
                 break;
@@ -426,6 +441,22 @@ public sealed class BootstrapCpu
     private void StoreAIntoAbsoluteIndexedX(ushort baseAddress) => MemoryBus.WriteByte(MemoryBus.ResolveAbsoluteIndexedAddress(baseAddress, X), A);
 
     private void StoreAIntoAbsoluteIndexedY(ushort baseAddress) => MemoryBus.WriteByte(MemoryBus.ResolveAbsoluteIndexedAddress(baseAddress, Y), A);
+
+    private void LoadAFromIndexedIndirect(byte zeroPageAddress)
+    {
+        A = MemoryBus.ReadByte(MemoryBus.ResolveIndexedIndirectAddress(zeroPageAddress, X));
+        UpdateZeroAndNegative(A);
+    }
+
+    private void StoreAIntoIndexedIndirect(byte zeroPageAddress) => MemoryBus.WriteByte(MemoryBus.ResolveIndexedIndirectAddress(zeroPageAddress, X), A);
+
+    private void LoadAFromIndirectIndexed(byte zeroPageAddress)
+    {
+        A = MemoryBus.ReadByte(MemoryBus.ResolveIndirectIndexedAddress(zeroPageAddress, Y));
+        UpdateZeroAndNegative(A);
+    }
+
+    private void StoreAIntoIndirectIndexed(byte zeroPageAddress) => MemoryBus.WriteByte(MemoryBus.ResolveIndirectIndexedAddress(zeroPageAddress, Y), A);
 
     private void StoreXIntoZeroPage(byte zeroPageAddress) => MemoryBus.WriteByte(MemoryBus.ResolveZeroPageAddress(zeroPageAddress), X);
 
