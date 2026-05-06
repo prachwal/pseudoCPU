@@ -4,7 +4,7 @@ Ten plik przechowuje stan biezacego epica i informacje fazowe, ktorych nie nalez
 
 ## Active Epic
 - GitHub issue: #46
-- Status: blocked
+- Status: qc
 - Owner agent: `issue-executor`
 - Quality gate agent: `epic-qc`
 
@@ -18,8 +18,8 @@ Ten plik przechowuje stan biezacego epica i informacje fazowe, ktorych nie nalez
 
 ## Current Scope
 - Active epic scope: phase 6 `Y` register foundation and Y-counter instruction slice.
-- Implementation tasks #47-#53 are complete; QC gate #54 completed with a blocking follow-up issue #55.
-- Use epic mode for follow-up #55, then rerun QC and sync steps.
+- Implementation tasks #47-#54 are complete; QC gate #54 passed after follow-up #55.
+- Use epic mode for issue sync and closure steps.
 - Before CPU/opcode/flag/stack/assembler/CLI work, read `docs/6502-domain-rules.md`.
 
 ## Last Completed Scope Snapshot
@@ -29,9 +29,9 @@ Ten plik przechowuje stan biezacego epica i informacje fazowe, ktorych nie nalez
 - Out of scope pozostaje: IRQ/NMI/RESET vectors, `BRK` vector, `RTI`, pelny status register 6502 jako docelowy model procesora, decimal/interrupt/overflow/break live semantics, cycle counting, etykiety assemblera oraz `.org` / `.byte` / `.word`.
 
 ## Phase Notes
-- Epic #46 jest w stanie `blocked` po bramce `epic-qc` i utworzeniu follow-up #55.
-- Taski #47-#54 są zamknięte; follow-up #55 pozostaje otwarty.
-- Chapter dla #46 pozostaje w indeksie i oczekuje na rozwiązanie follow-up oraz ponowny QC.
+- Epic #46 jest w stanie `qc` po ponownym pozytywnym `epic-qc`.
+- Taski #47-#54 są zamknięte; follow-up #55 został zamknięty.
+- Chapter dla #46 oczekuje na `issue-sync` przed zamknięciem epica.
 - Ostatni zamknięty epic #36 pozostaje bez zmian.
 
 ## QC Feedback Loop
@@ -44,17 +44,17 @@ Ten plik przechowuje stan biezacego epica i informacje fazowe, ktorych nie nalez
 
 ## Verification Snapshot
 - Last narrow test command: `dotnet test tests/pseudoCPU.Bootstrap.Tests/pseudoCPU.Bootstrap.Tests.csproj --filter "FullyQualifiedName~Y|FullyQualifiedName~Ldy|FullyQualifiedName~Iny|FullyQualifiedName~Dey|FullyQualifiedName~Cpy|FullyQualifiedName~Sty"` — PASS.
-- Last full test command: `dotnet test tests/pseudoCPU.Bootstrap.Tests/pseudoCPU.Bootstrap.Tests.csproj` — FAIL (`BootstrapCpuTests.LdxImmediateUpdatesZeroAndNegativeFlags(value: 0, expectedZero: False, expectedNegative: False)`).
+- Last full test command: `dotnet test tests/pseudoCPU.Bootstrap.Tests/pseudoCPU.Bootstrap.Tests.csproj` — PASS.
 - Last build command: `dotnet build pseudoCPU.sln` — PASS.
 - Last format command: `dotnet format pseudoCPU.sln --verify-no-changes` — PASS.
 - Last CLI smoke command: `dotnet run --project src/pseudoCPU.Cli -- run-asm --source examples/y-counter-loop.asm --start 0x0600 --max-steps 100 --trace` — PASS.
-- Latest QC result: blocked (#54).
+- Latest QC result: PASS (#54).
 
 ## QC Gate
-- #54 - completed; verdict BLOCKED.
+- #54 - completed; verdict PASS.
 
 ## Follow-up Issues
 - #45 - completed: sync `docs/pseudoCPU-processor-guide.md` with the implemented stack slice, `SP` model and current supported opcodes.
 - Epic QC verdict recorded in comment: https://github.com/prachwal/pseudoCPU/issues/36#issuecomment-4387471999
 - #54 - completed: epic QC gate for `Y` register slice.
-- #55 - open: fix `LDX` immediate zero-flag regression discovered during QC.
+- #55 - completed: fix `LDX` immediate zero-flag regression discovered during QC.

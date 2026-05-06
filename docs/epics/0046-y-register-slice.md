@@ -2,7 +2,7 @@
 
 ## Epic Issue
 - Epic: #46
-- Status: blocked
+- Status: qc
 - Owner agent: `issue-planner`
 - Execution agent: `issue-executor`
 - Quality gate agent: `epic-qc`
@@ -11,9 +11,9 @@
 - Done: [ ]
 - Chapter: Phase 6: 6502 Y register foundation and Y-counter instruction slice
 - Epic issue: #46
-- Status: blocked
-- QC verdict: BLOCKED
-- Follow-up: #55
+- Status: qc
+- QC verdict: PASS
+- Follow-up: none
 
 ## Outcome
 Repo dodaje bootstrapowy rejestr `Y` jako drugi 8-bitowy rejestr indeksowy i domyka pionowy slice instrukcji `LDY #imm`, `INY`, `DEY`, `CPY #imm`, `STY abs`. Po zakończeniu epica procesor, assembler, CLI trace i dokumentacja mają jawny kontrakt dla `Y`, a mapy slice i snapshot aktywnego epica pozostają spójne.
@@ -55,19 +55,19 @@ Ten chapter dokumentuje zamknięty zakres budowy rejestru `Y` i instrukcji liczn
 - [x] #54 - run epic QC gate for `Y` register slice.
 
 ## Acceptance Criteria
-- [ ] Bootstrap CPU exposes 8-bit `Y` register without regressing current `A`, `X`, `SP`, `PC` contracts.
-- [ ] `LDY #imm`, `INY`, `DEY`, `CPY #imm`, `STY abs` are decoded, executed and tested.
-- [ ] `LDY`, `INY`, `DEY` update only `Y`, `PC` and `Zero` / `Negative` according to their contract.
-- [ ] `INY` and `DEY` use 8-bit wrap-around semantics.
-- [ ] `CPY #imm` sets `Carry`, `Zero` and `Negative` according to `Y - operand` without mutating `Y`.
-- [ ] `STY abs` writes `Y` in little-endian absolute addressing order and does not change flags.
-- [ ] At least one assembler-driven program exercises the new `Y` slice.
-- [ ] Trace/CLI remains aligned with implemented instruction set and visible register state.
-- [ ] `docs/cpu-slice-map.md`, `docs/pseudoCPU-processor-guide.md`, `docs/current-epic.md`, `docs/current-epic-summary.md` and `docs/epic-chapters.md` are updated.
-- [ ] `dotnet build pseudoCPU.sln` passes.
-- [ ] `dotnet test tests/pseudoCPU.Bootstrap.Tests/pseudoCPU.Bootstrap.Tests.csproj` passes.
-- [ ] `dotnet format pseudoCPU.sln --verify-no-changes` passes.
-- [ ] Epic passes `epic-qc`; if not, follow-up issues are created and linked before closure.
+- [x] Bootstrap CPU exposes 8-bit `Y` register without regressing current `A`, `X`, `SP`, `PC` contracts.
+- [x] `LDY #imm`, `INY`, `DEY`, `CPY #imm`, `STY abs` are decoded, executed and tested.
+- [x] `LDY`, `INY`, `DEY` update only `Y`, `PC` and `Zero` / `Negative` according to their contract.
+- [x] `INY` and `DEY` use 8-bit wrap-around semantics.
+- [x] `CPY #imm` sets `Carry`, `Zero` and `Negative` according to `Y - operand` without mutating `Y`.
+- [x] `STY abs` writes `Y` in little-endian absolute addressing order and does not change flags.
+- [x] At least one assembler-driven program exercises the new `Y` slice.
+- [x] Trace/CLI remains aligned with implemented instruction set and visible register state.
+- [x] `docs/cpu-slice-map.md`, `docs/pseudoCPU-processor-guide.md`, `docs/current-epic.md`, `docs/current-epic-summary.md` and `docs/epic-chapters.md` are updated.
+- [x] `dotnet build pseudoCPU.sln` passes.
+- [x] `dotnet test tests/pseudoCPU.Bootstrap.Tests/pseudoCPU.Bootstrap.Tests.csproj` passes.
+- [x] `dotnet format pseudoCPU.sln --verify-no-changes` passes.
+- [x] Epic passes `epic-qc`; if not, follow-up issues are created and linked before closure.
 - [ ] `issue-sync` synchronizes the main epic body and chapter docs before epic closure.
 
 ## Verification Strategy
@@ -86,16 +86,16 @@ Ten chapter dokumentuje zamknięty zakres budowy rejestru `Y` i instrukcji liczn
 - [x] `docs/cpu-slice-map.md` po dodaniu `LDY`, `INY`, `DEY`, `CPY`, `STY`.
 - [x] `docs/pseudoCPU-processor-guide.md` po dopisaniu rejestru `Y` i semantyki instrukcji.
 - [x] `docs/epic-chapters.md` po dodaniu aktywnego chaptera do indeksu.
-- [x] `docs/current-epic.md` po ustawieniu stanu epica na `blocked`.
-- [x] `docs/current-epic-summary.md` po ustawieniu stanu routingowego na `blocked`.
+- [x] `docs/current-epic.md` po ustawieniu stanu epica na `qc`.
+- [x] `docs/current-epic-summary.md` po ustawieniu stanu routingowego na `qc`.
 
 ## QC Gate
 - QC issue/comment: #54
-- Verdict: BLOCKED
+- Verdict: PASS
 - Follow-up issues:
-  - #55 - fix `LDX` immediate zero-flag regression discovered during QC.
+  - none
 
 ## Final Notes
-- Final status: blocked
-- Remaining risks: follow-up #55 is required to resolve the failing full bootstrap test (`BootstrapCpuTests.LdxImmediateUpdatesZeroAndNegativeFlags(value: 0, expectedZero: False, expectedNegative: False)`).
+- Final status: qc
+- Remaining risks: issue-sync is still required before epica #46 can be closed.
 - Permanent decisions: `Y` pozostaje 8-bitowym rejestrem bootstrapowym; `CPY` używa bootstrapowego modelu flag `Carry` / `Zero` / `Negative` bez rozszerzania status register.
