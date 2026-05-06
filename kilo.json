@@ -3,7 +3,9 @@
   "default_agent": "issue-planner",
   "instructions": [
     "AGENTS.md",
+    "docs/agentic-epic-flow.md",
     "docs/current-epic.md",
+    ".kilo/agent/issue-sync.md",
     ".kilo/agent/epic-qc.md",
     ".kilo/rules/github-issue-file-bodies.md"
   ]
