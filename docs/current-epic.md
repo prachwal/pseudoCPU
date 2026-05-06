@@ -4,7 +4,7 @@ Ten plik przechowuje stan biezacego epica i informacje fazowe, ktorych nie nalez
 
 ## Active Epic
 - GitHub issue: #36
-- Status: active
+- Status: qc
 - Owner agent: `issue-planner`
 - Quality gate agent: `epic-qc`
 
@@ -21,6 +21,7 @@ Ten plik przechowuje stan biezacego epica i informacje fazowe, ktorych nie nalez
 - Task #44 jest obowiazkowa bramka `epic-qc`; epic nie moze zostac zamkniety bez komentarza `Epic QC Gate`.
 - Task #43 ma zamknac aktualizacje `docs/cpu-slice-map.md`, chaptera oraz snapshotu tego pliku po implementacji.
 - Task #37 zapisuje bootstrapowy kontrakt status byte: `Carry` = bit 0, `Zero` = bit 1, `Negative` = bit 7, a bity 2-6 sa zarezerwowane / ignorowane; `PHP` zapisuje tylko ten snapshot, a `PLP` odtwarza wylacznie wspierane flagi.
+- Implementacja taskow #37-#43 jest zakonczona; epic oczekuje na wynik taska QC #44.
 
 ## QC Feedback Loop
 1. `issue-planner` utrzymuje strukture chapter -> epic -> taski.

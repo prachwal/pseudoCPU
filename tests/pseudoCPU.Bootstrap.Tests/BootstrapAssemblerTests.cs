@@ -49,6 +49,52 @@ public class BootstrapAssemblerTests
 
     [Trait("Category", "Assembler")]
     [Fact]
+    public void AssemblesStackOpcodesToExpectedBytes()
+    {
+        const string source = """
+            PHA
+            PLA
+            PHP
+            PLP
+            """;
+
+        var bytes = BootstrapAssembler.Assemble(source);
+
+        Assert.Equal([0x48, 0x68, 0x08, 0x28], bytes);
+    }
+
+    [Trait("Category", "AsmExecution")]
+    [Fact]
+    public void AssemblesAndRunsStackOpcodeProgramToExpectedCpuState()
+    {
+        const string source = """
+            LDA #$2A
+            PHA
+            LDA #$00
+            CMP #$00
+            PHP
+            LDA #$00
+            CMP #$01
+            PLP
+            PLA
+            BRK
+            """;
+
+        var cpu = new BootstrapCpu();
+        cpu.LoadProgram(BootstrapAssembler.Assemble(source), 0x0400);
+        cpu.Run();
+
+        Assert.True(cpu.IsHalted);
+        Assert.Equal(0x2A, cpu.A);
+        Assert.True(cpu.Carry);
+        Assert.False(cpu.Zero);
+        Assert.False(cpu.Negative);
+        Assert.Equal(0xFF, cpu.SP);
+        Assert.Equal(0x040F, cpu.PC);
+    }
+
+    [Trait("Category", "Assembler")]
+    [Fact]
     public void AssemblesJsrAndRtsToExpectedBytes()
     {
         const string source = """

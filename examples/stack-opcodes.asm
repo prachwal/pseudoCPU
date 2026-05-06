@@ -1,0 +1,10 @@
+LDA #$2A
+PHA
+LDA #$00
+CMP #$00
+PHP
+LDA #$00
+CMP #$01
+PLP
+PLA
+BRK

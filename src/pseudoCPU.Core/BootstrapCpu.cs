@@ -3,6 +3,9 @@ namespace pseudoCPU.Core;
 public sealed class BootstrapCpu
 {
     private const ushort StackPageBaseAddress = 0x0100;
+    private const byte CarryStatusBit = 1 << 0;
+    private const byte ZeroStatusBit = 1 << 1;
+    private const byte NegativeStatusBit = 1 << 7;
     private readonly byte[] _memory = new byte[ushort.MaxValue + 1];
 
     public byte A { get; private set; }
@@ -90,6 +93,12 @@ public sealed class BootstrapCpu
 
         switch (BootstrapOpcodeDecoder.Decode(opcode))
         {
+            case BootstrapOpcode.Php:
+                PushByte(CreateStatusSnapshot());
+                break;
+            case BootstrapOpcode.Plp:
+                RestoreStatusSnapshot(PopByte());
+                break;
             case BootstrapOpcode.Pha:
                 PushByte(A);
                 break;
@@ -233,6 +242,35 @@ public sealed class BootstrapCpu
 
         var offset = unchecked((sbyte)offsetByte);
         PC = unchecked((ushort)(PC + offset));
+    }
+
+    private byte CreateStatusSnapshot()
+    {
+        byte status = 0;
+
+        if (Carry)
+        {
+            status |= CarryStatusBit;
+        }
+
+        if (Zero)
+        {
+            status |= ZeroStatusBit;
+        }
+
+        if (Negative)
+        {
+            status |= NegativeStatusBit;
+        }
+
+        return status;
+    }
+
+    private void RestoreStatusSnapshot(byte status)
+    {
+        Carry = (status & CarryStatusBit) != 0;
+        Zero = (status & ZeroStatusBit) != 0;
+        Negative = (status & NegativeStatusBit) != 0;
     }
 
     private static ushort GetStackAddress(byte stackPointer) => (ushort)(StackPageBaseAddress | stackPointer);

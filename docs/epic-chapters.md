@@ -37,7 +37,7 @@ Ta tabela jest glowna lista kontrolna realizacji chapterow. Planner musi aktuali
 | Done | Chapter | Epic Issue | Status | QC Verdict | Follow-up | Notes |
 |---|---|---:|---|---|---|---|
 | [x] | Phase 4: 6502 stack page foundation and JSR/RTS subroutine flow | #26 | done | PASS | none | Stack page `$0100-$01FF`, `SP`, push/pop semantics, `JSR abs`, `RTS`, assembler/CLI/docs and mandatory QC gate #35. |
-| [ ] | Phase 5: 6502 stack opcode slice PHA/PLA/PHP/PLP | #36 | active | TBD | TBD | Stack opcodes `PHA`, `PLA`, `PHP`, `PLP`, bootstrap status byte contract, assembler/CLI/docs and mandatory QC gate #44. |
+| [ ] | Phase 5: 6502 stack opcode slice PHA/PLA/PHP/PLP | #36 | qc | TBD | TBD | Stack opcodes `PHA`, `PLA`, `PHP`, `PLP`, bootstrap status byte contract, assembler/CLI/docs and mandatory QC gate #44. |
 
 ## QC References
 
@@ -118,7 +118,7 @@ Skopiuj ten szablon dla kazdego nowego epica.
 | Chapter | Epic Issue | Status | Scope |
 |---|---:|---|---|
 | Phase 4: 6502 stack page foundation and JSR/RTS subroutine flow | #26 | done | Stack page `$0100-$01FF`, 8-bit `SP`, push/pop ordering, `JSR abs`, `RTS`, assembler/CLI/docs |
-| Phase 5: 6502 stack opcode slice PHA/PLA/PHP/PLP | #36 | active | `PHA`, `PLA`, `PHP`, `PLP`, bootstrap status byte contract, assembler/CLI/docs |
+| Phase 5: 6502 stack opcode slice PHA/PLA/PHP/PLP | #36 | qc | `PHA`, `PLA`, `PHP`, `PLP`, bootstrap status byte contract, assembler/CLI/docs |
 
 ## QC Reference 25: Phase 3 quality control
 
@@ -209,7 +209,7 @@ Repo zyskuje bootstrapowy model stacka zgodny semantycznie z 6502 dla aktualnego
 
 ### Epic Issue
 - Epic: #36
-- Status: active
+- Status: qc
 - Owner agent: `issue-planner`
 - Execution agent: `issue-executor`
 - Quality gate agent: `epic-qc`
@@ -218,7 +218,7 @@ Repo zyskuje bootstrapowy model stacka zgodny semantycznie z 6502 dla aktualnego
 - Done: [ ]
 - Chapter: Phase 5: 6502 stack opcode slice PHA/PLA/PHP/PLP
 - Epic issue: #36
-- Status: active
+- Status: qc
 - QC verdict: TBD
 - Follow-up: TBD
 
@@ -255,26 +255,26 @@ Repo dodaje drugi stackowy slice 6502 na fundamencie #26: `PHA`, `PLA`, `PHP`, `
 Ten chapter rozszerza gotowy model stacka o podstawowe instrukcje odkładania i zdejmowania akumulatora oraz statusu. `PHA`/`PLA` sprawdzają dyscypline stacka dla danych, a `PHP`/`PLP` wprowadzają pierwszy jawny kontrakt status byte bez udawania pełnego status register 6502. Rozdział celowo nie dotyka przerwań, `RTI`, cycle countingu ani pełnych flag procesora.
 
 ### Task Issues
-- [ ] #37 - define bootstrap status byte contract for PHP and PLP.
-- [ ] #38 - implement PHA and PLA CPU/decode semantics.
-- [ ] #39 - implement PHP and PLP CPU/decode semantics.
-- [ ] #40 - add stack opcode interaction and regression tests.
-- [ ] #41 - extend assembler for PHA/PLA/PHP/PLP and add ASM end-to-end coverage.
-- [ ] #42 - update CLI trace for stack opcode visibility.
-- [ ] #43 - update slice map and chapter documentation for stack opcode slice.
+- [x] #37 - define bootstrap status byte contract for PHP and PLP.
+- [x] #38 - implement PHA and PLA CPU/decode semantics.
+- [x] #39 - implement PHP and PLP CPU/decode semantics.
+- [x] #40 - add stack opcode interaction and regression tests.
+- [x] #41 - extend assembler for PHA/PLA/PHP/PLP and add ASM end-to-end coverage.
+- [x] #42 - update CLI trace for stack opcode visibility.
+- [x] #43 - update slice map and chapter documentation for stack opcode slice.
 - [ ] #44 - QC gate przez `epic-qc`.
 
 ### Acceptance Criteria
-- [ ] Bootstrap status byte contract for `PHP` / `PLP` is documented before implementation.
-- [ ] `PHA`, `PLA`, `PHP`, `PLP` are decoded, executed and tested.
-- [ ] `PHA` pushes `A` and changes only `SP` / stack memory.
-- [ ] `PLA` pulls into `A` and updates `Zero` / `Negative`.
-- [ ] `PHP` pushes status snapshot for currently supported flags.
-- [ ] `PLP` restores currently supported flags from status snapshot without silently adding unsupported status behavior.
-- [ ] Stack order and `SP` restoration are covered by tests.
-- [ ] At least one assembler-driven stack opcode program is covered by tests.
-- [ ] Trace/CLI remains aligned with implemented instruction set and new mnemonics.
-- [ ] `docs/cpu-slice-map.md`, `docs/current-epic.md` and `docs/epic-chapters.md` are updated.
+- [x] Bootstrap status byte contract for `PHP` / `PLP` is documented before implementation.
+- [x] `PHA`, `PLA`, `PHP`, `PLP` are decoded, executed and tested.
+- [x] `PHA` pushes `A` and changes only `SP` / stack memory.
+- [x] `PLA` pulls into `A` and updates `Zero` / `Negative`.
+- [x] `PHP` pushes status snapshot for currently supported flags.
+- [x] `PLP` restores currently supported flags from status snapshot without silently adding unsupported status behavior.
+- [x] Stack order and `SP` restoration are covered by tests.
+- [x] At least one assembler-driven stack opcode program is covered by tests.
+- [x] Trace/CLI remains aligned with implemented instruction set and new mnemonics.
+- [x] `docs/cpu-slice-map.md`, `docs/current-epic.md` and `docs/epic-chapters.md` are updated.
 - [ ] Epic passes `epic-qc`, a ewentualne follow-up issues sa jawnie zalinkowane.
 
 ### Verification Strategy
@@ -290,9 +290,9 @@ Ten chapter rozszerza gotowy model stacka o podstawowe instrukcje odkładania i 
   - `dotnet run --project src/pseudoCPU.Cli -- run-asm --source examples/stack-opcodes.asm --start 0x0600 --max-steps 100 --trace`
 
 ### Documentation Updates
-- [ ] `docs/cpu-slice-map.md` po dodaniu `PHA`, `PLA`, `PHP`, `PLP`.
+- [x] `docs/cpu-slice-map.md` po dodaniu `PHA`, `PLA`, `PHP`, `PLP`.
 - [ ] Ten chapter po przejsciu taskow i po QC gate.
-- [ ] `docs/current-epic.md` dla aktywnego stanu i snapshotu weryfikacji.
+- [x] `docs/current-epic.md` dla aktywnego stanu i snapshotu weryfikacji.
 - [ ] ADR w `docs/adr/`, jesli status byte contract okaze sie decyzja wykraczajaca poza chapter.
 
 ### QC Gate
@@ -302,6 +302,6 @@ Ten chapter rozszerza gotowy model stacka o podstawowe instrukcje odkładania i 
   - TBD
 
 ### Final Notes
-- Final status: active
+- Final status: qc
 - Remaining risks: status byte contract moze spowodowac drift do pelnego status register; nalezy utrzymac bootstrapowy zakres.
 - Permanent decisions: TBD after #37 and QC.

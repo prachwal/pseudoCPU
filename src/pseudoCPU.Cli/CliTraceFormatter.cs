@@ -14,6 +14,10 @@ internal static class CliTraceFormatter
     {
         return opcode switch
         {
+            (byte)BootstrapOpcode.Php => "PHP",
+            (byte)BootstrapOpcode.Plp => "PLP",
+            (byte)BootstrapOpcode.Pha => "PHA",
+            (byte)BootstrapOpcode.Pla => "PLA",
             (byte)BootstrapOpcode.JsrAbsolute => $"JSR ${ReadWord(cpu, (ushort)(pc + 1)):X4}",
             (byte)BootstrapOpcode.Rts => "RTS",
             (byte)BootstrapOpcode.LdaImmediate => $"LDA #${cpu.ReadByte((ushort)(pc + 1)):X2}",

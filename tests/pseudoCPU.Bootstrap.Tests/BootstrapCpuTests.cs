@@ -54,6 +54,42 @@ public class BootstrapCpuTests
 
     [Trait("Category", "InstructionSlice")]
     [Fact]
+    public void PhpPushesSupportedFlagsIntoBootstrapStatusSnapshot()
+    {
+        var cpu = new BootstrapCpu();
+
+        cpu.LoadProgram([0xA9, 0x00, 0xC9, 0x00, 0x08, 0x00], 0x0600);
+
+        cpu.RunSteps(3);
+
+        Assert.Equal(0xFE, cpu.SP);
+        Assert.Equal(0x03, cpu.ReadByte(0x01FF));
+        Assert.True(cpu.Carry);
+        Assert.True(cpu.Zero);
+        Assert.False(cpu.Negative);
+        Assert.False(cpu.IsHalted);
+    }
+
+    [Trait("Category", "InstructionSlice")]
+    [Fact]
+    public void PlpRestoresOnlySupportedFlagsFromBootstrapStatusSnapshot()
+    {
+        var cpu = new BootstrapCpu();
+
+        cpu.LoadProgram([0x28, 0x00], 0x0600);
+        cpu.PushByte(0xFF);
+
+        cpu.Step();
+
+        Assert.Equal(0xFF, cpu.SP);
+        Assert.True(cpu.Carry);
+        Assert.True(cpu.Zero);
+        Assert.True(cpu.Negative);
+        Assert.False(cpu.IsHalted);
+    }
+
+    [Trait("Category", "InstructionSlice")]
+    [Fact]
     public void PhaPushesAccumulatorWithoutChangingFlags()
     {
         var cpu = new BootstrapCpu();
@@ -97,6 +133,62 @@ public class BootstrapCpuTests
         Assert.Equal(expectedNegative, cpu.Negative);
         Assert.Equal(0xFF, cpu.SP);
         Assert.False(cpu.IsHalted);
+    }
+
+    [Trait("Category", "StackOpcode")]
+    [Fact]
+    public void PhaAndPlaPreserveLifoOrderingAndRestoreStackPointer()
+    {
+        var cpu = new BootstrapCpu();
+
+        cpu.LoadProgram([0xA9, 0x11, 0x48, 0xA9, 0x22, 0x48, 0x68, 0xAA, 0x68, 0x00], 0x0600);
+
+        cpu.RunUntilHalt();
+
+        Assert.True(cpu.IsHalted);
+        Assert.Equal(0x11, cpu.A);
+        Assert.Equal(0x22, cpu.X);
+        Assert.Equal(0xFF, cpu.SP);
+        Assert.Equal(0x060A, cpu.PC);
+    }
+
+    [Trait("Category", "StackOpcode")]
+    [Fact]
+    public void PhpAndPlpRoundTripSupportedStatusBitsAndIgnoreReservedBits()
+    {
+        var cpu = new BootstrapCpu();
+
+        cpu.LoadProgram([0x28, 0x08, 0x00], 0x0600);
+        cpu.PushByte(0xFF);
+
+        cpu.RunUntilHalt();
+
+        Assert.True(cpu.IsHalted);
+        Assert.True(cpu.Carry);
+        Assert.True(cpu.Zero);
+        Assert.True(cpu.Negative);
+        Assert.Equal(0xFE, cpu.SP);
+        Assert.Equal(0x83, cpu.ReadByte(0x01FF));
+        Assert.Equal(0x0603, cpu.PC);
+    }
+
+    [Trait("Category", "StackOpcode")]
+    [Fact]
+    public void MixedStackOpcodeSequenceRestoresStatusAndAccumulatorInOrder()
+    {
+        var cpu = new BootstrapCpu();
+
+        cpu.LoadProgram([0xA9, 0x2A, 0x48, 0xA9, 0x00, 0xC9, 0x00, 0x08, 0xA9, 0x00, 0xC9, 0x01, 0x28, 0x68, 0x00], 0x0600);
+
+        cpu.RunUntilHalt();
+
+        Assert.True(cpu.IsHalted);
+        Assert.Equal(0x2A, cpu.A);
+        Assert.True(cpu.Carry);
+        Assert.False(cpu.Zero);
+        Assert.False(cpu.Negative);
+        Assert.Equal(0xFF, cpu.SP);
+        Assert.Equal(0x060F, cpu.PC);
     }
 
     [Trait("Category", "InstructionSlice")]

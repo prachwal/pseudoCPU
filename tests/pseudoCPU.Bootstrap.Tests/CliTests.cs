@@ -139,6 +139,42 @@ public class CliTests
 
     [Trait("Category", "Cli")]
     [Fact]
+    public void RunAsmEmitsTraceForStackOpcodes()
+    {
+        var examplePath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "examples", "stack-opcodes.asm"));
+        var originalOut = Console.Out;
+        var originalError = Console.Error;
+
+        try
+        {
+            Assert.True(File.Exists(examplePath), examplePath);
+
+            using var standardOut = new StringWriter();
+            using var standardError = new StringWriter();
+            Console.SetOut(standardOut);
+            Console.SetError(standardError);
+
+            var exitCode = CliApplication.Run(["run-asm", "--source", examplePath, "--start", "0x0600", "--max-steps", "100", "--trace"]);
+
+            Assert.Equal(0, exitCode);
+            Assert.Empty(standardError.ToString());
+            var output = standardOut.ToString();
+            Assert.Contains("PHA", output);
+            Assert.Contains("PHP", output);
+            Assert.Contains("PLP", output);
+            Assert.Contains("PLA", output);
+            Assert.Contains("Status: Halted", output);
+            Assert.Contains("Carry: true", output);
+        }
+        finally
+        {
+            Console.SetOut(originalOut);
+            Console.SetError(originalError);
+        }
+    }
+
+    [Trait("Category", "Cli")]
+    [Fact]
     public void RunAsmEmitsTraceForJsrAndRtsInstructions()
     {
         var sourcePath = Path.GetTempFileName();

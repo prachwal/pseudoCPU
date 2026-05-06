@@ -23,6 +23,22 @@ public static class BootstrapAssembler
 
             switch (mnemonic)
             {
+                case "PHP":
+                    RequireNoOperand(mnemonic, operand);
+                    bytes.Add((byte)BootstrapOpcode.Php);
+                    break;
+                case "PLP":
+                    RequireNoOperand(mnemonic, operand);
+                    bytes.Add((byte)BootstrapOpcode.Plp);
+                    break;
+                case "PHA":
+                    RequireNoOperand(mnemonic, operand);
+                    bytes.Add((byte)BootstrapOpcode.Pha);
+                    break;
+                case "PLA":
+                    RequireNoOperand(mnemonic, operand);
+                    bytes.Add((byte)BootstrapOpcode.Pla);
+                    break;
                 case "JSR":
                     RequireOperand(mnemonic, operand);
                     bytes.Add((byte)BootstrapOpcode.JsrAbsolute);

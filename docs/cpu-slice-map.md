@@ -19,5 +19,9 @@ Bootstrap assembler accepts raw branch offsets only; labels and `.org` remain un
 | STX abs | 8E | done | done | done | done | done | phase 3 |
 | JSR abs | 20 | done | done | done | done | done | pushes return address high then low |
 | RTS | 60 | done | done | done | done | done | pops low then high and returns to next instruction |
+| PHA | 48 | done | done | done | done | done | pushes A without flag updates |
+| PLA | 68 | done | done | done | done | done | pulls into A and updates Z/N |
+| PHP | 08 | done | done | done | done | done | pushes bootstrap status snapshot |
+| PLP | 28 | done | done | done | done | done | restores Carry/Zero/Negative only |
 
 Maintain this map after each opcode phase.
