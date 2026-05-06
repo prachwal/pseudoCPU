@@ -28,6 +28,11 @@ public static class BootstrapAssembler
                     bytes.Add((byte)BootstrapOpcode.LdaImmediate);
                     bytes.Add(ParseByteLiteral(operand[1..], mnemonic));
                     break;
+                case "LDX":
+                    RequireOperand(mnemonic, operand, '#');
+                    bytes.Add((byte)BootstrapOpcode.LdxImmediate);
+                    bytes.Add(ParseByteLiteral(operand[1..], mnemonic));
+                    break;
                 case "TAX":
                     RequireNoOperand(mnemonic, operand);
                     bytes.Add((byte)BootstrapOpcode.Tax);
@@ -36,14 +41,28 @@ public static class BootstrapAssembler
                     RequireNoOperand(mnemonic, operand);
                     bytes.Add((byte)BootstrapOpcode.Inx);
                     break;
+                case "DEX":
+                    RequireNoOperand(mnemonic, operand);
+                    bytes.Add((byte)BootstrapOpcode.Dex);
+                    break;
                 case "STA":
                     RequireOperand(mnemonic, operand);
                     bytes.Add((byte)BootstrapOpcode.StaAbsolute);
                     bytes.AddRange(ParseWordLiteral(operand, mnemonic));
                     break;
+                case "STX":
+                    RequireOperand(mnemonic, operand);
+                    bytes.Add((byte)BootstrapOpcode.StxAbsolute);
+                    bytes.AddRange(ParseWordLiteral(operand, mnemonic));
+                    break;
                 case "CMP":
                     RequireOperand(mnemonic, operand, '#');
                     bytes.Add((byte)BootstrapOpcode.CmpImmediate);
+                    bytes.Add(ParseByteLiteral(operand[1..], mnemonic));
+                    break;
+                case "CPX":
+                    RequireOperand(mnemonic, operand, '#');
+                    bytes.Add((byte)BootstrapOpcode.CpxImmediate);
                     bytes.Add(ParseByteLiteral(operand[1..], mnemonic));
                     break;
                 case "JMP":

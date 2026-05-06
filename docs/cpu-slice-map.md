@@ -1,5 +1,7 @@
 # CPU Slice Map
 
+Bootstrap assembler accepts raw branch offsets only; labels and `.org` remain unsupported.
+
 | Instruction | Opcode | CPU | Decoder | Assembler | Tests | CLI trace | Notes |
 |---|---:|---|---|---|---|---|---|
 | LDA #imm | A9 | done | done | done | done | done | updates Z/N |
@@ -11,9 +13,9 @@
 | JMP abs | 4C | done | done | done | done | done | absolute jump |
 | BEQ rel | F0 | done | done | done | done | done | branch on Zero |
 | BNE rel | D0 | done | done | done | done | done | branch on !Zero |
-| LDX #imm | A2 | done | done | planned | done | done | phase 3 |
-| DEX | CA | done | done | planned | done | done | phase 3 |
-| CPX #imm | E0 | done | done | planned | done | done | phase 3 |
-| STX abs | 8E | done | done | planned | done | done | phase 3 |
+| LDX #imm | A2 | done | done | done | done | done | phase 3 |
+| DEX | CA | done | done | done | done | done | phase 3 |
+| CPX #imm | E0 | done | done | done | done | done | phase 3 |
+| STX abs | 8E | done | done | done | done | done | phase 3 |
 
 Maintain this map after each opcode phase.

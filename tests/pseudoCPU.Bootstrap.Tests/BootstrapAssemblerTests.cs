@@ -67,6 +67,51 @@ public class BootstrapAssemblerTests
     }
 
     [Trait("Category", "Assembler")]
+    [Fact]
+    public void AssemblesXCounterSliceProgramToExpectedBytes()
+    {
+        const string source = """
+            LDX #$03
+            DEX
+            CPX #$00
+            BNE $FB
+            STX $2000
+            BRK
+            """;
+
+        var bytes = BootstrapAssembler.Assemble(source);
+
+        Assert.Equal([0xA2, 0x03, 0xCA, 0xE0, 0x00, 0xD0, 0xFB, 0x8E, 0x00, 0x20, 0x00], bytes);
+    }
+
+    [Trait("Category", "AsmExecution")]
+    [Fact]
+    public void AssemblesAndRunsXCounterProgramToExpectedCpuState()
+    {
+        // Raw branch offsets only; labels are intentionally unsupported.
+        const string source = """
+            LDX #$03
+            DEX
+            CPX #$00
+            BNE $FB
+            STX $2000
+            BRK
+            """;
+
+        var cpu = new BootstrapCpu();
+        cpu.LoadProgram(BootstrapAssembler.Assemble(source), 0x0400);
+        cpu.Run();
+
+        Assert.True(cpu.IsHalted);
+        Assert.Equal(0x00, cpu.X);
+        Assert.True(cpu.Zero);
+        Assert.False(cpu.Negative);
+        Assert.True(cpu.Carry);
+        Assert.Equal(0x00, cpu.ReadByte(0x2000));
+        Assert.Equal(0x040B, cpu.PC);
+    }
+
+    [Trait("Category", "Assembler")]
     [Theory]
     [InlineData("LDA $01", typeof(FormatException), "requires an operand starting with '#'")]
     [InlineData("STA #$1234", typeof(FormatException), "invalid hexadecimal literal")]
