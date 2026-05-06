@@ -107,6 +107,41 @@ public class BootstrapAssemblerTests
         Assert.Equal([0x20, 0x34, 0x12, 0x60], bytes);
     }
 
+    [Trait("Category", "Assembler")]
+    [Fact]
+    public void AssemblesAddressingModesSliceToExpectedBytes()
+    {
+        const string source = """
+            LDA $10
+            LDA $10,X
+            LDX $10
+            LDX $10,Y
+            LDY $10
+            LDY $10,X
+            STA $10
+            STA $10,X
+            STA $1234
+            STA $1234,X
+            STA $1234,Y
+            STX $10
+            STX $10,Y
+            STX $1234
+            STY $10
+            STY $10,X
+            STY $1234
+            JMP ($1234)
+            LDA ($10,X)
+            LDA ($10),Y
+            STA ($10,X)
+            STA ($10),Y
+            BRK
+            """;
+
+        var bytes = BootstrapAssembler.Assemble(source);
+
+        Assert.Equal([0xA5, 0x10, 0xB5, 0x10, 0xA6, 0x10, 0xB6, 0x10, 0xA4, 0x10, 0xB4, 0x10, 0x85, 0x10, 0x95, 0x10, 0x8D, 0x34, 0x12, 0x9D, 0x34, 0x12, 0x99, 0x34, 0x12, 0x86, 0x10, 0x96, 0x10, 0x8E, 0x34, 0x12, 0x84, 0x10, 0x94, 0x10, 0x8C, 0x34, 0x12, 0x6C, 0x34, 0x12, 0xA1, 0x10, 0xB1, 0x10, 0x81, 0x10, 0x91, 0x10, 0x00], bytes);
+    }
+
     [Trait("Category", "AsmExecution")]
     [Fact]
     public void AssemblesAndRunsSubroutineProgramToExpectedCpuState()
@@ -128,6 +163,29 @@ public class BootstrapAssemblerTests
         Assert.Equal(0x05, cpu.X);
         Assert.Equal(0xFF, cpu.SP);
         Assert.Equal(0x0406, cpu.PC);
+    }
+
+    [Trait("Category", "AsmExecution")]
+    [Fact]
+    public void AssemblesAndRunsAddressingModeExampleToExpectedCpuState()
+    {
+        var examplePath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "examples", "addressing-modes.asm"));
+        var source = File.ReadAllText(examplePath);
+        var programBytes = BootstrapAssembler.Assemble(source);
+
+        var cpu = new BootstrapCpu();
+        cpu.LoadProgram(programBytes, 0x0400);
+        cpu.Run();
+
+        Assert.True(cpu.IsHalted);
+        Assert.Equal(0x33, cpu.A);
+        Assert.Equal(0x04, cpu.X);
+        Assert.Equal(0x01, cpu.Y);
+        Assert.Equal(0x11, cpu.ReadByte(0x0010));
+        Assert.Equal(0x22, cpu.ReadByte(0x1234));
+        Assert.Equal(0x33, cpu.ReadByte(0x1235));
+        Assert.Equal(0x44, cpu.ReadByte(0x1236));
+        Assert.Equal(0x043B, cpu.PC);
     }
 
 
