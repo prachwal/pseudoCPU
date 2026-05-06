@@ -4,7 +4,7 @@ Ten dokument definiuje stabilny workflow pracy agentow dla planowania, realizacj
 
 ## Core Rule
 
-Jeden realny GitHub epic issue = jeden chapter dokumentacji.
+Jeden realny GitHub epic issue = jeden chapter file w `docs/epics/`.
 
 GitHub issue pozostaje zrodlem prawdy dla planu, taskow, postepu, wynikow testow i decyzji. Chapter jest trwalym opisem produktowo-technicznym epica, czytelnym po zamknieciu pracy.
 
@@ -12,7 +12,7 @@ GitHub issue pozostaje zrodlem prawdy dla planu, taskow, postepu, wynikow testow
 
 ### Epic issue
 
-Epic issue to GitHub issue z labelem `epic`. Tylko takie issue moze miec chapter w `docs/epic-chapters.md`.
+Epic issue to GitHub issue z labelem `epic`. Tylko takie issue moze miec chapter file w `docs/epics/`.
 
 Epic musi zawierac: Outcome, In Scope, Out Of Scope, Task Breakdown, Recommended Execution Order, Verification Strategy, Acceptance Criteria, Knowledge Log i Progress Log.
 
@@ -34,28 +34,66 @@ Follow-up issue powstaje dopiero wtedy, gdy `epic-qc` wykryje brak, regresje, ni
 
 `docs/current-epic.md` przechowuje stan aktywnego epica: numer issue, zakres, biezace decyzje, snapshot weryfikacji i follow-upy.
 
+`docs/current-epic-summary.md` przechowuje krotki routing context dla agentow.
+
 Nie przechowuj biezacej fazy w `AGENTS.md`.
 
-### Epic chapter
+### Epic chapter index
 
-`docs/epic-chapters.md` przechowuje trwale chaptery dla realnych epic issues. Nie tworz chaptera dla task issue, QC task issue ani follow-up issue bez labela `epic`.
+`docs/epic-chapters.md` jest lekkim indeksem chapterow. Nie przechowuj tam pelnych historycznych chapterow.
+
+### Epic chapter file
+
+Pelny chapter realnego epica trzymamy w `docs/epics/<epic-number>-<slug>.md`.
+
+Nie tworz chaptera dla task issue, QC task issue ani follow-up issue bez labela `epic`.
 
 ### Issue sync gate
 
-`issue-sync` synchronizuje glowne body epica z child taskami, komentarzem QC, chapter docs i `docs/current-epic.md`. To osobny gate przed zamknieciem epica.
+`issue-sync` synchronizuje glowne body epica z child taskami, komentarzem QC, relevantnym chapter file, `docs/epic-chapters.md`, `docs/current-epic.md` i `docs/current-epic-summary.md`. To osobny gate przed zamknieciem epica.
+
+## Work Modes
+
+### Small-task mode
+
+Uzywaj dla malych zmian bez zmiany kontraktu publicznego i bez potrzeby chaptera.
+
+Wymaga:
+
+- jednego task issue,
+- waskiego scope,
+- waskiej komendy testowej,
+- finalnego komentarza,
+- bez `epic-qc`,
+- bez `issue-sync`, chyba ze task nalezy do aktywnego epica.
+
+### Epic mode
+
+Uzywaj dla zmian wieloetapowych, domenowych, kontraktowych, architektonicznych albo wymagajacych QC.
+
+Wymaga:
+
+- epic issue,
+- task issues,
+- chapter file w `docs/epics/`,
+- wpisu w `docs/epic-chapters.md`,
+- `docs/current-epic.md`,
+- `docs/current-epic-summary.md`,
+- `epic-qc`,
+- `issue-sync` przed closure.
 
 ## Planner Flow
 
 `issue-planner` wykonuje te kroki:
 
 1. Sprawdza aktualny stan repo, istniejace issues i lokalne instrukcje.
-2. Identyfikuje, czy praca wymaga nowego epica, taska czy follow-upa.
-3. Dla nowego epica tworzy chapter w `docs/epic-chapters.md`.
-4. Dodaje wpis do `Chapter Completion Checklist`.
+2. Identyfikuje, czy praca wymaga small-task mode, nowego epica, taska czy follow-upa.
+3. Dla nowego epica tworzy chapter file w `docs/epics/<epic-number>-<slug>.md`.
+4. Dodaje wpis do `docs/epic-chapters.md`.
 5. Tworzy GitHub epic issue z labelem `epic`.
 6. Tworzy task issues z jasno okreslonym zakresem.
 7. Linkuje taski w epic issue i chapterze.
-8. Aktualizuje `docs/current-epic.md` jako stan aktywnego epica.
+8. Aktualizuje `docs/current-epic.md` i `docs/current-epic-summary.md` jako stan aktywnego epica.
 9. Dodaje obowiazkowy task QC gate na koncu epica.
 10. Dodaje obowiazkowy krok `issue-sync` przed zamknieciem epica.
 11. Przekazuje pierwszy wykonawczy task do `issue-executor`.
@@ -78,14 +116,14 @@ Nie przechowuj biezacej fazy w `AGENTS.md`.
 
 `epic-qc` wykonuje bramke jakosci po taskach implementacyjnych i dokumentacyjnych:
 
-1. Czyta epic issue, child task issues, komentarze, `docs/current-epic.md`, `docs/epic-chapters.md`, `AGENTS.md` i dokumenty domenowe.
+1. Czyta epic issue, child task issues, komentarze, `docs/current-epic-summary.md`, relevantny chapter file, `docs/epic-chapters.md`, `AGENTS.md` i potrzebne dokumenty domenowe.
 2. Sprawdza, czy scope epica jest dowieziony bez cichego rozszerzania.
 3. Sprawdza acceptance criteria, testy, build, formatowanie i dokumentacje.
-4. Sprawdza, czy chapter istnieje tylko dla realnego epic issue.
+4. Sprawdza, czy chapter file istnieje tylko dla realnego epic issue.
 5. Sprawdza, czy `Chapter Completion Checklist` nie myli QC taska z follow-up issue.
 6. Jesli sa defekty, tworzy follow-up issues przez plik body.
 7. Dodaje komentarz `Epic QC Gate` do epica.
-8. Aktualizuje chapter status.
+8. Aktualizuje chapter status i indeks.
 9. Nie zamyka epica, dopoki `issue-sync` nie potwierdzi synchronizacji glownego body epica.
 
 ## Epic Body Sync Gate
@@ -103,7 +141,9 @@ Epic closure is forbidden while the main epic issue body still has stale uncheck
 - follow-up issues po `PASS_WITH_FOLLOW_UP` albo `BLOCKED`,
 - `Final Notes` w glownym body epica,
 - `docs/epic-chapters.md`,
-- `docs/current-epic.md`.
+- relevantny `docs/epics/<epic>.md`,
+- `docs/current-epic.md`,
+- `docs/current-epic-summary.md`.
 
 Glowny epic body musi byc aktualizowany przez plik body i `gh issue edit --body-file <file>`.
 
@@ -134,26 +174,20 @@ Nie przekazuj wieloliniowego markdownu przez inline `--body`. Plik body jest dom
 
 ## Domain Precision Rule
 
-Kazdy epic i task musi precyzowac kontrakt domenowy. W `pseudoCPU` oznacza to jawne wskazanie opcode'ow, flag, rejestrow, addressing modes, zmian assemblera, trace/CLI i dokumentow.
+Szczegolowe reguly domenowe 6502 sa w `docs/6502-domain-rules.md`.
 
-Dla semantyki 6502 nie pisz tylko `zgodne z 6502`, jezeli istnieje ryzyko off-by-one albo kolejnosci bajtow. Wypisz dokladny kontrakt.
-
-Dla `JSR`/`RTS` kontrakt musi wskazywac:
-
-- `JSR abs` odklada adres powrotu `PC + 2`, czyli adres ostatniego bajtu instrukcji `JSR`.
-- `JSR abs` odklada high byte, potem low byte, uzywajac normalnej semantyki push.
-- `RTS` pobiera low byte, potem high byte, sklada adres, zwieksza go o 1 i wraca do instrukcji po `JSR`.
+Kazdy epic i task domenowy musi precyzowac kontrakt: opcode, flagi, rejestry, addressing modes, zmiany assemblera, trace/CLI i dokumenty.
 
 ## Definition of Ready for Epic Execution
 
 Epic jest gotowy do realizacji, gdy:
 
 - ma label `epic`,
-- ma chapter w `docs/epic-chapters.md`,
-- ma wpis w `Chapter Completion Checklist`,
+- ma chapter file w `docs/epics/`,
+- ma wpis w `docs/epic-chapters.md`,
 - ma komplet task issues,
 - taski sa linkowane z epica i chaptera,
-- `docs/current-epic.md` wskazuje aktywny epic,
+- `docs/current-epic.md` i `docs/current-epic-summary.md` wskazuja aktywny epic,
 - jest wskazany task QC gate,
 - jest wskazany krok `issue-sync` przed zamknieciem,
 - acceptance criteria zawieraja testy i dokumentacje,
@@ -172,4 +206,4 @@ Epic jest zakonczony, gdy:
 - glowne body epica jest zsynchronizowane: taski `[x]`, acceptance `[x]`, realne sciezki, link QC gate, follow-up issues i final notes,
 - `issue-sync` dodal komentarz synchronizacji albo final notes potwierdzajace synchronizacje body,
 - `Chapter Completion Checklist` ma poprawny status,
-- `docs/current-epic.md` jest zaktualizowane albo przygotowane pod kolejny epic.
+- `docs/current-epic.md` i `docs/current-epic-summary.md` sa zaktualizowane albo przygotowane pod kolejny epic.
