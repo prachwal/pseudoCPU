@@ -148,6 +148,9 @@ public sealed class BootstrapCpu
                 A = FetchByte();
                 UpdateZeroAndNegative(A);
                 break;
+            case BootstrapOpcode.AdcImmediate:
+                AddWithCarry(FetchByte());
+                break;
             case BootstrapOpcode.LdyImmediate:
                 Y = FetchByte();
                 UpdateZeroAndNegative(Y);
@@ -202,6 +205,9 @@ public sealed class BootstrapCpu
                 }
             case BootstrapOpcode.CmpImmediate:
                 CompareWithAccumulator(FetchByte());
+                break;
+            case BootstrapOpcode.SbcImmediate:
+                SubtractWithBorrow(FetchByte());
                 break;
             case BootstrapOpcode.CpxImmediate:
                 CompareWithX(FetchByte());
@@ -259,6 +265,32 @@ public sealed class BootstrapCpu
     {
         Status.Zero = value == 0;
         Status.Negative = (value & 0x80) != 0;
+    }
+
+    private void AddWithCarry(byte value)
+    {
+        var carryIn = Status.Carry ? 1 : 0;
+        var sum = A + value + carryIn;
+        var result = (byte)sum;
+
+        Status.Carry = sum > byte.MaxValue;
+        Status.Overflow = (~(A ^ value) & (A ^ result) & 0x80) != 0;
+
+        A = result;
+        UpdateZeroAndNegative(A);
+    }
+
+    private void SubtractWithBorrow(byte value)
+    {
+        var borrow = Status.Carry ? 0 : 1;
+        var difference = A - value - borrow;
+        var result = (byte)difference;
+
+        Status.Carry = difference >= 0;
+        Status.Overflow = ((A ^ result) & (A ^ value) & 0x80) != 0;
+
+        A = result;
+        UpdateZeroAndNegative(A);
     }
 
     private void CompareWithAccumulator(byte value)

@@ -418,6 +418,54 @@ public class BootstrapCpuTests
 
     [Trait("Category", "InstructionSlice")]
     [Theory]
+    [InlineData(0x00, 0x00, false, 0x00, true, false, false, false)]
+    [InlineData(0x7F, 0x01, false, 0x80, false, true, true, false)]
+    [InlineData(0xFF, 0x01, false, 0x00, true, false, false, true)]
+    [InlineData(0xFF, 0x00, true, 0x00, true, false, false, true)]
+    public void AdcImmediateUpdatesCarryOverflowZeroAndNegativeFlags(byte accumulator, byte operand, bool initialCarry, byte expectedResult, bool expectedZero, bool expectedNegative, bool expectedOverflow, bool expectedCarry)
+    {
+        var cpu = new BootstrapCpu();
+
+        cpu.LoadProgram([0xA9, accumulator, 0x69, operand, 0x00]);
+        cpu.Step();
+        cpu.Status.Carry = initialCarry;
+
+        cpu.Step();
+
+        Assert.Equal(expectedResult, cpu.A);
+        Assert.Equal(expectedZero, cpu.Zero);
+        Assert.Equal(expectedNegative, cpu.Negative);
+        Assert.Equal(expectedOverflow, cpu.Status.Overflow);
+        Assert.Equal(expectedCarry, cpu.Carry);
+        Assert.False(cpu.IsHalted);
+    }
+
+    [Trait("Category", "InstructionSlice")]
+    [Theory]
+    [InlineData(0x03, 0x01, true, 0x02, false, false, false, true)]
+    [InlineData(0x00, 0x01, true, 0xFF, false, true, false, false)]
+    [InlineData(0x80, 0x01, true, 0x7F, false, false, true, true)]
+    [InlineData(0x01, 0x00, false, 0x00, true, false, false, true)]
+    public void SbcImmediateUpdatesBorrowOverflowZeroAndNegativeFlags(byte accumulator, byte operand, bool initialCarry, byte expectedResult, bool expectedZero, bool expectedNegative, bool expectedOverflow, bool expectedCarry)
+    {
+        var cpu = new BootstrapCpu();
+
+        cpu.LoadProgram([0xA9, accumulator, 0xE9, operand, 0x00]);
+        cpu.Step();
+        cpu.Status.Carry = initialCarry;
+
+        cpu.Step();
+
+        Assert.Equal(expectedResult, cpu.A);
+        Assert.Equal(expectedZero, cpu.Zero);
+        Assert.Equal(expectedNegative, cpu.Negative);
+        Assert.Equal(expectedOverflow, cpu.Status.Overflow);
+        Assert.Equal(expectedCarry, cpu.Carry);
+        Assert.False(cpu.IsHalted);
+    }
+
+    [Trait("Category", "InstructionSlice")]
+    [Theory]
     [InlineData(0x00, false, false)]
     [InlineData(0x80, false, true)]
     public void InyUpdatesZeroAndNegativeFlags(byte value, bool expectedZero, bool expectedNegative)
