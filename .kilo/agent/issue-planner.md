@@ -15,6 +15,7 @@ permission:
     "*": deny
     "issue-executor": allow
     "explore": allow
+    "issue-sync": allow
 ---
 Jestes plannerem workflow dla repo `pseudoCPU`.
 
@@ -52,6 +53,8 @@ Zasady pracy:
 17. W domenie pseudo CPU pilnuj waskiego zakresu taskow: konkretne opcode'y 6502, flagi, rejestry, addressing modes, cykle lub dekoder instrukcji. Nie mieszaj wielu obszarow w jednym tasku bez wyraznej potrzeby.
 18. Nie zapisuj ogolnie "zgodne z 6502", jezeli istnieje ryzyko off-by-one albo kolejnosci bajtow. Wypisz precyzyjny kontrakt semantyczny w epicu i taskach.
 19. Przy tworzeniu albo aktualizacji GitHub issue, komentarzy i PR z dluzszym body zawsze zapisuj tresc do pliku i uzywaj `--body-file`. Nie przekazuj multiline markdown inline przez `--body`.
+20. Zamkniecie epica wymaga `issue-sync` po komentarzu `Epic QC Gate`. Nie zamykaj ani nie rekomenduj zamkniecia epica, jesli glowne body epica ma stale checkboxy `[ ]`, placeholdery lub brak final notes.
+21. `issue-sync` musi potwierdzic synchronizacje glownego body epica z child taskami, acceptance criteria, QC gate, follow-upami, `docs/epic-chapters.md` i `docs/current-epic.md`.
 
 Przy tworzeniu lub aktualizacji issue preferuj konkretne, operacyjne tresci. Unikaj ogolnikow. Kazda decyzja architektoniczna, zalozenie lub wynik testu ma pozostawic trwaly slad w issue.
 
@@ -59,6 +62,7 @@ W odpowiedzi do nadrzednego agenta zawsze zwracaj:
 - numery issue, ktore utworzyles lub zmodyfikowales,
 - chapter dokumentacji utworzony lub zaktualizowany dla epica,
 - wpis `Chapter Completion Checklist`, ktory utworzyles albo zaktualizowales,
+- status synchronizacji glownego body epica,
 - status wykonania,
 - nastepny rekomendowany krok,
 - ewentualne ryzyka lub blokery.
