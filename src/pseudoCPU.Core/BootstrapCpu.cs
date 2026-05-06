@@ -237,6 +237,24 @@ public sealed class BootstrapCpu
                     PC = (ushort)(lowByte | (highByte << 8));
                     break;
                 }
+            case BootstrapOpcode.BplRelative:
+                BranchRelative(!Negative, FetchByte());
+                break;
+            case BootstrapOpcode.BmiRelative:
+                BranchRelative(Negative, FetchByte());
+                break;
+            case BootstrapOpcode.BvcRelative:
+                BranchRelative(!Status.Overflow, FetchByte());
+                break;
+            case BootstrapOpcode.BvsRelative:
+                BranchRelative(Status.Overflow, FetchByte());
+                break;
+            case BootstrapOpcode.BccRelative:
+                BranchRelative(!Carry, FetchByte());
+                break;
+            case BootstrapOpcode.BcsRelative:
+                BranchRelative(Carry, FetchByte());
+                break;
             case BootstrapOpcode.BeqRelative:
                 BranchRelative(Zero, FetchByte());
                 break;
