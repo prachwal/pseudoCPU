@@ -8,13 +8,33 @@ Jeden chapter = jeden epic.
 
 Kazdy nowy epic musi miec jeden dedykowany rozdzial w tym pliku albo w osobnym pliku chaptera podlinkowanym z tego indeksu. Rozdzial nie jest zamiennikiem GitHub issue. GitHub issue pozostaje zrodlem prawdy dla planu, taskow, postepu i wynikow, a chapter jest stabilnym opisem produktowo-technicznym epica.
 
+## Status Values
+
+| Status | Meaning |
+|---|---|
+| `planned` | Chapter opisany, ale epic nie jest jeszcze aktywnie realizowany. |
+| `active` | Epic jest w trakcie planowania albo implementacji. |
+| `qc` | Implementacja jest zakonczona i czeka na bramke `epic-qc`. |
+| `done` | Epic ma pozytywny QC gate i chapter jest zamkniety. |
+| `blocked` | Epic nie moze isc dalej bez decyzji albo zaleznosci. |
+| `superseded` | Chapter zostal zastapiony innym epicem/chapterem. |
+
 ## Chapter Lifecycle
 
 1. Planner tworzy albo aktualizuje chapter przed utworzeniem taskow epica.
 2. Planner tworzy epic issue i task issues, a nastepnie linkuje ich numery w chapterze.
-3. Executor aktualizuje issue, a nie chapter, podczas codziennego postepu.
-4. Po zakonczeniu epica `epic-qc` zapisuje werdykt QC w issue i aktualizuje finalny status chaptera, jesli trzeba utrwalic decyzje.
-5. Tymczasowy stan biezacej pracy trafia do `docs/current-epic.md`; trwale wnioski z epica zostaja w chapterze, ADR albo dokumentacji domenowej.
+3. Planner aktualizuje `Chapter Completion Checklist` oraz `Current Chapter Index` przy kazdej zmianie statusu epica.
+4. Executor aktualizuje issue, a nie chapter, podczas codziennego postepu.
+5. Po zakonczeniu epica `epic-qc` zapisuje werdykt QC w issue i aktualizuje finalny status chaptera, jesli trzeba utrwalic decyzje.
+6. Tymczasowy stan biezacej pracy trafia do `docs/current-epic.md`; trwale wnioski z epica zostaja w chapterze, ADR albo dokumentacji domenowej.
+
+## Chapter Completion Checklist
+
+Ta tabela jest glowna lista kontrolna realizacji chapterow. Planner musi aktualizowac ja przy planowaniu nowego epica, przejsciu do implementacji, przejsciu do QC oraz zamknieciu epica.
+
+| Done | Chapter | Epic Issue | Status | QC Verdict | Follow-up | Notes |
+|---|---|---:|---|---|---|---|
+| [ ] | Phase 3 quality control | #25 | active | TBD | TBD | Cleanup po fazie 3: Carry, trace/assembler drift, CLI summary i regresja testow. |
 
 ## Chapter Template
 
@@ -25,10 +45,18 @@ Skopiuj ten szablon dla kazdego nowego epica.
 
 ### Epic Issue
 - Epic: #<number>
-- Status: planned | active | blocked | qc | done
+- Status: planned | active | blocked | qc | done | superseded
 - Owner agent: `issue-planner`
 - Execution agent: `issue-executor`
 - Quality gate agent: `epic-qc`
+
+### Completion Checklist Entry
+- Done: [ ]
+- Chapter: <chapter title>
+- Epic issue: #<number>
+- Status: planned | active | blocked | qc | done | superseded
+- QC verdict: PASS | PASS_WITH_FOLLOW_UP | BLOCKED | TBD
+- Follow-up: #<number> | none | TBD
 
 ### Outcome
 <Jakie zachowanie, mozliwosc albo kontrakt ma istniec po zakonczeniu epica.>
@@ -69,7 +97,7 @@ Skopiuj ten szablon dla kazdego nowego epica.
   - #<issue> - <powod>
 
 ### Final Notes
-- Final status: planned | active | blocked | done
+- Final status: planned | active | blocked | qc | done | superseded
 - Remaining risks:
 - Permanent decisions:
 ```
@@ -88,6 +116,14 @@ Skopiuj ten szablon dla kazdego nowego epica.
 - Owner agent: `issue-planner`
 - Execution agent: `issue-executor`
 - Quality gate agent: `epic-qc`
+
+### Completion Checklist Entry
+- Done: [ ]
+- Chapter: Phase 3 quality control
+- Epic issue: #25
+- Status: active
+- QC verdict: TBD
+- Follow-up: TBD
 
 ### Outcome
 Repo wraca do zielonego i spojnego stanu po fazie 3: testy odzwierciedlaja aktualna semantyke `Carry`, trace CLI i assembler nie rozjezdzaja sie w zapisie branch offsetow, a finalny output CLI pokazuje komplet aktualnie wspieranych flag.
