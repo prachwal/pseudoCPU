@@ -2,6 +2,9 @@
   "$schema": "https://app.kilo.ai/config.json",
   "default_agent": "issue-planner",
   "instructions": [
-    "AGENTS.md"
+    "AGENTS.md",
+    "docs/current-epic.md",
+    ".kilo/agents/epic-qc.md",
+    ".kilo/rules/github-issue-file-bodies.md"
   ]
 }
