@@ -2,7 +2,7 @@
 
 ## Epic Issue
 - Epic: #46
-- Status: qc
+- Status: blocked
 - Owner agent: `issue-planner`
 - Execution agent: `issue-executor`
 - Quality gate agent: `epic-qc`
@@ -11,9 +11,9 @@
 - Done: [ ]
 - Chapter: Phase 6: 6502 Y register foundation and Y-counter instruction slice
 - Epic issue: #46
-- Status: qc
-- QC verdict: TBD
-- Follow-up: TBD
+- Status: blocked
+- QC verdict: BLOCKED
+- Follow-up: #55
 
 ## Outcome
 Repo dodaje bootstrapowy rejestr `Y` jako drugi 8-bitowy rejestr indeksowy i domyka pionowy slice instrukcji `LDY #imm`, `INY`, `DEY`, `CPY #imm`, `STY abs`. Po zakończeniu epica procesor, assembler, CLI trace i dokumentacja mają jawny kontrakt dla `Y`, a mapy slice i snapshot aktywnego epica pozostają spójne.
@@ -52,7 +52,7 @@ Ten chapter dokumentuje zamknięty zakres budowy rejestru `Y` i instrukcji liczn
 - [x] #51 - extend assembler and add ASM end-to-end coverage for `Y` slice.
 - [x] #52 - update CLI trace for `Y` register visibility.
 - [x] #53 - update slice map and chapter documentation for `Y` slice.
-- [ ] #54 - run epic QC gate for `Y` register slice.
+- [x] #54 - run epic QC gate for `Y` register slice.
 
 ## Acceptance Criteria
 - [ ] Bootstrap CPU exposes 8-bit `Y` register without regressing current `A`, `X`, `SP`, `PC` contracts.
@@ -86,16 +86,16 @@ Ten chapter dokumentuje zamknięty zakres budowy rejestru `Y` i instrukcji liczn
 - [x] `docs/cpu-slice-map.md` po dodaniu `LDY`, `INY`, `DEY`, `CPY`, `STY`.
 - [x] `docs/pseudoCPU-processor-guide.md` po dopisaniu rejestru `Y` i semantyki instrukcji.
 - [x] `docs/epic-chapters.md` po dodaniu aktywnego chaptera do indeksu.
-- [x] `docs/current-epic.md` po ustawieniu stanu epica na `qc`.
-- [x] `docs/current-epic-summary.md` po ustawieniu stanu routingowego na `qc`.
+- [x] `docs/current-epic.md` po ustawieniu stanu epica na `blocked`.
+- [x] `docs/current-epic-summary.md` po ustawieniu stanu routingowego na `blocked`.
 
 ## QC Gate
 - QC issue/comment: #54
-- Verdict: TBD
+- Verdict: BLOCKED
 - Follow-up issues:
-  - TBD
+  - #55 - fix `LDX` immediate zero-flag regression discovered during QC.
 
 ## Final Notes
-- Final status: qc
-- Remaining risks: brak bramki `epic-qc`; status epica i body oczekują na finalne potwierdzenie zgodności z kodem.
+- Final status: blocked
+- Remaining risks: follow-up #55 is required to resolve the failing full bootstrap test (`BootstrapCpuTests.LdxImmediateUpdatesZeroAndNegativeFlags(value: 0, expectedZero: False, expectedNegative: False)`).
 - Permanent decisions: `Y` pozostaje 8-bitowym rejestrem bootstrapowym; `CPY` używa bootstrapowego modelu flag `Carry` / `Zero` / `Negative` bez rozszerzania status register.

@@ -38,7 +38,7 @@ Tylko issue z labelem `epic` moze byc opisane jako `Epic <nr>`. Taski, QC taski 
 |---|---:|---|---|---|
 | Phase 4: 6502 stack page foundation and JSR/RTS subroutine flow | #26 | done | `docs/epics/0026-stack-jsr-rts.md` | Stack page `$0100-$01FF`, 8-bit `SP`, push/pop ordering, `JSR abs`, `RTS`, assembler/CLI/docs |
 | Phase 5: 6502 stack opcode slice PHA/PLA/PHP/PLP | #36 | done | `docs/epics/0036-stack-opcodes.md` | `PHA`, `PLA`, `PHP`, `PLP`, bootstrap status byte contract, assembler/CLI/docs |
-| Phase 6: 6502 Y register foundation and Y-counter instruction slice | #46 | qc | `docs/epics/0046-y-register-slice.md` | `Y`, `LDY`, `INY`, `DEY`, `CPY`, `STY`, assembler/CLI/docs, pre-QC snapshot |
+| Phase 6: 6502 Y register foundation and Y-counter instruction slice | #46 | blocked | `docs/epics/0046-y-register-slice.md` | `Y`, `LDY`, `INY`, `DEY`, `CPY`, `STY`, assembler/CLI/docs, QC blocked by LDX regression #55 |
 
 ## New Chapter File Template
 
