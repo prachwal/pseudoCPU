@@ -3,10 +3,14 @@ namespace pseudoCPU.Core;
 public enum BootstrapOpcode : byte
 {
     LdaImmediate = 0xA9,
+    LdxImmediate = 0xA2,
     Tax = 0xAA,
     Inx = 0xE8,
+    Dex = 0xCA,
     StaAbsolute = 0x8D,
+    StxAbsolute = 0x8E,
     CmpImmediate = 0xC9,
+    CpxImmediate = 0xE0,
     JmpAbsolute = 0x4C,
     BeqRelative = 0xF0,
     BneRelative = 0xD0,
@@ -18,10 +22,14 @@ public static class BootstrapOpcodeDecoder
     public static BootstrapOpcode Decode(byte opcode) => opcode switch
     {
         0xA9 => BootstrapOpcode.LdaImmediate,
+        0xA2 => BootstrapOpcode.LdxImmediate,
         0xAA => BootstrapOpcode.Tax,
         0xE8 => BootstrapOpcode.Inx,
+        0xCA => BootstrapOpcode.Dex,
         0x8D => BootstrapOpcode.StaAbsolute,
+        0x8E => BootstrapOpcode.StxAbsolute,
         0xC9 => BootstrapOpcode.CmpImmediate,
+        0xE0 => BootstrapOpcode.CpxImmediate,
         0x4C => BootstrapOpcode.JmpAbsolute,
         0xF0 => BootstrapOpcode.BeqRelative,
         0xD0 => BootstrapOpcode.BneRelative,

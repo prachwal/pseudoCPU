@@ -11,9 +11,9 @@
 | JMP abs | 4C | done | done | done | done | done | absolute jump |
 | BEQ rel | F0 | done | done | done | done | done | branch on Zero |
 | BNE rel | D0 | done | done | done | done | done | branch on !Zero |
-| LDX #imm | A2 | planned | planned | planned | planned | planned | phase 3 |
-| DEX | CA | planned | planned | planned | planned | planned | phase 3 |
-| CPX #imm | E0 | planned | planned | planned | planned | planned | phase 3 |
-| STX abs | 8E | planned | planned | planned | planned | planned | phase 3 |
+| LDX #imm | A2 | done | done | planned | done | done | phase 3 |
+| DEX | CA | done | done | planned | done | done | phase 3 |
+| CPX #imm | E0 | done | done | planned | done | done | phase 3 |
+| STX abs | 8E | done | done | planned | done | done | phase 3 |
 
 Maintain this map after each opcode phase.

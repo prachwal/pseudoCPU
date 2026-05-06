@@ -25,6 +25,25 @@ public class BootstrapCpuTests
 
     [Trait("Category", "InstructionSlice")]
     [Theory]
+    [InlineData(0x00, true, false)]
+    [InlineData(0x80, false, true)]
+    public void LdxImmediateUpdatesZeroAndNegativeFlags(byte value, bool expectedZero, bool expectedNegative)
+    {
+        var cpu = new BootstrapCpu();
+
+        cpu.LoadProgram([0xA2, value, 0x00]);
+
+        cpu.Step();
+
+        Assert.Equal(value, cpu.X);
+        Assert.Equal(expectedZero, cpu.Zero);
+        Assert.Equal(expectedNegative, cpu.Negative);
+        Assert.False(cpu.Carry);
+        Assert.False(cpu.IsHalted);
+    }
+
+    [Trait("Category", "InstructionSlice")]
+    [Theory]
     [InlineData(0x03, 0x03, true, false, true)]
     [InlineData(0x04, 0x03, false, false, true)]
     [InlineData(0x02, 0x03, false, true, false)]
@@ -38,6 +57,27 @@ public class BootstrapCpuTests
         cpu.Step();
 
         Assert.Equal(accumulator, cpu.A);
+        Assert.Equal(expectedZero, cpu.Zero);
+        Assert.Equal(expectedNegative, cpu.Negative);
+        Assert.Equal(expectedCarry, cpu.Carry);
+        Assert.False(cpu.IsHalted);
+    }
+
+    [Trait("Category", "InstructionSlice")]
+    [Theory]
+    [InlineData(0x03, 0x03, true, false, true)]
+    [InlineData(0x04, 0x03, false, false, true)]
+    [InlineData(0x02, 0x03, false, true, false)]
+    public void CpxImmediateUpdatesZeroNegativeAndCarryFlags(byte index, byte operand, bool expectedZero, bool expectedNegative, bool expectedCarry)
+    {
+        var cpu = new BootstrapCpu();
+
+        cpu.LoadProgram([0xA2, index, 0xE0, operand, 0x00]);
+
+        cpu.Step();
+        cpu.Step();
+
+        Assert.Equal(index, cpu.X);
         Assert.Equal(expectedZero, cpu.Zero);
         Assert.Equal(expectedNegative, cpu.Negative);
         Assert.Equal(expectedCarry, cpu.Carry);
@@ -92,6 +132,30 @@ public class BootstrapCpuTests
         Assert.True(cpu.IsHalted);
         Assert.Equal(0x0608, cpu.PC);
         Assert.Equal(0xFF, cpu.ReadByte(0x1234));
+    }
+
+    [Trait("Category", "InstructionSlice")]
+    [Fact]
+    public void DexWrapsAndStxAbsoluteStoresIndexRegister()
+    {
+        var cpu = new BootstrapCpu();
+
+        cpu.LoadProgram([0xA2, 0x00, 0xCA, 0x8E, 0x78, 0x56, 0x00], 0x0500);
+
+        cpu.Step();
+        Assert.Equal(0x00, cpu.X);
+        Assert.True(cpu.Zero);
+        Assert.False(cpu.Negative);
+
+        cpu.Step();
+        Assert.Equal(0xFF, cpu.X);
+        Assert.False(cpu.Zero);
+        Assert.True(cpu.Negative);
+
+        cpu.Step();
+
+        Assert.Equal(0xFF, cpu.ReadByte(0x5678));
+        Assert.False(cpu.IsHalted);
     }
 
     [Trait("Category", "InstructionSlice")]

@@ -90,12 +90,20 @@ public sealed class BootstrapCpu
                 A = FetchByte();
                 UpdateZeroAndNegative(A);
                 break;
+            case BootstrapOpcode.LdxImmediate:
+                X = FetchByte();
+                UpdateZeroAndNegative(X);
+                break;
             case BootstrapOpcode.Tax:
                 X = A;
                 UpdateZeroAndNegative(X);
                 break;
             case BootstrapOpcode.Inx:
                 X++;
+                UpdateZeroAndNegative(X);
+                break;
+            case BootstrapOpcode.Dex:
+                X--;
                 UpdateZeroAndNegative(X);
                 break;
             case BootstrapOpcode.StaAbsolute:
@@ -106,8 +114,19 @@ public sealed class BootstrapCpu
                     _memory[address] = A;
                     break;
                 }
+            case BootstrapOpcode.StxAbsolute:
+                {
+                    var lowByte = FetchByte();
+                    var highByte = FetchByte();
+                    var address = (ushort)(lowByte | (highByte << 8));
+                    _memory[address] = X;
+                    break;
+                }
             case BootstrapOpcode.CmpImmediate:
                 CompareWithAccumulator(FetchByte());
+                break;
+            case BootstrapOpcode.CpxImmediate:
+                CompareWithX(FetchByte());
                 break;
             case BootstrapOpcode.JmpAbsolute:
                 {
@@ -148,6 +167,14 @@ public sealed class BootstrapCpu
         Zero = A == value;
         Negative = (result & 0x80) != 0;
         Carry = A >= value;
+    }
+
+    private void CompareWithX(byte value)
+    {
+        var result = unchecked((byte)(X - value));
+        Zero = X == value;
+        Negative = (result & 0x80) != 0;
+        Carry = X >= value;
     }
 
     private void BranchRelative(bool condition, byte offsetByte)
