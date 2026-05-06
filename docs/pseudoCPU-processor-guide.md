@@ -314,7 +314,26 @@ Tryby poza aktualnym zakresem:
 - indirect indexed,
 - accumulator addressing.
 
-Nie należy dodawać trybów adresowania bez osobnego issue.
+Kontrakt phase 8 dla tych trybów jest doprecyzowany w ADR-0006 i issue #69; nie należy rozszerzać go poza jawnie wymienione opcode subsety.
+
+### 6.4. Phase 8 addressing and bus contract
+
+Phase 8 dzieli się na trzy jawne taski z wąskim, nie-blankietowym zakresem opcode:
+
+| Task | Addressing mode | Exact opcode subset |
+|---|---|---|
+| #71 | zero page + zero page indexed | `LDA $zz`, `LDX $zz`, `LDY $zz`, `STA $zz`, `STX $zz`, `STY $zz`, `LDA $zz,X`, `LDX $zz,Y`, `LDY $zz,X`, `STA $zz,X`, `STX $zz,Y`, `STY $zz,X` |
+| #72 | absolute indexed `,X` / `,Y` | `LDA $hhhh,X`, `LDA $hhhh,Y`, `LDX $hhhh,Y`, `LDY $hhhh,X`, `STA $hhhh,X`, `STA $hhhh,Y` |
+| #73 | indirect forms | `JMP ($hhhh)`, `LDA ($zz,X)`, `STA ($zz,X)`, `LDA ($zz),Y`, `STA ($zz),Y` |
+
+Semantyka wspólna dla całego slice:
+
+- operand absolute i pointer bytes są kodowane little-endian (`low byte`, potem `high byte`),
+- zero page wrap-around działa wyłącznie w zero-page pointer resolution albo zero-page indexed effective address; nie tworzy dodatkowych side effectów,
+- absolute indexed liczy effective address jako base 16-bit + index bez specjalnej magii poza wynikowym adresem,
+- memory bus foundation jest RAM-only: jedna warstwa przygotowania do późniejszych MMIO, bez urządzeń i bez side effectów innych niż odczyt/zapis RAM,
+- `JMP (indirect)` jest specyfikowane osobno od pointer-based data modes i zachowuje 6502-style page-wrap przy odczycie wysokiego bajtu pointera z granicy strony,
+- pointer-based data modes nie dziedziczą tej anomalii; `(indirect,X)` składa pointer z zero-page base po dodaniu `X`, a `(indirect),Y` najpierw składa pointer z zero-page, potem dodaje `Y` do 16-bit base.
 
 ---
 
