@@ -2,21 +2,23 @@
 
 ## Repo State
 - Repo zawiera solution `pseudoCPU.sln` oraz projekty `src/pseudoCPU.Core`, `src/pseudoCPU.Cli` i `tests/pseudoCPU.Bootstrap.Tests`.
-- Bootstrap CPU obejmuje slice `LDA #imm`, `TAX`, `INX`, `STA abs`, `BRK`, `CMP #imm`, `JMP abs`, `BEQ rel` i `BNE rel`; nie rozszerzaj zakresu bez osobnego issue.
-- Następny planowany zakres fazy 3 to dalsze rozszerzenie slice o licznikową pętlę na `X`.
+- Trwajacy epic, biezacy zakres, decyzje fazowe i nastepne kroki zapisuj w `docs/current-epic.md`; nie dopisuj ich do `AGENTS.md`.
+- `AGENTS.md` ma zawierac tylko stabilne zasady pracy agentow, workflow i stale ograniczenia repo.
 - Bootstrapowy assembler nie wspiera etykiet ani dyrektywy `.org`; branch offsety podawaj jawnie jako relatywny bajt.
-- `CMP #imm` aktualizuje `Zero`, `Negative` i `Carry`; pełna zgodność 6502 poza tym zakresem nadal nie jest celem tego etapu.
 - Nie zgaduj dodatkowych projektow, sciezek ani komend build/test poza tym, co jest faktycznie obecne w repo.
 
 ## Primary Workflow
-- Zrodlem prawdy dla planu, taskow, postepu i wynikow testow sa GitHub Issues, nie sam chat.
+- Zrodlem prawdy dla planu, taskow, postepu i wynikow testow sa GitHub Issues oraz `docs/current-epic.md`, nie sam chat.
 - Do planowania uzywaj `/issue-plan`; do realizacji taska `/issue-execute`; do zsynchronizowania stanu issue z repo `/issue-sync`.
 - Planner ma utrzymywac strukture epic -> taski i zapisywac decyzje, kryteria akceptacji, zaleznosci oraz strategie weryfikacji bezposrednio w issue.
 - Executor ma dopisywac do issue komentarze startowe, postep, komendy weryfikacyjne, wynik koncowy i jawny sygnal zamkniecia taska.
+- Po implementacji epica uruchom subagenta `epic-qc` jako niezalezna bramke kontroli jakosci przed zamknieciem epica.
+- Petla zwrotna epica: planner -> executor -> `epic-qc` -> follow-up issue -> planner/executor, az `epic-qc` nie znajdzie blokujacych defektow.
+- Jezeli `epic-qc` po weryfikacji silniejszym modelem wykryje brakujacy zakres, regresje, dług techniczny lub ryzyko projektowe, utworz follow-up issue podobne do istniejacych taskow, np. #17 albo #25, i zalinkuj je z epica.
 - Taski implementacyjne powinny zawierac i respektowac sekcje Definition of Done oraz Scope Guard.
 - Po kazdym epiku nalezy dopisac lub zaktualizowac komentarz QC gate oraz utrzymywac go jako jawny punkt kontroli.
 - Po nowych opcode'ach aktualizuj `docs/cpu-slice-map.md`, zeby stan slice byl jawny i aktualny.
-- Dla decyzji architektonicznych dodawaj ADR-y w `docs/adr/` zamiast rozpraszać je po komentarzach.
+- Dla decyzji architektonicznych dodawaj ADR-y w `docs/adr/` zamiast rozpraszac je po komentarzach.
 
 ## Git Branch Workflow
 - Kazda faza pracy startuje z nowego brancha roboczego utworzonego przed rozpoczeciem zmian.
@@ -29,11 +31,14 @@
 - Zarzadzaj issue przez `gh issue ...`; nie zakladaj recznej pracy w przegladarce.
 - Nowe taski i epiki tworz z sekcjami zgodnymi z szablonami w `.github/ISSUE_TEMPLATE/`.
 - Kazdy task implementacyjny musi zawierac: cel, zakres, kryteria akceptacji, plan weryfikacji i zaleznosci.
+- Kazde `gh issue create`, `gh issue edit`, `gh issue comment` i `gh pr create` z body dluzszym niz jedna linia musi uzywac pliku body oraz flagi `--body-file`; nie przekazuj dlugich tresci inline w shellu.
+- Pliki body tworz w katalogu tymczasowym albo w `.tmp/issue-bodies/`; nazwa pliku ma zawierac numer issue lub roboczy slug zadania.
+- Nie raportuj uzytkownikowi komunikatu typu "przechodze na prostszy zapis przez plik tymczasowy" jako normalnego kroku pracy; uzycie pliku jest obowiazkowym domyslem, nie fallbackiem.
 - Jesli wiedza powstaje w trakcie pracy, utrwal ja w issue body lub komentarzu i odwoluj sie do numerow issue w kolejnych zadaniach.
 
 ## Shell And GitHub CLI Hygiene
 - W tym srodowisku uzywaj `python3`, nie `python`.
-- Przy wysylaniu dluzszych tresci do GitHub (`gh issue comment`, `gh issue edit`, `gh pr create`) unikaj inline shell stringow; zapisuj body do pliku i przekazuj przez `--body-file`, zeby backticki, cudzyslowy i nowe linie nie uszkadzaly wiadomosci.
+- Przy wysylaniu dluzszych tresci do GitHub (`gh issue create`, `gh issue comment`, `gh issue edit`, `gh pr create`) zawsze zapisuj body do pliku i przekazuj przez `--body-file`, zeby backticki, cudzyslowy i nowe linie nie uszkadzaly wiadomosci.
 - Gdy pracujesz z JSON z `gh ... --json` lub innym CLI, preferuj `jq` do odczytu i transformacji zamiast parsowania tekstu wyjsciowego shellowymi hackami.
 
 ## .NET And Tests
