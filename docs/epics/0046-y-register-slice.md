@@ -2,18 +2,18 @@
 
 ## Epic Issue
 - Epic: #46
-- Status: qc
+- Status: done
 - Owner agent: `issue-planner`
 - Execution agent: `issue-executor`
 - Quality gate agent: `epic-qc`
 
 ## Completion Checklist Entry
-- Done: [ ]
+- Done: [x]
 - Chapter: Phase 6: 6502 Y register foundation and Y-counter instruction slice
 - Epic issue: #46
-- Status: qc
+- Status: done
 - QC verdict: PASS
-- Follow-up: none
+- Follow-up: #55 completed
 
 ## Outcome
 Repo dodaje bootstrapowy rejestr `Y` jako drugi 8-bitowy rejestr indeksowy i domyka pionowy slice instrukcji `LDY #imm`, `INY`, `DEY`, `CPY #imm`, `STY abs`. Po zakończeniu epica procesor, assembler, CLI trace i dokumentacja mają jawny kontrakt dla `Y`, a mapy slice i snapshot aktywnego epica pozostają spójne.
@@ -68,7 +68,7 @@ Ten chapter dokumentuje zamknięty zakres budowy rejestru `Y` i instrukcji liczn
 - [x] `dotnet test tests/pseudoCPU.Bootstrap.Tests/pseudoCPU.Bootstrap.Tests.csproj` passes.
 - [x] `dotnet format pseudoCPU.sln --verify-no-changes` passes.
 - [x] Epic passes `epic-qc`; if not, follow-up issues are created and linked before closure.
-- [ ] `issue-sync` synchronizes the main epic body and chapter docs before epic closure.
+- [x] `issue-sync` synchronizes the main epic body and chapter docs before epic closure.
 
 ## Verification Strategy
 - Narrow tests:
@@ -85,17 +85,18 @@ Ten chapter dokumentuje zamknięty zakres budowy rejestru `Y` i instrukcji liczn
 ## Documentation Updates
 - [x] `docs/cpu-slice-map.md` po dodaniu `LDY`, `INY`, `DEY`, `CPY`, `STY`.
 - [x] `docs/pseudoCPU-processor-guide.md` po dopisaniu rejestru `Y` i semantyki instrukcji.
-- [x] `docs/epic-chapters.md` po dodaniu aktywnego chaptera do indeksu.
-- [x] `docs/current-epic.md` po ustawieniu stanu epica na `qc`.
-- [x] `docs/current-epic-summary.md` po ustawieniu stanu routingowego na `qc`.
+- [x] `docs/epic-chapters.md` po zamknięciu chaptera i zmianie statusu na `done`.
+- [x] `docs/current-epic.md` po przeniesieniu #46 do ostatnio zamkniętego epica.
+- [x] `docs/current-epic-summary.md` po zamknięciu #46 i wyczyszczeniu aktywnego routingu.
 
 ## QC Gate
-- QC issue/comment: #54
+- QC issue/comment: https://github.com/prachwal/pseudoCPU/issues/46#issuecomment-4389479914
 - Verdict: PASS
 - Follow-up issues:
-  - none
+  - #55 - completed: fix `LDX` immediate zero-flag regression discovered during QC.
 
 ## Final Notes
-- Final status: qc
-- Remaining risks: issue-sync is still required before epica #46 can be closed.
+- Final status: done
+- Remaining risks: none.
 - Permanent decisions: `Y` pozostaje 8-bitowym rejestrem bootstrapowym; `CPY` używa bootstrapowego modelu flag `Carry` / `Zero` / `Negative` bez rozszerzania status register.
+- Closure notes: epic body, chapter docs i snapshot bieżącego stanu zostały zsynchronizowane po finalnym QC PASS; epic może pozostać zamknięty jako spójny stan workflow.

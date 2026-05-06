@@ -2,7 +2,7 @@
 
 ## Epic Issue
 - Epic: #56
-- Status: planned
+- Status: qc
 - Owner agent: `issue-planner`
 - Execution agent: `issue-executor`
 - Quality gate agent: `epic-qc`
@@ -11,7 +11,7 @@
 - Done: [ ]
 - Chapter: Phase 7: full status register and core flag/arithmetic completion
 - Epic issue: #56
-- Status: planned
+- Status: qc
 - QC verdict: TBD
 - Follow-up: TBD
 
@@ -39,14 +39,14 @@ Ten chapter domyka brakujący środek ciężkości semantyki CPU: status registe
 ADR-0005 utrwala canonical layout status byte `N V - B D I Z C` oraz bootstrapowy subset `C / Z / N` jako jawny punkt odniesienia dla kolejnych tasków fazy 7.
 
 ## Task Issues
-- [ ] #60 - define full status register contract and ADR.
-- [ ] #61 - add full status register foundation in core.
-- [ ] #62 - implement flag-control opcodes.
-- [ ] #63 - implement `ADC` and `SBC` immediate semantics.
-- [ ] #64 - implement `BIT` and accumulator shift/rotate semantics.
-- [ ] #65 - implement remaining flag-driven branches and regression coverage.
-- [ ] #66 - align assembler and CLI trace with status and arithmetic slice.
-- [ ] #67 - update slice map and chapter docs for phase 7 core completion.
+- [x] #60 - define full status register contract and ADR.
+- [x] #61 - add full status register foundation in core.
+- [x] #62 - implement flag-control opcodes.
+- [x] #63 - implement `ADC` and `SBC` immediate semantics.
+- [x] #64 - implement `BIT` and accumulator shift/rotate semantics.
+- [x] #65 - implement remaining flag-driven branches and regression coverage.
+- [x] #66 - align assembler and CLI trace with status and arithmetic slice.
+- [x] #67 - update slice map and chapter docs for phase 7 core completion.
 - [ ] #68 - QC gate przez `epic-qc`.
 
 ## Acceptance Criteria
@@ -69,11 +69,11 @@ ADR-0005 utrwala canonical layout status byte `N V - B D I Z C` oraz bootstrapow
   - `dotnet format pseudoCPU.sln --verify-no-changes`
 
 ## Documentation Updates
-- [ ] `docs/cpu-slice-map.md` po wdrożeniu nowych opcode'ów i status semantics.
-- [ ] `docs/pseudoCPU-processor-guide.md` po pełnym status/ALU slice.
+- [x] `docs/cpu-slice-map.md` po wdrożeniu nowych opcode'ów i status semantics.
+- [x] `docs/pseudoCPU-processor-guide.md` po pełnym status/ALU slice.
 - [x] `docs/adr/0005-status-register-contract.md` dokumentuje kontrakt status register dla #60.
-- [ ] Ten chapter po przejściu tasków i po QC gate.
-- [ ] `docs/current-epic.md`, `docs/current-epic-summary.md` i `docs/epic-chapters.md` dla stanu plan -> qc -> done.
+- [x] Ten chapter po przejściu tasków i aktualizacji stanu przed QC gate.
+- [x] `docs/current-epic.md`, `docs/current-epic-summary.md` i `docs/epic-chapters.md` dla stanu plan -> qc.
 
 ## QC Gate
 - QC issue/comment: TBD
@@ -82,6 +82,6 @@ ADR-0005 utrwala canonical layout status byte `N V - B D I Z C` oraz bootstrapow
   - TBD
 
 ## Final Notes
-- Final status: planned
-- Remaining risks: decimal-mode semantics i rola `B` / `I` muszą być precyzyjnie zawężone, aby nie wejść przedwcześnie w interrupt flow.
-- Permanent decisions: status register ma być wdrażany jawnie i testowalnie, bez ukrytego rozszerzania contractu na execution model kolejnej fazy.
+- Final status: qc
+- Remaining risks: brak znanych blockerów przed #68; QC może jeszcze ujawnić drift dokumentacji względem implementacji.
+- Permanent decisions: status register jest jawny i testowalny, a phase 7 domyka core status/ALU/branch slice bez wchodzenia w interrupt flow.

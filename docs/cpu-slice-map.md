@@ -28,5 +28,25 @@ Bootstrap assembler accepts raw branch offsets only; labels and `.org` remain un
 | DEY | 88 | done | done | done | done | done | updates Z/N |
 | CPY #imm | C0 | done | done | done | done | done | updates C/Z/N without mutating Y |
 | STY abs | 8C | done | done | done | done | done | no flag updates |
+| ADC #imm | 69 | done | done | done | done | done | phase 7 immediate add, updates C/V/Z/N |
+| SBC #imm | E9 | done | done | done | done | done | phase 7 immediate subtract, updates C/V/Z/N |
+| BIT zp | 24 | done | done | done | done | done | phase 7 zero-page only, updates Z/N/V |
+| ASL A | 0A | done | done | done | done | done | accumulator shift left, updates C/Z/N |
+| LSR A | 4A | done | done | done | done | done | accumulator shift right, updates C/Z/N |
+| ROL A | 2A | done | done | done | done | done | accumulator rotate left, updates C/Z/N |
+| ROR A | 6A | done | done | done | done | done | accumulator rotate right, updates C/Z/N |
+| CLC | 18 | done | done | done | done | done | clears Carry |
+| SEC | 38 | done | done | done | done | done | sets Carry |
+| CLI | 58 | done | done | done | done | done | clears Interrupt Disable |
+| SEI | 78 | done | done | done | done | done | sets Interrupt Disable |
+| CLD | D8 | done | done | done | done | done | clears Decimal |
+| SED | F8 | done | done | done | done | done | sets Decimal |
+| CLV | B8 | done | done | done | done | done | clears Overflow |
+| BCC | 90 | done | done | done | done | done | branch on clear Carry |
+| BCS | B0 | done | done | done | done | done | branch on set Carry |
+| BMI | 30 | done | done | done | done | done | branch on Negative |
+| BPL | 10 | done | done | done | done | done | branch on positive |
+| BVC | 50 | done | done | done | done | done | branch on clear Overflow |
+| BVS | 70 | done | done | done | done | done | branch on set Overflow |
 
 Maintain this map after each opcode phase.

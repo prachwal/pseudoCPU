@@ -3,36 +3,40 @@
 Ten plik przechowuje stan biezacego epica i informacje fazowe, ktorych nie nalezy dopisywac do `AGENTS.md`.
 
 ## Active Epic
-- GitHub issue: #46
+- GitHub issue: #56
 - Status: qc
 - Owner agent: `issue-executor`
 - Quality gate agent: `epic-qc`
+- Chapter file: `docs/epics/0056-status-alu-branches.md`
+
+## Planned Epic Queue
+1. #57 - `docs/epics/0057-addressing-bus-indirect.md`
+2. #58 - `docs/epics/0058-reset-interrupts-timing.md`
+3. #59 - `docs/epics/0059-assembler-loader-tooling.md`
 
 ## Last Completed Epic
-- GitHub issue: #36
-- Chapter file: `docs/epics/0036-stack-opcodes.md`
+- GitHub issue: #46
+- Chapter file: `docs/epics/0046-y-register-slice.md`
 - Status: done
-- QC verdict: PASS_WITH_FOLLOW_UP
-- Follow-up: #45
+- QC verdict: PASS
+- Follow-up: #55
 - Follow-up status: completed
 
 ## Current Scope
-- Active epic scope: phase 6 `Y` register foundation and Y-counter instruction slice.
-- Implementation tasks #47-#54 are complete; QC gate #54 passed after follow-up #55.
-- Use epic mode for issue sync and closure steps.
+- Phase 7 introduces full status register semantics and closes key core ALU/branch gaps.
+- Remaining planned phases cover addressing/memory, reset/interrupt/timing, and assembler/tooling completion.
 - Before CPU/opcode/flag/stack/assembler/CLI work, read `docs/6502-domain-rules.md`.
 
-## Last Completed Scope Snapshot
-- Source of truth: epic #36 and child tasks #37-#44.
-- Zakres zakonczony: stack opcode slice `PHA`, `PLA`, `PHP`, `PLP` na fundamencie stack page `$0100-$01FF`, 8-bitowego `SP` i helperow push/pop z #26.
-- Bootstrapowy status byte: `Carry` = bit 0, `Zero` = bit 1, `Negative` = bit 7, a bity 2-6 sa zarezerwowane / ignorowane; `PHP` zapisuje tylko ten snapshot, a `PLP` odtwarza wylacznie wspierane flagi.
-- Out of scope pozostaje: IRQ/NMI/RESET vectors, `BRK` vector, `RTI`, pelny status register 6502 jako docelowy model procesora, decimal/interrupt/overflow/break live semantics, cycle counting, etykiety assemblera oraz `.org` / `.byte` / `.word`.
+## Active Task Plan
+1. #68 - run epic QC gate for status and arithmetic completion.
+2. `issue-sync` - synchronize epic #56 body and workflow docs before closure.
 
 ## Phase Notes
-- Epic #46 jest w stanie `qc` po ponownym pozytywnym `epic-qc`.
-- Taski #47-#54 są zamknięte; follow-up #55 został zamknięty.
-- Chapter dla #46 oczekuje na `issue-sync` przed zamknięciem epica.
-- Ostatni zamknięty epic #36 pozostaje bez zmian.
+- Four condensed completion epics are now planned: #56-#59.
+- Only #56 is the active planned epic; #57-#59 remain queued.
+- Implementation tasks #60-#67 are complete.
+- #68 is the remaining QC gate before sync and closure.
+- Follow-up issues remain `TBD` until QC verdict.
 
 ## QC Feedback Loop
 1. `issue-planner` utrzymuje strukture chapter -> epic -> taski.
@@ -43,18 +47,15 @@ Ten plik przechowuje stan biezacego epica i informacje fazowe, ktorych nie nalez
 6. Petla wraca do planner/executor do czasu braku blokujacych ustalen QC i spójnego sync.
 
 ## Verification Snapshot
-- Last narrow test command: `dotnet test tests/pseudoCPU.Bootstrap.Tests/pseudoCPU.Bootstrap.Tests.csproj --filter "FullyQualifiedName~Y|FullyQualifiedName~Ldy|FullyQualifiedName~Iny|FullyQualifiedName~Dey|FullyQualifiedName~Cpy|FullyQualifiedName~Sty"` — PASS.
-- Last full test command: `dotnet test tests/pseudoCPU.Bootstrap.Tests/pseudoCPU.Bootstrap.Tests.csproj` — PASS.
-- Last build command: `dotnet build pseudoCPU.sln` — PASS.
-- Last format command: `dotnet format pseudoCPU.sln --verify-no-changes` — PASS.
-- Last CLI smoke command: `dotnet run --project src/pseudoCPU.Cli -- run-asm --source examples/y-counter-loop.asm --start 0x0600 --max-steps 100 --trace` — PASS.
-- Latest QC result: PASS (#54).
+- Planned narrow test command: `dotnet test tests/pseudoCPU.Bootstrap.Tests/pseudoCPU.Bootstrap.Tests.csproj --filter "FullyQualifiedName~Adc|FullyQualifiedName~Sbc|FullyQualifiedName~Bit|FullyQualifiedName~Branch|FullyQualifiedName~Status"`
+- Planned full test command: `dotnet test tests/pseudoCPU.Bootstrap.Tests/pseudoCPU.Bootstrap.Tests.csproj`
+- Planned build command: `dotnet build pseudoCPU.sln`
+- Planned format command: `dotnet format pseudoCPU.sln --verify-no-changes`
+- Latest QC result: pending (#68 not started)
 
 ## QC Gate
-- #54 - completed; verdict PASS.
+- #68 - planned QC gate task for epic #56.
 
 ## Follow-up Issues
-- #45 - completed: sync `docs/pseudoCPU-processor-guide.md` with the implemented stack slice, `SP` model and current supported opcodes.
-- Epic QC verdict recorded in comment: https://github.com/prachwal/pseudoCPU/issues/36#issuecomment-4387471999
-- #54 - completed: epic QC gate for `Y` register slice.
-- #55 - completed: fix `LDX` immediate zero-flag regression discovered during QC.
+- TBD after `epic-qc` for #56.
+- `issue-sync` will be required before closing #56.

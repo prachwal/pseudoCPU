@@ -62,14 +62,14 @@ Procesor posiada:
 - rejestr indeksowy `X`,
 - rejestr indeksowy `Y`,
 - licznik programu `PC`,
-- flagi `Zero`, `Negative` i `Carry`,
+- pełny status register `P` z układem `N V - B D I Z C`,
+- bootstrapowo nadal widoczne flagi `Zero`, `Negative` i `Carry` jako najczęściej używane skróty,
 - bootstrapowy model stosu oparty na stronie `$0100-$01FF` i 8-bitowym `SP`,
 - stan zatrzymania `IsHalted`,
 - publiczne API do ładowania programu, wykonywania pojedynczego kroku, wykonywania limitowanej liczby kroków i wykonywania do zatrzymania.
 
 Aktualny model nie posiada jeszcze:
 
-- pełnego rejestru statusu jako bajtu,
 - przerwań,
 - wektorów resetu/NMI/IRQ,
 - licznika cykli,
@@ -196,24 +196,28 @@ Zero = X == operand
 Negative = bit7(X - operand)
 ```
 
-Na tym etapie `Carry` wspiera już kontrakty `CMP #imm` i `CPX #imm`, ale nie rozszerza jeszcze modelu o `ADC`, `SBC`, rotacje ani przesunięcia bitowe. Te instrukcje wymagają osobnych tasków.
+Na tym etapie `Carry` wspiera kontrakty porównania oraz phase 7 arithmetic/branch slice, w tym `ADC #imm`, `SBC #imm` i branchy zależne od flag.
 
-### 5.4. Flagi poza aktualnym zakresem
+### 5.4. Status register `P`
 
-Aktualnie poza zakresem są:
+Status register jest jawny i mapowany jako pojedynczy bajt:
 
-- `Overflow`,
-- `Interrupt Disable`,
-- `Decimal`,
-- `Break`,
-- pełne mapowanie status register do jednego bajtu,
-- rozszerzenie bootstrapowego snapshotu statusu poza `Carry`, `Zero` i `Negative`.
+```text
+bit 7 = Negative
+bit 6 = Overflow
+bit 5 = reserved
+bit 4 = Break
+bit 3 = Decimal
+bit 2 = Interrupt Disable
+bit 1 = Zero
+bit 0 = Carry
+```
 
-Nie należy dodawać tych flag przy okazji zwykłych tasków opcode, jeżeli nie są wymienione w issue.
+Phase 7 utrwala ten kontrakt dla `ADC #imm`, `SBC #imm`, `BIT`, flag-control opcodes oraz branchy.
 
 ### 5.5. Bootstrapowy bajt statusu dla `PHP` / `PLP`
 
-Do czasu osobnego epica na pełny status register 6502 bootstrapowy snapshot statusu obejmuje tylko aktualnie wspierane flagi:
+`PHP` / `PLP` nadal zachowują bootstrapowy snapshot kompatybilny z wcześniejszym slice:
 
 ```text
 bit 0 = Carry
@@ -222,14 +226,14 @@ bit 7 = Negative
 bit 2-6 = reserved / ignored
 ```
 
-Kontrakt dla przyszłej implementacji:
+Kontrakt dla bootstrapowego snapshotu:
 
 - `PHP` zapisuje na stack jedynie ten bootstrapowy snapshot.
 - `PHP` ustawia bity `2-6` na `0`.
 - `PLP` odtwarza tylko `Carry`, `Zero` i `Negative` z tego snapshotu.
 - `PLP` ignoruje bity `2-6`; nie są one traktowane jako pełna semantyka status register 6502.
 
-Ten kontrakt nie wprowadza jeszcze `Overflow`, `Interrupt Disable`, `Decimal` ani `Break` jako aktywnych flag procesora.
+Ten kontrakt pozostaje oddzielony od jawnego `P` używanego przez phase 7 slice.
 
 ---
 
@@ -353,7 +357,32 @@ Dla bezpieczeństwa każdy dłuższy przebieg powinien mieć limit kroków. Prog
 | `CPY #imm` | `0xC0` | Immediate | Implemented |
 | `STY abs` | `0x8C` | Absolute | Implemented |
 
-### 8.4. Planowany phase 3 slice
+### 8.4. Zrealizowany phase 7 status/ALU/branch slice
+
+| Instrukcja | Opcode | Tryb | Status |
+|---|---:|---|---|
+| `ADC #imm` | `0x69` | Immediate | Implemented |
+| `SBC #imm` | `0xE9` | Immediate | Implemented |
+| `BIT zp` | `0x24` | Zero Page | Implemented, zero-page only |
+| `ASL A` | `0x0A` | Accumulator | Implemented |
+| `LSR A` | `0x4A` | Accumulator | Implemented |
+| `ROL A` | `0x2A` | Accumulator | Implemented |
+| `ROR A` | `0x6A` | Accumulator | Implemented |
+| `CLC` | `0x18` | Implied | Implemented |
+| `SEC` | `0x38` | Implied | Implemented |
+| `CLI` | `0x58` | Implied | Implemented |
+| `SEI` | `0x78` | Implied | Implemented |
+| `CLD` | `0xD8` | Implied | Implemented |
+| `SED` | `0xF8` | Implied | Implemented |
+| `CLV` | `0xB8` | Implied | Implemented |
+| `BCC` | `0x90` | Relative | Implemented |
+| `BCS` | `0xB0` | Relative | Implemented |
+| `BMI` | `0x30` | Relative | Implemented |
+| `BPL` | `0x10` | Relative | Implemented |
+| `BVC` | `0x50` | Relative | Implemented |
+| `BVS` | `0x70` | Relative | Implemented |
+
+### 8.5. Planowany phase 3 slice
 
 | Instrukcja | Opcode | Tryb | Status |
 |---|---:|---|---|
@@ -362,16 +391,12 @@ Dla bezpieczeństwa każdy dłuższy przebieg powinien mieć limit kroków. Prog
 | `CPX #imm` | `0xE0` | Immediate | Planned |
 | `STX abs` | `0x8E` | Absolute | Planned |
 
-### 8.4. Instrukcje poza zakresem
+### 8.6. Instrukcje poza zakresem
 
 Poza aktualnym zakresem są m.in.:
 
-- `ADC`, `SBC`,
 - `AND`, `ORA`, `EOR`,
-- `ASL`, `LSR`, `ROL`, `ROR`,
 - `RTI`,
-- `BIT`,
-- `CLC`, `SEC`, `CLI`, `SEI`, `CLV`, `CLD`, `SED`,
 - pełne warianty adresowania dla istniejących instrukcji.
 
 ---
@@ -960,7 +985,7 @@ Przykładowy format:
 #0001 PC=0x0600 OPC=0xA9 LDA #$01 A=0x01 X=0x00 Z=false N=false
 ```
 
-Po dodaniu `Carry` trace powinien zawierać także `C=true|false` albo równoważny zapis.
+Po dodaniu pełnego status register trace powinien zawierać także `P=` albo równoważny zapis wszystkich flag `N V - B D I Z C`.
 
 ---
 
@@ -1134,7 +1159,25 @@ Zakres:
 - testy rejestru, flag `Zero` / `Negative` / `Carry`, assembler i trace/CLI visibility,
 - aktualizacja dokumentacji i mapy slice.
 
-### 14.7. Potencjalna kolejna faza: MMIO
+### 14.7. Zrealizowana faza: status/ALU/branch core completion
+
+Cel: domknąć pełny status register i flag-driven core slice.
+
+Zakres:
+
+- `P` z układem `N V - B D I Z C`,
+- `ADC #imm`,
+- `SBC #imm`,
+- `BIT zp`,
+- `ASL A`,
+- `LSR A`,
+- `ROL A`,
+- `ROR A`,
+- `CLC`, `SEC`, `CLI`, `SEI`, `CLD`, `SED`, `CLV`,
+- `BCC`, `BCS`, `BMI`, `BPL`, `BVC`, `BVS`,
+- aktualizacja assemblera, trace/CLI visibility, dokumentacji i mapy slice.
+
+### 14.8. Potencjalna kolejna faza: MMIO
 
 Cel: umożliwić komunikację z urządzeniami.
 
@@ -1155,7 +1198,6 @@ Aktualne ograniczenia są świadome:
 - brak pełnej zgodności 6502,
 - brak cycle accuracy,
 - brak przerwań,
-- brak pełnego status register,
 - brak etykiet w assemblerze,
 - brak `.org`,
 - brak zaawansowanych trybów adresowania,
