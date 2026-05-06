@@ -3,9 +3,6 @@ namespace pseudoCPU.Core;
 public sealed class BootstrapCpu
 {
     private const ushort StackPageBaseAddress = 0x0100;
-    private const byte CarryStatusBit = 1 << 0;
-    private const byte ZeroStatusBit = 1 << 1;
-    private const byte NegativeStatusBit = 1 << 7;
     private readonly byte[] _memory = new byte[ushort.MaxValue + 1];
 
     public byte A { get; private set; }
@@ -18,11 +15,13 @@ public sealed class BootstrapCpu
 
     public byte SP { get; private set; }
 
-    public bool Zero { get; private set; }
+    public BootstrapStatusRegister Status { get; private set; } = new();
 
-    public bool Negative { get; private set; }
+    public bool Zero => Status.Zero;
 
-    public bool Carry { get; private set; }
+    public bool Negative => Status.Negative;
+
+    public bool Carry => Status.Carry;
 
     public bool IsHalted { get; private set; }
 
@@ -41,9 +40,7 @@ public sealed class BootstrapCpu
         Y = 0;
         PC = startAddress;
         SP = 0xFF;
-        Zero = false;
-        Negative = false;
-        Carry = false;
+        Status = new BootstrapStatusRegister();
         IsHalted = false;
     }
 
@@ -239,32 +236,32 @@ public sealed class BootstrapCpu
 
     private void UpdateZeroAndNegative(byte value)
     {
-        Zero = value == 0;
-        Negative = (value & 0x80) != 0;
+        Status.Zero = value == 0;
+        Status.Negative = (value & 0x80) != 0;
     }
 
     private void CompareWithAccumulator(byte value)
     {
         var result = unchecked((byte)(A - value));
-        Zero = A == value;
-        Negative = (result & 0x80) != 0;
-        Carry = A >= value;
+        Status.Zero = A == value;
+        Status.Negative = (result & 0x80) != 0;
+        Status.Carry = A >= value;
     }
 
     private void CompareWithX(byte value)
     {
         var result = unchecked((byte)(X - value));
-        Zero = X == value;
-        Negative = (result & 0x80) != 0;
-        Carry = X >= value;
+        Status.Zero = X == value;
+        Status.Negative = (result & 0x80) != 0;
+        Status.Carry = X >= value;
     }
 
     private void CompareWithY(byte value)
     {
         var result = unchecked((byte)(Y - value));
-        Zero = Y == value;
-        Negative = (result & 0x80) != 0;
-        Carry = Y >= value;
+        Status.Zero = Y == value;
+        Status.Negative = (result & 0x80) != 0;
+        Status.Carry = Y >= value;
     }
 
     private void BranchRelative(bool condition, byte offsetByte)
@@ -280,31 +277,14 @@ public sealed class BootstrapCpu
 
     private byte CreateStatusSnapshot()
     {
-        byte status = 0;
-
-        if (Carry)
-        {
-            status |= CarryStatusBit;
-        }
-
-        if (Zero)
-        {
-            status |= ZeroStatusBit;
-        }
-
-        if (Negative)
-        {
-            status |= NegativeStatusBit;
-        }
-
-        return status;
+        return (byte)(Status.ToByte() & 0x83);
     }
 
     private void RestoreStatusSnapshot(byte status)
     {
-        Carry = (status & CarryStatusBit) != 0;
-        Zero = (status & ZeroStatusBit) != 0;
-        Negative = (status & NegativeStatusBit) != 0;
+        Status.Carry = (status & 0x01) != 0;
+        Status.Zero = (status & 0x02) != 0;
+        Status.Negative = (status & 0x80) != 0;
     }
 
     private static ushort GetStackAddress(byte stackPointer) => (ushort)(StackPageBaseAddress | stackPointer);

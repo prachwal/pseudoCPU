@@ -20,6 +20,10 @@ public class BootstrapCpuTests
         Assert.False(cpu.Zero);
         Assert.False(cpu.Negative);
         Assert.False(cpu.Carry);
+        Assert.False(cpu.Status.Overflow);
+        Assert.False(cpu.Status.Break);
+        Assert.False(cpu.Status.Decimal);
+        Assert.False(cpu.Status.InterruptDisable);
         Assert.False(cpu.IsHalted);
     }
 
@@ -75,6 +79,34 @@ public class BootstrapCpuTests
         Assert.True(cpu.Zero);
         Assert.False(cpu.Negative);
         Assert.False(cpu.IsHalted);
+    }
+
+    [Trait("Category", "InstructionSlice")]
+    [Fact]
+    public void StatusRegisterMapsFlagsToCanonicalByteLayout()
+    {
+        var status = new BootstrapStatusRegister
+        {
+            Carry = true,
+            Zero = true,
+            InterruptDisable = true,
+            Decimal = true,
+            Break = true,
+            Overflow = true,
+            Negative = true,
+        };
+
+        Assert.Equal(0xDF, status.ToByte());
+
+        var restored = BootstrapStatusRegister.FromByte(0xDF);
+
+        Assert.True(restored.Carry);
+        Assert.True(restored.Zero);
+        Assert.True(restored.InterruptDisable);
+        Assert.True(restored.Decimal);
+        Assert.True(restored.Break);
+        Assert.True(restored.Overflow);
+        Assert.True(restored.Negative);
     }
 
     [Trait("Category", "InstructionSlice")]
