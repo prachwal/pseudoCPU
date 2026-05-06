@@ -215,6 +215,49 @@ public class CliTests
 
     [Trait("Category", "Cli")]
     [Fact]
+    public void RunAsmEmitsTraceForStatusAndArithmeticSliceInstructions()
+    {
+        var sourcePath = Path.GetTempFileName();
+        var originalOut = Console.Out;
+        var originalError = Console.Error;
+
+        try
+        {
+            File.WriteAllText(sourcePath, "LDA #$40\nSTA $0010\nCLC\nADC #$01\nSEC\nSBC #$01\nBIT $10\nASL A\nLSR A\nROL A\nROR A\nBRK\n");
+
+            using var standardOut = new StringWriter();
+            using var standardError = new StringWriter();
+            Console.SetOut(standardOut);
+            Console.SetError(standardError);
+
+            var exitCode = CliApplication.Run(["run-asm", "--source", sourcePath, "--start", "0x0400", "--max-steps", "20", "--trace"]);
+
+            Assert.Equal(0, exitCode);
+            Assert.Empty(standardError.ToString());
+            var output = standardOut.ToString();
+            Assert.Contains("CLC", output);
+            Assert.Contains("ADC #$01", output);
+            Assert.Contains("SEC", output);
+            Assert.Contains("SBC #$01", output);
+            Assert.Contains("BIT $10", output);
+            Assert.Contains("ASL A", output);
+            Assert.Contains("LSR A", output);
+            Assert.Contains("ROL A", output);
+            Assert.Contains("ROR A", output);
+            Assert.Contains("P=0x", output);
+            Assert.Contains("V=", output);
+            Assert.Contains("Status: Halted", output);
+        }
+        finally
+        {
+            Console.SetOut(originalOut);
+            Console.SetError(originalError);
+            File.Delete(sourcePath);
+        }
+    }
+
+    [Trait("Category", "Cli")]
+    [Fact]
     public void RunAsmEmitsTraceForJsrAndRtsInstructions()
     {
         var sourcePath = Path.GetTempFileName();

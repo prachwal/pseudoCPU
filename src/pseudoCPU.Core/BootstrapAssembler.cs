@@ -27,6 +27,34 @@ public static class BootstrapAssembler
                     RequireNoOperand(mnemonic, operand);
                     bytes.Add((byte)BootstrapOpcode.Php);
                     break;
+                case "CLC":
+                    RequireNoOperand(mnemonic, operand);
+                    bytes.Add((byte)BootstrapOpcode.Clc);
+                    break;
+                case "SEC":
+                    RequireNoOperand(mnemonic, operand);
+                    bytes.Add((byte)BootstrapOpcode.Sec);
+                    break;
+                case "CLI":
+                    RequireNoOperand(mnemonic, operand);
+                    bytes.Add((byte)BootstrapOpcode.Cli);
+                    break;
+                case "SEI":
+                    RequireNoOperand(mnemonic, operand);
+                    bytes.Add((byte)BootstrapOpcode.Sei);
+                    break;
+                case "CLD":
+                    RequireNoOperand(mnemonic, operand);
+                    bytes.Add((byte)BootstrapOpcode.Cld);
+                    break;
+                case "SED":
+                    RequireNoOperand(mnemonic, operand);
+                    bytes.Add((byte)BootstrapOpcode.Sed);
+                    break;
+                case "CLV":
+                    RequireNoOperand(mnemonic, operand);
+                    bytes.Add((byte)BootstrapOpcode.Clv);
+                    break;
                 case "PLP":
                     RequireNoOperand(mnemonic, operand);
                     bytes.Add((byte)BootstrapOpcode.Plp);
@@ -38,6 +66,22 @@ public static class BootstrapAssembler
                 case "PLA":
                     RequireNoOperand(mnemonic, operand);
                     bytes.Add((byte)BootstrapOpcode.Pla);
+                    break;
+                case "ASL":
+                    RequireNoOperandOrAccumulator(mnemonic, operand);
+                    bytes.Add((byte)BootstrapOpcode.AslAccumulator);
+                    break;
+                case "LSR":
+                    RequireNoOperandOrAccumulator(mnemonic, operand);
+                    bytes.Add((byte)BootstrapOpcode.LsrAccumulator);
+                    break;
+                case "ROL":
+                    RequireNoOperandOrAccumulator(mnemonic, operand);
+                    bytes.Add((byte)BootstrapOpcode.RolAccumulator);
+                    break;
+                case "ROR":
+                    RequireNoOperandOrAccumulator(mnemonic, operand);
+                    bytes.Add((byte)BootstrapOpcode.RorAccumulator);
                     break;
                 case "JSR":
                     RequireOperand(mnemonic, operand);
@@ -103,6 +147,16 @@ public static class BootstrapAssembler
                     bytes.Add((byte)BootstrapOpcode.CmpImmediate);
                     bytes.Add(ParseByteLiteral(operand[1..], mnemonic));
                     break;
+                case "ADC":
+                    RequireOperand(mnemonic, operand, '#');
+                    bytes.Add((byte)BootstrapOpcode.AdcImmediate);
+                    bytes.Add(ParseByteLiteral(operand[1..], mnemonic));
+                    break;
+                case "SBC":
+                    RequireOperand(mnemonic, operand, '#');
+                    bytes.Add((byte)BootstrapOpcode.SbcImmediate);
+                    bytes.Add(ParseByteLiteral(operand[1..], mnemonic));
+                    break;
                 case "CPY":
                     RequireOperand(mnemonic, operand, '#');
                     bytes.Add((byte)BootstrapOpcode.CpyImmediate);
@@ -127,6 +181,41 @@ public static class BootstrapAssembler
                     RequireOperand(mnemonic, operand);
                     bytes.Add((byte)BootstrapOpcode.BneRelative);
                     bytes.Add(unchecked((byte)ParseRelativeOffset(operand, mnemonic)));
+                    break;
+                case "BPL":
+                    RequireOperand(mnemonic, operand);
+                    bytes.Add((byte)BootstrapOpcode.BplRelative);
+                    bytes.Add(unchecked((byte)ParseRelativeOffset(operand, mnemonic)));
+                    break;
+                case "BMI":
+                    RequireOperand(mnemonic, operand);
+                    bytes.Add((byte)BootstrapOpcode.BmiRelative);
+                    bytes.Add(unchecked((byte)ParseRelativeOffset(operand, mnemonic)));
+                    break;
+                case "BVC":
+                    RequireOperand(mnemonic, operand);
+                    bytes.Add((byte)BootstrapOpcode.BvcRelative);
+                    bytes.Add(unchecked((byte)ParseRelativeOffset(operand, mnemonic)));
+                    break;
+                case "BVS":
+                    RequireOperand(mnemonic, operand);
+                    bytes.Add((byte)BootstrapOpcode.BvsRelative);
+                    bytes.Add(unchecked((byte)ParseRelativeOffset(operand, mnemonic)));
+                    break;
+                case "BCC":
+                    RequireOperand(mnemonic, operand);
+                    bytes.Add((byte)BootstrapOpcode.BccRelative);
+                    bytes.Add(unchecked((byte)ParseRelativeOffset(operand, mnemonic)));
+                    break;
+                case "BCS":
+                    RequireOperand(mnemonic, operand);
+                    bytes.Add((byte)BootstrapOpcode.BcsRelative);
+                    bytes.Add(unchecked((byte)ParseRelativeOffset(operand, mnemonic)));
+                    break;
+                case "BIT":
+                    RequireOperand(mnemonic, operand);
+                    bytes.Add((byte)BootstrapOpcode.BitZeroPage);
+                    bytes.Add(ParseByteLiteral(operand, mnemonic));
                     break;
                 case "BRK":
                     RequireNoOperand(mnemonic, operand);
@@ -183,6 +272,16 @@ public static class BootstrapAssembler
         {
             throw new FormatException($"Instruction '{mnemonic}' does not take an operand.");
         }
+    }
+
+    private static void RequireNoOperandOrAccumulator(string mnemonic, string operand)
+    {
+        if (operand.Length == 0 || string.Equals(operand, "A", StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        throw new FormatException($"Instruction '{mnemonic}' does not take an operand.");
     }
 
     private static void RequireOperand(string mnemonic, string operand, char requiredPrefix = '\0')

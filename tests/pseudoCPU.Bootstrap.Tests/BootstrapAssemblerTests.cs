@@ -151,6 +151,39 @@ public class BootstrapAssemblerTests
 
     [Trait("Category", "Assembler")]
     [Fact]
+    public void AssemblesStatusAndArithmeticSliceToExpectedBytes()
+    {
+        const string source = """
+            CLC
+            SEC
+            CLI
+            SEI
+            CLD
+            SED
+            CLV
+            ADC #$01
+            SBC #$02
+            BIT $10
+            ASL A
+            LSR A
+            ROL A
+            ROR A
+            BPL $02
+            BMI $FE
+            BVC $02
+            BVS $FE
+            BCC $02
+            BCS $FE
+            BRK
+            """;
+
+        var bytes = BootstrapAssembler.Assemble(source);
+
+        Assert.Equal([0x18, 0x38, 0x58, 0x78, 0xD8, 0xF8, 0xB8, 0x69, 0x01, 0xE9, 0x02, 0x24, 0x10, 0x0A, 0x4A, 0x2A, 0x6A, 0x10, 0x02, 0x30, 0xFE, 0x50, 0x02, 0x70, 0xFE, 0x90, 0x02, 0xB0, 0xFE, 0x00], bytes);
+    }
+
+    [Trait("Category", "Assembler")]
+    [Fact]
     public void AssemblesXCounterSliceProgramToExpectedBytes()
     {
         const string source = """
