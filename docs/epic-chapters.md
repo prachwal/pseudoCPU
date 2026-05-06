@@ -8,6 +8,8 @@ Jeden chapter = jeden epic.
 
 Kazdy nowy epic musi miec jeden dedykowany rozdzial w tym pliku albo w osobnym pliku chaptera podlinkowanym z tego indeksu. Rozdzial nie jest zamiennikiem GitHub issue. GitHub issue pozostaje zrodlem prawdy dla planu, taskow, postepu i wynikow, a chapter jest stabilnym opisem produktowo-technicznym epica.
 
+Tylko issue z labelem `epic` moze byc opisane jako `Epic <nr>` w tym dokumencie. Taski, QC taski i follow-upy bez labela `epic` moga byc linkowane jako references, ale nie sa chapterami epica.
+
 ## Status Values
 
 | Status | Meaning |
@@ -34,8 +36,15 @@ Ta tabela jest glowna lista kontrolna realizacji chapterow. Planner musi aktuali
 
 | Done | Chapter | Epic Issue | Status | QC Verdict | Follow-up | Notes |
 |---|---|---:|---|---|---|---|
-| [ ] | Phase 3 quality control | #25 | active | TBD | TBD | Cleanup po fazie 3: Carry, trace/assembler drift, CLI summary i regresja testow. |
 | [x] | Phase 4: 6502 stack page foundation and JSR/RTS subroutine flow | #26 | done | PASS | none | Stack page `$0100-$01FF`, `SP`, push/pop semantics, `JSR abs`, `RTS`, assembler/CLI/docs and mandatory QC gate #35. |
+
+## QC References
+
+Ta sekcja przechowuje linki do taskow kontrolnych, review i follow-upow, ktore nie sa samodzielnymi epic chapterami.
+
+| Reference | Issue | Related Epic | Status | Notes |
+|---|---:|---:|---|---|
+| QC Reference 25: Phase 3 quality control | #25 | #18 | closed | Review po fazie 3: Carry semantics, trace/assembler drift, CLI summary i regresja testow. |
 
 ## Chapter Template
 
@@ -107,86 +116,27 @@ Skopiuj ten szablon dla kazdego nowego epica.
 
 | Chapter | Epic Issue | Status | Scope |
 |---|---:|---|---|
-| Phase 3 quality control | #25 | active | Carry semantics, trace/assembler drift, CLI summary and test regression cleanup |
 | Phase 4: 6502 stack page foundation and JSR/RTS subroutine flow | #26 | done | Stack page `$0100-$01FF`, 8-bit `SP`, push/pop ordering, `JSR abs`, `RTS`, assembler/CLI/docs |
 
-## Epic 25: Phase 3 quality control
+## QC Reference 25: Phase 3 quality control
 
-### Epic Issue
-- Epic: #25
-- Status: active
-- Owner agent: `issue-planner`
-- Execution agent: `issue-executor`
-- Quality gate agent: `epic-qc`
+### Reference Issue
+- Issue: #25
+- Related epic: #18
+- Type: QC reference / follow-up quality review
+- Status: closed
 
-### Completion Checklist Entry
-- Done: [ ]
-- Chapter: Phase 3 quality control
-- Epic issue: #25
-- Status: active
-- QC verdict: TBD
-- Follow-up: TBD
+### Purpose
+Issue #25 nie jest epic chapterem. To referencja QC po epiku #18, utworzona w celu utrwalenia wykrytych niespojnosci po fazie 3 i zaplanowania stabilizacji przed kolejnym zakresem CPU.
 
-### Outcome
-Repo wraca do zielonego i spojnego stanu po fazie 3: testy odzwierciedlaja aktualna semantyke `Carry`, trace CLI i assembler nie rozjezdzaja sie w zapisie branch offsetow, a finalny output CLI pokazuje komplet aktualnie wspieranych flag.
+### Findings Summary
+- Regresja testu po zmianie semantyki `Carry` dla `CMP #imm`.
+- Drift miedzy trace CLI i assemblerem dla branch offsetow.
+- Brak `Carry` w koncowym summary CLI mimo ekspozycji flagi w trace i CPU.
+- Ryzyko raportowania PASS przy niespojnym stanie suite.
 
-### Domain Scope
-- Area: aktualny bootstrapowy slice CPU, `Carry`, `CMP #imm`, `CPX #imm`, branch offsety, trace CLI i finalny summary CLI.
-- In scope:
-  - naprawa regresji testu po zmianie semantyki `CMP #imm`,
-  - sprawdzenie testow zależnych od `Carry`,
-  - ujednolicenie kontraktu branch offsetow miedzy trace CLI i assemblerem,
-  - dopisanie `Carry` do finalnego summary CLI,
-  - aktualizacja testow i dokumentacji kontraktu, jesli sie zmieni.
-- Out of scope:
-  - nowe opcode'y,
-  - etykiety assemblera,
-  - dyrektywy `.org`, `.byte`, `.word`,
-  - pelny status register 6502,
-  - cycle counting,
-  - przerwania,
-  - nowe komendy CLI poza zakresem korekty.
-
-### Chapter Narrative
-Ten chapter opisuje epic stabilizacyjny po fazie 3. Jego celem nie jest rozbudowa CPU o nowy zakres funkcjonalny, tylko zamkniecie niespojnosci wykrytych po implementacji: test po `CMP #imm` musi odpowiadac nowemu modelowi `Carry`, output trace nie powinien emitowac skladni nieakceptowanej przez assembler, a finalny summary CLI powinien pokazywac `Carry`, skoro flaga jest juz czescia publicznego zachowania aktualnego slice.
-
-### Task Issues
-- [ ] #25 - quality control task dla phase 3 cleanup.
-
-### Acceptance Criteria
-- [ ] Projekt testowy `tests/pseudoCPU.Bootstrap.Tests` przechodzi.
-- [ ] Test `BootstrapCpuTests.BneDoesNotBranchWhenZeroFlagIsSet` odzwierciedla nowa semantyke `CMP #imm`.
-- [ ] Nie ma testow oczekujacych starego zachowania `Carry` po `CMP #imm` albo `CPX #imm`.
-- [ ] Trace CLI i assembler maja spojny kontrakt branch offsetow.
-- [ ] Finalny output CLI pokazuje `Carry`.
-- [ ] Dokumentacja jest zaktualizowana, jesli kontrakt trace/outputu sie zmieni.
-
-### Verification Strategy
-- Narrow tests:
-  - `dotnet test tests/pseudoCPU.Bootstrap.Tests/pseudoCPU.Bootstrap.Tests.csproj --filter "FullyQualifiedName~BootstrapCpuTests.BneDoesNotBranchWhenZeroFlagIsSet"`
-- Full test project:
-  - `dotnet test tests/pseudoCPU.Bootstrap.Tests/pseudoCPU.Bootstrap.Tests.csproj`
-- Build:
-  - `dotnet build pseudoCPU.sln`
-- Format:
-  - `dotnet format pseudoCPU.sln --verify-no-changes`
-- CLI smoke:
-  - `dotnet run --project src/pseudoCPU.Cli -- run-asm --source examples/x-counter-loop.asm --start 0x0600 --max-steps 100 --trace`
-
-### Documentation Updates
-- [ ] `docs/cpu-slice-map.md`, jesli zmieni sie kontrakt trace, assemblera albo flag.
-- [ ] Ten chapter po finalnym QC.
-
-### QC Gate
-- QC issue/comment: TBD
-- Verdict: TBD
-- Follow-up issues:
-  - TBD
-
-### Final Notes
-- Final status: active
-- Remaining risks: testy i kontrakt CLI/assembler wymagaja potwierdzenia po implementacji.
-- Permanent decisions: chapter odpowiada epicowi i jest stabilnym opisem po zamknieciu pracy.
+### Resolution
+Zakres #25 zostal zamkniety przed epikiem #26. Nie nalezy traktowac #25 jako chaptera epica ani wpisywac go do `Chapter Completion Checklist`.
 
 ## Epic 26: Phase 4: 6502 stack page foundation and JSR/RTS subroutine flow
 
