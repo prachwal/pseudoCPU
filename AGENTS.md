@@ -17,12 +17,22 @@
 - Planner ma utrzymywac strukture chapter -> epic -> taski i zapisywac decyzje, kryteria akceptacji, zaleznosci oraz strategie weryfikacji bezposrednio w issue.
 - Executor ma dopisywac do issue komentarze startowe, postep, komendy weryfikacyjne, wynik koncowy i jawny sygnal zamkniecia taska.
 - Po implementacji epica uruchom subagenta `epic-qc` jako niezalezna bramke kontroli jakosci przed zamknieciem epica.
-- Petla zwrotna epica: planner -> executor -> `epic-qc` -> follow-up issue -> planner/executor, az `epic-qc` nie znajdzie blokujacych defektow.
+- Po komentarzu `Epic QC Gate` uruchom `issue-sync`, zeby zsynchronizowac glowne body epica z taskami, acceptance criteria, chapter docs, current-epic docs, QC gate i follow-up issues.
+- Epic closure is forbidden while the main epic issue body still has stale unchecked task or acceptance checkboxes that are already completed in child issues, QC comments or chapter docs.
+- Petla zwrotna epica: planner -> executor -> `epic-qc` -> `issue-sync` -> follow-up issue -> planner/executor, az `epic-qc` nie znajdzie blokujacych defektow i `issue-sync` potwierdzi spojny stan issue.
 - Jezeli `epic-qc` po weryfikacji silniejszym modelem wykryje brakujacy zakres, regresje, dlug techniczny lub ryzyko projektowe, utworz follow-up issue podobne do istniejacych taskow, np. #17 albo #25, i zalinkuj je z epica.
 - Taski implementacyjne powinny zawierac i respektowac sekcje Definition of Done oraz Scope Guard.
 - Po kazdym epiku nalezy dopisac lub zaktualizowac komentarz QC gate oraz utrzymywac go jako jawny punkt kontroli.
 - Po nowych opcode'ach aktualizuj `docs/cpu-slice-map.md`, zeby stan slice byl jawny i aktualny.
 - Dla decyzji architektonicznych dodawaj ADR-y w `docs/adr/` zamiast rozpraszac je po komentarzach.
+
+## Epic Body Sync Gate
+- Przed zamknieciem epica `issue-sync` musi zaktualizowac glowne body epica przez plik body i `gh issue edit --body-file`.
+- Glowne body epica musi miec taski oznaczone `[x]`, jesli child issues sa zamkniete albo jawnie superseded.
+- Glowne body epica musi miec acceptance criteria oznaczone `[x]`, jesli QC potwierdzil ich spelnienie.
+- Placeholdery sciezek, nazw plikow albo komend musza zostac zastapione realnymi wartosciami albo jawnie opisane jako not applicable.
+- Body epica musi zawierac link do komentarza `Epic QC Gate`, verdict QC, follow-up issues i `Final Notes`.
+- Zamkniecie epica bez synchronizacji body traktuj jako workflow defect wymagajacy korekty.
 
 ## Git Branch Workflow
 - Kazda faza pracy startuje z nowego brancha roboczego utworzonego przed rozpoczeciem zmian.
