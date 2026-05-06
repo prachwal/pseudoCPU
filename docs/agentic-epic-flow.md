@@ -40,6 +40,10 @@ Nie przechowuj biezacej fazy w `AGENTS.md`.
 
 `docs/epic-chapters.md` przechowuje trwale chaptery dla realnych epic issues. Nie tworz chaptera dla task issue, QC task issue ani follow-up issue bez labela `epic`.
 
+### Issue sync gate
+
+`issue-sync` synchronizuje glowne body epica z child taskami, komentarzem QC, chapter docs i `docs/current-epic.md`. To osobny gate przed zamknieciem epica.
+
 ## Planner Flow
 
 `issue-planner` wykonuje te kroki:
@@ -53,7 +57,8 @@ Nie przechowuj biezacej fazy w `AGENTS.md`.
 7. Linkuje taski w epic issue i chapterze.
 8. Aktualizuje `docs/current-epic.md` jako stan aktywnego epica.
 9. Dodaje obowiazkowy task QC gate na koncu epica.
-10. Przekazuje pierwszy wykonawczy task do `issue-executor`.
+10. Dodaje obowiazkowy krok `issue-sync` przed zamknieciem epica.
+11. Przekazuje pierwszy wykonawczy task do `issue-executor`.
 
 ## Executor Flow
 
@@ -81,6 +86,26 @@ Nie przechowuj biezacej fazy w `AGENTS.md`.
 6. Jesli sa defekty, tworzy follow-up issues przez plik body.
 7. Dodaje komentarz `Epic QC Gate` do epica.
 8. Aktualizuje chapter status.
+9. Nie zamyka epica, dopoki `issue-sync` nie potwierdzi synchronizacji glownego body epica.
+
+## Epic Body Sync Gate
+
+Przed zamknieciem epica musi zostac uruchomiony `issue-sync` albo rownowazny krok synchronizacji.
+
+Epic closure is forbidden while the main epic issue body still has stale unchecked task or acceptance checkboxes that are already completed in child issues, QC comments or chapter docs.
+
+`issue-sync` musi sprawdzic i zaktualizowac:
+
+- `Task Breakdown` w glownym body epica,
+- `Acceptance Criteria` w glownym body epica,
+- placeholdery sciezek i nazw plikow,
+- link do komentarza `Epic QC Gate`,
+- follow-up issues po `PASS_WITH_FOLLOW_UP` albo `BLOCKED`,
+- `Final Notes` w glownym body epica,
+- `docs/epic-chapters.md`,
+- `docs/current-epic.md`.
+
+Glowny epic body musi byc aktualizowany przez plik body i `gh issue edit --body-file <file>`.
 
 ## GitHub CLI Body Rule
 
@@ -130,6 +155,7 @@ Epic jest gotowy do realizacji, gdy:
 - taski sa linkowane z epica i chaptera,
 - `docs/current-epic.md` wskazuje aktywny epic,
 - jest wskazany task QC gate,
+- jest wskazany krok `issue-sync` przed zamknieciem,
 - acceptance criteria zawieraja testy i dokumentacje,
 - kontrakty domenowe sa precyzyjne,
 - placeholdery typu `examples/<file>.asm` maja task, ktory zamieni je na realne pliki przed QC.
@@ -143,5 +169,7 @@ Epic jest zakonczony, gdy:
 - dokumentacja domenowa i chapter sa zaktualizowane,
 - `epic-qc` dodal komentarz `Epic QC Gate`,
 - follow-up issues sa utworzone i zalinkowane, jesli QC wykryl braki,
+- glowne body epica jest zsynchronizowane: taski `[x]`, acceptance `[x]`, realne sciezki, link QC gate, follow-up issues i final notes,
+- `issue-sync` dodal komentarz synchronizacji albo final notes potwierdzajace synchronizacje body,
 - `Chapter Completion Checklist` ma poprawny status,
 - `docs/current-epic.md` jest zaktualizowane albo przygotowane pod kolejny epic.
