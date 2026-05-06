@@ -3,7 +3,9 @@ namespace pseudoCPU.Core;
 public sealed class BootstrapCpu
 {
     private const ushort StackPageBaseAddress = 0x0100;
-    private readonly byte[] _memory = new byte[ushort.MaxValue + 1];
+    private readonly BootstrapMemoryBus _memoryBus = new();
+
+    public BootstrapMemoryBus MemoryBus => _memoryBus;
 
     public byte A { get; private set; }
 
@@ -27,13 +29,7 @@ public sealed class BootstrapCpu
 
     public void LoadProgram(ReadOnlySpan<byte> program, ushort startAddress = 0x0000)
     {
-        if (program.Length > _memory.Length - startAddress)
-        {
-            throw new ArgumentOutOfRangeException(nameof(program), "Program does not fit in memory.");
-        }
-
-        Array.Clear(_memory);
-        program.CopyTo(_memory.AsSpan(startAddress));
+        MemoryBus.LoadProgram(program, startAddress);
 
         A = 0;
         X = 0;
@@ -196,7 +192,7 @@ public sealed class BootstrapCpu
                     var lowByte = FetchByte();
                     var highByte = FetchByte();
                     var address = (ushort)(lowByte | (highByte << 8));
-                    _memory[address] = A;
+                    MemoryBus.WriteByte(address, A);
                     break;
                 }
             case BootstrapOpcode.StxAbsolute:
@@ -204,7 +200,7 @@ public sealed class BootstrapCpu
                     var lowByte = FetchByte();
                     var highByte = FetchByte();
                     var address = (ushort)(lowByte | (highByte << 8));
-                    _memory[address] = X;
+                    MemoryBus.WriteByte(address, X);
                     break;
                 }
             case BootstrapOpcode.StyAbsolute:
@@ -212,7 +208,7 @@ public sealed class BootstrapCpu
                     var lowByte = FetchByte();
                     var highByte = FetchByte();
                     var address = (ushort)(lowByte | (highByte << 8));
-                    _memory[address] = Y;
+                    MemoryBus.WriteByte(address, Y);
                     break;
                 }
             case BootstrapOpcode.CmpImmediate:
@@ -269,23 +265,23 @@ public sealed class BootstrapCpu
         }
     }
 
-    public byte ReadByte(ushort address) => _memory[address];
+    public byte ReadByte(ushort address) => MemoryBus.ReadByte(address);
 
-    public void WriteByte(ushort address, byte value) => _memory[address] = value;
+    public void WriteByte(ushort address, byte value) => MemoryBus.WriteByte(address, value);
 
     public void PushByte(byte value)
     {
-        _memory[GetStackAddress(SP)] = value;
+        MemoryBus.WriteByte(GetStackAddress(SP), value);
         SP--;
     }
 
     public byte PopByte()
     {
         SP++;
-        return _memory[GetStackAddress(SP)];
+        return MemoryBus.ReadByte(GetStackAddress(SP));
     }
 
-    private byte FetchByte() => _memory[PC++];
+    private byte FetchByte() => MemoryBus.ReadByte(PC++);
 
     private ushort FetchWord()
     {
@@ -302,7 +298,7 @@ public sealed class BootstrapCpu
 
     private void BitZeroPage(byte zeroPageAddress)
     {
-        var value = ReadByte(zeroPageAddress);
+        var value = MemoryBus.ReadByte(MemoryBus.ResolveZeroPageAddress(zeroPageAddress));
 
         Status.Zero = (A & value) == 0;
         Status.Overflow = (value & 0x40) != 0;
