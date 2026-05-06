@@ -1,0 +1,32 @@
+name: dotnet-ci
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore
+        run: dotnet restore pseudoCPU.sln
+
+      - name: Verify formatting
+        run: dotnet format pseudoCPU.sln --verify-no-changes
+
+      - name: Build
+        run: dotnet build pseudoCPU.sln --no-restore
+
+      - name: Test bootstrap suite
+        run: dotnet test tests/pseudoCPU.Bootstrap.Tests/pseudoCPU.Bootstrap.Tests.csproj --no-build

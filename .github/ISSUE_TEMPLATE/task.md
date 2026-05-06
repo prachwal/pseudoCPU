@@ -10,6 +10,27 @@ labels: task
 ## Scope
 - 
 
+## Definition of Done
+- [ ] Kod jest sformatowany.
+- [ ] Dodano lub zaktualizowano testy.
+- [ ] Narrow test filter przechodzi.
+- [ ] `dotnet build pseudoCPU.sln` przechodzi.
+- [ ] `dotnet format pseudoCPU.sln --verify-no-changes` przechodzi.
+- [ ] `AGENTS.md` / docs zaktualizowane, jeśli zmienił się kontrakt.
+- [ ] Nie rozszerzono zakresu poza issue.
+- [ ] Wynik zapisany w komentarzu issue.
+
+## Scope Guard
+Do not implement unless explicitly requested:
+- labels in assembler,
+- `.org`, `.byte`, `.word`,
+- new addressing modes,
+- cycle counting,
+- interrupts,
+- stack/subroutines,
+- unrelated opcode groups,
+- new CLI commands outside this issue.
+
 ## Acceptance Criteria
 - [ ] 
 

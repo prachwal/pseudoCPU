@@ -12,6 +12,10 @@
 - Do planowania uzywaj `/issue-plan`; do realizacji taska `/issue-execute`; do zsynchronizowania stanu issue z repo `/issue-sync`.
 - Planner ma utrzymywac strukture epic -> taski i zapisywac decyzje, kryteria akceptacji, zaleznosci oraz strategie weryfikacji bezposrednio w issue.
 - Executor ma dopisywac do issue komentarze startowe, postep, komendy weryfikacyjne, wynik koncowy i jawny sygnal zamkniecia taska.
+- Taski implementacyjne powinny zawierac i respektowac sekcje Definition of Done oraz Scope Guard.
+- Po kazdym epiku nalezy dopisac lub zaktualizowac komentarz QC gate oraz utrzymywac go jako jawny punkt kontroli.
+- Po nowych opcode'ach aktualizuj `docs/cpu-slice-map.md`, zeby stan slice byl jawny i aktualny.
+- Dla decyzji architektonicznych dodawaj ADR-y w `docs/adr/` zamiast rozpraszać je po komentarzach.
 
 ## Git Branch Workflow
 - Kazda faza pracy startuje z nowego brancha roboczego utworzonego przed rozpoczeciem zmian.
