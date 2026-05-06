@@ -37,6 +37,7 @@ Ta tabela jest glowna lista kontrolna realizacji chapterow. Planner musi aktuali
 | Done | Chapter | Epic Issue | Status | QC Verdict | Follow-up | Notes |
 |---|---|---:|---|---|---|---|
 | [x] | Phase 4: 6502 stack page foundation and JSR/RTS subroutine flow | #26 | done | PASS | none | Stack page `$0100-$01FF`, `SP`, push/pop semantics, `JSR abs`, `RTS`, assembler/CLI/docs and mandatory QC gate #35. |
+| [ ] | Phase 5: 6502 stack opcode slice PHA/PLA/PHP/PLP | #36 | active | TBD | TBD | Stack opcodes `PHA`, `PLA`, `PHP`, `PLP`, bootstrap status byte contract, assembler/CLI/docs and mandatory QC gate #44. |
 
 ## QC References
 
@@ -117,6 +118,7 @@ Skopiuj ten szablon dla kazdego nowego epica.
 | Chapter | Epic Issue | Status | Scope |
 |---|---:|---|---|
 | Phase 4: 6502 stack page foundation and JSR/RTS subroutine flow | #26 | done | Stack page `$0100-$01FF`, 8-bit `SP`, push/pop ordering, `JSR abs`, `RTS`, assembler/CLI/docs |
+| Phase 5: 6502 stack opcode slice PHA/PLA/PHP/PLP | #36 | active | `PHA`, `PLA`, `PHP`, `PLP`, bootstrap status byte contract, assembler/CLI/docs |
 
 ## QC Reference 25: Phase 3 quality control
 
@@ -156,7 +158,7 @@ Zakres #25 zostal zamkniety przed epikiem #26. Nie nalezy traktowac #25 jako cha
 - Follow-up: none
 
 ### Outcome
-Repo zyskuje bootstrapowy model stacka zgodny semantycznie z 6502 dla aktualnego zakresu: stack page `$0100-$01FF`, 8-bitowy `SP`, poprawne push/pop oraz obsluge `JSR abs` i `RTS`. Po domknieciu chaptera kolejne epiki moga dodawac instrukcje stackowe i przerwania bez zgadywania adresowania, inicjalizacji `SP` i kontraktu powrotu z podprogramu.
+Repo zyskuje bootstrapowy model stacka zgodny semantycznie z 6502 dla aktualnego zakresu: stack page `$0100-$01FF`, 8-bitowy `SP`, poprawne push/pop oraz obsluge `JSR abs` i `RTS`.
 
 ### Domain Scope
 - Area: stack page `$0100-$01FF`, rejestr `SP`, helpery push/pop, `JSR abs`, `RTS`, assembler, CLI trace, `docs/cpu-slice-map.md` i `docs/current-epic.md`.
@@ -169,7 +171,7 @@ Repo zyskuje bootstrapowy model stacka zgodny semantycznie z 6502 dla aktualnego
   - dekoder i wykonanie `RTS`,
   - testy stack semantics, wrap-around i subroutine flow,
   - wsparcie assemblera dla `JSR` / `RTS`,
-  - aktualizacja trace/CLI, jesli pokazuje mnemoniki instrukcji,
+  - aktualizacja trace/CLI,
   - aktualizacja mapy slice CPU i chaptera.
 - Out of scope:
   - IRQ/NMI/RESET vectors,
@@ -180,9 +182,6 @@ Repo zyskuje bootstrapowy model stacka zgodny semantycznie z 6502 dla aktualnego
   - etykiety assemblera,
   - `.org`, `.byte`, `.word`,
   - nowe komendy CLI poza minimalnym smoke/test flow.
-
-### Chapter Narrative
-Ten chapter wprowadza pierwszy normalny model stacka 6502 do bootstrapowego pseudoCPU. Zamiast traktowac subroutine flow jako specjalny przypadek skoku, epic ustala wspolny kontrakt stack page, inicjalizacji `SP` i kolejnosci push/pop, a potem opiera na nim `JSR abs` oraz `RTS`. Rozdzial celowo nie dodaje jeszcze innych instrukcji stackowych ani przerwan; jego wartoscia jest stabilny fundament, na ktorym kolejne epiki beda mogly bez driftu budowac `PHA`/`PLA`, wejscie w IRQ/NMI i dalsza zgodnosc 6502.
 
 ### Task Issues
 - [x] #27 - normalny model stacka 6502 w Core.
@@ -195,36 +194,6 @@ Ten chapter wprowadza pierwszy normalny model stacka 6502 do bootstrapowego pseu
 - [x] #34 - aktualizacja `docs/cpu-slice-map.md`, chaptera i snapshotu biezacego epica.
 - [x] #35 - QC gate przez `epic-qc`.
 
-### Acceptance Criteria
-- [x] `BootstrapCpu` utrzymuje `SP` jako 8-bitowy rejestr i nie wychodzi ze stack page `$0100-$01FF`.
-- [x] `LoadProgram` inicjalizuje `SP` na `$FF` i kontrakt jest zapisany w issue/chapterze.
-- [x] Push zapisuje pod `$0100 + SP`, a potem dekrementuje `SP`; pop najpierw inkrementuje `SP`, a potem czyta z `$0100 + SP`.
-- [x] `JSR abs` zapisuje poprawny adres powrotu i ustawia `PC` na cel wywolania.
-- [x] `RTS` odtwarza adres powrotu ze stacka i wznawia wykonanie na instrukcji po `JSR`.
-- [x] Istnieja testy na wrap-around stacka i na co najmniej jeden nested/sequential subroutine flow.
-- [x] Assembler rozumie `JSR $addr` i `RTS`, a co najmniej jeden test ASM end-to-end pokrywa podprogram.
-- [x] CLI trace, jesli pokazuje instrukcje, umie wypisac `JSR` i `RTS` bez driftu wobec assemblera.
-- [x] `docs/cpu-slice-map.md` odzwierciedla nowy slice po implementacji.
-- [x] Epic przechodzi `epic-qc`, a ewentualne follow-up issues sa jawnie zalinkowane.
-
-### Verification Strategy
-- Narrow tests:
-  - `dotnet test tests/pseudoCPU.Bootstrap.Tests/pseudoCPU.Bootstrap.Tests.csproj --filter "FullyQualifiedName~Stack|FullyQualifiedName~Jsr|FullyQualifiedName~Rts"`
-- Full test project:
-  - `dotnet test tests/pseudoCPU.Bootstrap.Tests/pseudoCPU.Bootstrap.Tests.csproj`
-- Build:
-  - `dotnet build pseudoCPU.sln`
-- Format:
-  - `dotnet format pseudoCPU.sln --verify-no-changes`
-- CLI smoke:
-  - `dotnet run --project src/pseudoCPU.Cli -- run-asm --source examples/jsr-rts-subroutine.asm --start 0x0600 --max-steps 100 --trace`
-
-### Documentation Updates
-- [x] `docs/cpu-slice-map.md` po dodaniu `JSR abs`, `RTS` i stack foundation.
-- [x] Ten chapter po przejsciu taskow i po QC gate.
-- [x] `docs/current-epic.md` dla aktywnego stanu i snapshotu weryfikacji.
-- [ ] ADR w `docs/adr/` tylko jesli implementacja wymusi trwala decyzje wykraczajaca poza chapter.
-
 ### QC Gate
 - QC issue/comment: https://github.com/prachwal/pseudoCPU/issues/26#issuecomment-4386834276
 - Verdict: PASS
@@ -235,3 +204,104 @@ Ten chapter wprowadza pierwszy normalny model stacka 6502 do bootstrapowego pseu
 - Final status: done
 - Remaining risks: none blocking after QC; future epics still need separate work for reset/interrupt flow and additional stack opcodes.
 - Permanent decisions: bootstrapowy kontrakt startu `SP` to `$FF` do czasu osobnego epica reset/interrupt; stack semantics maja pozostac wspolnym fundamentem dla przyszlych instrukcji stackowych.
+
+## Epic 36: Phase 5: 6502 stack opcode slice PHA/PLA/PHP/PLP
+
+### Epic Issue
+- Epic: #36
+- Status: active
+- Owner agent: `issue-planner`
+- Execution agent: `issue-executor`
+- Quality gate agent: `epic-qc`
+
+### Completion Checklist Entry
+- Done: [ ]
+- Chapter: Phase 5: 6502 stack opcode slice PHA/PLA/PHP/PLP
+- Epic issue: #36
+- Status: active
+- QC verdict: TBD
+- Follow-up: TBD
+
+### Outcome
+Repo dodaje drugi stackowy slice 6502 na fundamencie #26: `PHA`, `PLA`, `PHP`, `PLP`, ich testy CPU, assembler, trace/CLI i dokumentacje. Najwazniejszym warunkiem gotowosci jest jawny bootstrapowy kontrakt status byte dla `PHP` / `PLP`, zdefiniowany przed implementacja.
+
+### Domain Scope
+- Area: stack opcodes implied, status snapshot, assembler, CLI trace, `docs/cpu-slice-map.md`, `docs/current-epic.md`.
+- In scope:
+  - `PHA` (`0x48`) implied,
+  - `PLA` (`0x68`) implied,
+  - `PHP` (`0x08`) implied,
+  - `PLP` (`0x28`) implied,
+  - status byte contract dla aktualnie wspieranych flag `Carry`, `Zero`, `Negative`,
+  - `PLA` aktualizuje `Zero` i `Negative`,
+  - `PLP` odtwarza wspierane flagi zgodnie z kontraktem #37,
+  - testy interakcji stack opcode slice,
+  - assembler expected bytes i ASM end-to-end,
+  - trace/CLI visibility,
+  - aktualizacja mapy slice i snapshotu aktywnego epica.
+- Out of scope:
+  - IRQ/NMI/RESET vectors,
+  - `BRK` vector behavior beyond current halt contract,
+  - `RTI`,
+  - pelny status register 6502 jako docelowy model procesora,
+  - decimal/interrupt/overflow/break live semantics poza bootstrapowym snapshotem,
+  - cycle counting,
+  - addressing modes inne niz implied,
+  - etykiety assemblera,
+  - `.org`, `.byte`, `.word`,
+  - nowe komendy CLI.
+
+### Chapter Narrative
+Ten chapter rozszerza gotowy model stacka o podstawowe instrukcje odkładania i zdejmowania akumulatora oraz statusu. `PHA`/`PLA` sprawdzają dyscypline stacka dla danych, a `PHP`/`PLP` wprowadzają pierwszy jawny kontrakt status byte bez udawania pełnego status register 6502. Rozdział celowo nie dotyka przerwań, `RTI`, cycle countingu ani pełnych flag procesora.
+
+### Task Issues
+- [ ] #37 - define bootstrap status byte contract for PHP and PLP.
+- [ ] #38 - implement PHA and PLA CPU/decode semantics.
+- [ ] #39 - implement PHP and PLP CPU/decode semantics.
+- [ ] #40 - add stack opcode interaction and regression tests.
+- [ ] #41 - extend assembler for PHA/PLA/PHP/PLP and add ASM end-to-end coverage.
+- [ ] #42 - update CLI trace for stack opcode visibility.
+- [ ] #43 - update slice map and chapter documentation for stack opcode slice.
+- [ ] #44 - QC gate przez `epic-qc`.
+
+### Acceptance Criteria
+- [ ] Bootstrap status byte contract for `PHP` / `PLP` is documented before implementation.
+- [ ] `PHA`, `PLA`, `PHP`, `PLP` are decoded, executed and tested.
+- [ ] `PHA` pushes `A` and changes only `SP` / stack memory.
+- [ ] `PLA` pulls into `A` and updates `Zero` / `Negative`.
+- [ ] `PHP` pushes status snapshot for currently supported flags.
+- [ ] `PLP` restores currently supported flags from status snapshot without silently adding unsupported status behavior.
+- [ ] Stack order and `SP` restoration are covered by tests.
+- [ ] At least one assembler-driven stack opcode program is covered by tests.
+- [ ] Trace/CLI remains aligned with implemented instruction set and new mnemonics.
+- [ ] `docs/cpu-slice-map.md`, `docs/current-epic.md` and `docs/epic-chapters.md` are updated.
+- [ ] Epic passes `epic-qc`, a ewentualne follow-up issues sa jawnie zalinkowane.
+
+### Verification Strategy
+- Narrow tests:
+  - `dotnet test tests/pseudoCPU.Bootstrap.Tests/pseudoCPU.Bootstrap.Tests.csproj --filter "FullyQualifiedName~Pha|FullyQualifiedName~Pla|FullyQualifiedName~Php|FullyQualifiedName~Plp|FullyQualifiedName~StackOpcode"`
+- Full test project:
+  - `dotnet test tests/pseudoCPU.Bootstrap.Tests/pseudoCPU.Bootstrap.Tests.csproj`
+- Build:
+  - `dotnet build pseudoCPU.sln`
+- Format:
+  - `dotnet format pseudoCPU.sln --verify-no-changes`
+- CLI smoke:
+  - `dotnet run --project src/pseudoCPU.Cli -- run-asm --source examples/stack-opcodes.asm --start 0x0600 --max-steps 100 --trace`
+
+### Documentation Updates
+- [ ] `docs/cpu-slice-map.md` po dodaniu `PHA`, `PLA`, `PHP`, `PLP`.
+- [ ] Ten chapter po przejsciu taskow i po QC gate.
+- [ ] `docs/current-epic.md` dla aktywnego stanu i snapshotu weryfikacji.
+- [ ] ADR w `docs/adr/`, jesli status byte contract okaze sie decyzja wykraczajaca poza chapter.
+
+### QC Gate
+- QC issue/comment: #44
+- Verdict: TBD
+- Follow-up issues:
+  - TBD
+
+### Final Notes
+- Final status: active
+- Remaining risks: status byte contract moze spowodowac drift do pelnego status register; nalezy utrzymac bootstrapowy zakres.
+- Permanent decisions: TBD after #37 and QC.
