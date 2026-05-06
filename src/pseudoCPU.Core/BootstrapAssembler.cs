@@ -23,6 +23,15 @@ public static class BootstrapAssembler
 
             switch (mnemonic)
             {
+                case "JSR":
+                    RequireOperand(mnemonic, operand);
+                    bytes.Add((byte)BootstrapOpcode.JsrAbsolute);
+                    bytes.AddRange(ParseWordLiteral(operand, mnemonic));
+                    break;
+                case "RTS":
+                    RequireNoOperand(mnemonic, operand);
+                    bytes.Add((byte)BootstrapOpcode.Rts);
+                    break;
                 case "LDA":
                     RequireOperand(mnemonic, operand, '#');
                     bytes.Add((byte)BootstrapOpcode.LdaImmediate);

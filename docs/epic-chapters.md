@@ -35,7 +35,7 @@ Ta tabela jest glowna lista kontrolna realizacji chapterow. Planner musi aktuali
 | Done | Chapter | Epic Issue | Status | QC Verdict | Follow-up | Notes |
 |---|---|---:|---|---|---|---|
 | [ ] | Phase 3 quality control | #25 | active | TBD | TBD | Cleanup po fazie 3: Carry, trace/assembler drift, CLI summary i regresja testow. |
-| [ ] | Phase 4: 6502 stack page foundation and JSR/RTS subroutine flow | #26 | active | TBD | #35 | Stack page `$0100-$01FF`, `SP`, push/pop semantics, `JSR abs`, `RTS`, assembler/CLI/docs and mandatory QC gate. |
+| [ ] | Phase 4: 6502 stack page foundation and JSR/RTS subroutine flow | #26 | qc | TBD | TBD | Stack page `$0100-$01FF`, `SP`, push/pop semantics, `JSR abs`, `RTS`, assembler/CLI/docs and mandatory QC gate #35. |
 
 ## Chapter Template
 
@@ -108,7 +108,7 @@ Skopiuj ten szablon dla kazdego nowego epica.
 | Chapter | Epic Issue | Status | Scope |
 |---|---:|---|---|
 | Phase 3 quality control | #25 | active | Carry semantics, trace/assembler drift, CLI summary and test regression cleanup |
-| Phase 4: 6502 stack page foundation and JSR/RTS subroutine flow | #26 | active | Stack page `$0100-$01FF`, 8-bit `SP`, push/pop ordering, `JSR abs`, `RTS`, assembler/CLI/docs |
+| Phase 4: 6502 stack page foundation and JSR/RTS subroutine flow | #26 | qc | Stack page `$0100-$01FF`, 8-bit `SP`, push/pop ordering, `JSR abs`, `RTS`, assembler/CLI/docs |
 
 ## Epic 25: Phase 3 quality control
 
@@ -192,7 +192,7 @@ Ten chapter opisuje epic stabilizacyjny po fazie 3. Jego celem nie jest rozbudow
 
 ### Epic Issue
 - Epic: #26
-- Status: active
+- Status: qc
 - Owner agent: `issue-planner`
 - Execution agent: `issue-executor`
 - Quality gate agent: `epic-qc`
@@ -201,9 +201,9 @@ Ten chapter opisuje epic stabilizacyjny po fazie 3. Jego celem nie jest rozbudow
 - Done: [ ]
 - Chapter: Phase 4: 6502 stack page foundation and JSR/RTS subroutine flow
 - Epic issue: #26
-- Status: active
+- Status: qc
 - QC verdict: TBD
-- Follow-up: #35
+- Follow-up: TBD
 
 ### Outcome
 Repo zyskuje bootstrapowy model stacka zgodny semantycznie z 6502 dla aktualnego zakresu: stack page `$0100-$01FF`, 8-bitowy `SP`, poprawne push/pop oraz obsluge `JSR abs` i `RTS`. Po domknieciu chaptera kolejne epiki moga dodawac instrukcje stackowe i przerwania bez zgadywania adresowania, inicjalizacji `SP` i kontraktu powrotu z podprogramu.
@@ -235,14 +235,14 @@ Repo zyskuje bootstrapowy model stacka zgodny semantycznie z 6502 dla aktualnego
 Ten chapter wprowadza pierwszy normalny model stacka 6502 do bootstrapowego pseudoCPU. Zamiast traktowac subroutine flow jako specjalny przypadek skoku, epic ustala wspolny kontrakt stack page, inicjalizacji `SP` i kolejnosci push/pop, a potem opiera na nim `JSR abs` oraz `RTS`. Rozdzial celowo nie dodaje jeszcze innych instrukcji stackowych ani przerwan; jego wartoscia jest stabilny fundament, na ktorym kolejne epiki beda mogly bez driftu budowac `PHA`/`PLA`, wejscie w IRQ/NMI i dalsza zgodnosc 6502.
 
 ### Task Issues
-- [ ] #27 - normalny model stacka 6502 w Core.
-- [ ] #28 - testy `SP`, push/pop i wrap-around.
-- [ ] #29 - implementacja `JSR abs` w decoderze i CPU.
-- [ ] #30 - implementacja `RTS` na bazie stacka.
-- [ ] #31 - testy pelnego przeplywu podprogramow `JSR` / `RTS`.
-- [ ] #32 - wsparcie assemblera dla `JSR` / `RTS` i ASM end-to-end.
-- [ ] #33 - aktualizacja trace/CLI dla nowych mnemonikow.
-- [ ] #34 - aktualizacja `docs/cpu-slice-map.md`, chaptera i snapshotu biezacego epica.
+- [x] #27 - normalny model stacka 6502 w Core.
+- [x] #28 - testy `SP`, push/pop i wrap-around.
+- [x] #29 - implementacja `JSR abs` w decoderze i CPU.
+- [x] #30 - implementacja `RTS` na bazie stacka.
+- [x] #31 - testy pelnego przeplywu podprogramow `JSR` / `RTS`.
+- [x] #32 - wsparcie assemblera dla `JSR` / `RTS` i ASM end-to-end.
+- [x] #33 - aktualizacja trace/CLI dla nowych mnemonikow.
+- [x] #34 - aktualizacja `docs/cpu-slice-map.md`, chaptera i snapshotu biezacego epica.
 - [ ] #35 - QC gate przez `epic-qc`.
 
 ### Acceptance Criteria
@@ -267,7 +267,7 @@ Ten chapter wprowadza pierwszy normalny model stacka 6502 do bootstrapowego pseu
 - Format:
   - `dotnet format pseudoCPU.sln --verify-no-changes`
 - CLI smoke:
-  - `dotnet run --project src/pseudoCPU.Cli -- run-asm --source examples/<phase-4-subroutine-example>.asm --start 0x0600 --max-steps 100 --trace`
+  - `dotnet run --project src/pseudoCPU.Cli -- run-asm --source examples/jsr-rts-subroutine.asm --start 0x0600 --max-steps 100 --trace`
 
 ### Documentation Updates
 - [ ] `docs/cpu-slice-map.md` po dodaniu `JSR abs`, `RTS` i stack foundation.
@@ -282,6 +282,6 @@ Ten chapter wprowadza pierwszy normalny model stacka 6502 do bootstrapowego pseu
   - TBD
 
 ### Final Notes
-- Final status: active
+- Final status: qc
 - Remaining risks: off-by-one w adresie powrotu `JSR`/`RTS`, kolejnosc bajtow na stacku i drift miedzy assemblerem a trace CLI.
 - Permanent decisions: bootstrapowy kontrakt startu `SP` to `$FF` do czasu osobnego epica reset/interrupt; stack semantics maja pozostac wspolnym fundamentem dla przyszlych instrukcji stackowych.

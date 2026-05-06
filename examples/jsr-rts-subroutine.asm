@@ -1,0 +1,5 @@
+JSR $0606
+LDA #$2A
+BRK
+LDX #$05
+RTS

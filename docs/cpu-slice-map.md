@@ -17,5 +17,7 @@ Bootstrap assembler accepts raw branch offsets only; labels and `.org` remain un
 | DEX | CA | done | done | done | done | done | phase 3 |
 | CPX #imm | E0 | done | done | done | done | done | phase 3 |
 | STX abs | 8E | done | done | done | done | done | phase 3 |
+| JSR abs | 20 | done | done | done | done | done | pushes return address high then low |
+| RTS | 60 | done | done | done | done | done | pops low then high and returns to next instruction |
 
 Maintain this map after each opcode phase.

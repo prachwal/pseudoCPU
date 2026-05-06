@@ -2,6 +2,8 @@ namespace pseudoCPU.Core;
 
 public enum BootstrapOpcode : byte
 {
+    JsrAbsolute = 0x20,
+    Rts = 0x60,
     LdaImmediate = 0xA9,
     LdxImmediate = 0xA2,
     Tax = 0xAA,
@@ -21,6 +23,8 @@ public static class BootstrapOpcodeDecoder
 {
     public static BootstrapOpcode Decode(byte opcode) => opcode switch
     {
+        0x20 => BootstrapOpcode.JsrAbsolute,
+        0x60 => BootstrapOpcode.Rts,
         0xA9 => BootstrapOpcode.LdaImmediate,
         0xA2 => BootstrapOpcode.LdxImmediate,
         0xAA => BootstrapOpcode.Tax,

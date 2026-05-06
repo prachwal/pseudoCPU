@@ -136,4 +136,38 @@ public class CliTests
             Console.SetError(originalError);
         }
     }
+
+    [Trait("Category", "Cli")]
+    [Fact]
+    public void RunAsmEmitsTraceForJsrAndRtsInstructions()
+    {
+        var sourcePath = Path.GetTempFileName();
+        var originalOut = Console.Out;
+        var originalError = Console.Error;
+
+        try
+        {
+            File.WriteAllText(sourcePath, "JSR $0406\nLDA #$2A\nBRK\nLDX #$05\nRTS\n");
+
+            using var standardOut = new StringWriter();
+            using var standardError = new StringWriter();
+            Console.SetOut(standardOut);
+            Console.SetError(standardError);
+
+            var exitCode = CliApplication.Run(["run-asm", "--source", sourcePath, "--start", "0x0400", "--max-steps", "10", "--trace"]);
+
+            Assert.Equal(0, exitCode);
+            Assert.Empty(standardError.ToString());
+            var output = standardOut.ToString();
+            Assert.Contains("JSR $0406", output);
+            Assert.Contains("RTS", output);
+            Assert.Contains("Status: Halted", output);
+        }
+        finally
+        {
+            Console.SetOut(originalOut);
+            Console.SetError(originalError);
+            File.Delete(sourcePath);
+        }
+    }
 }

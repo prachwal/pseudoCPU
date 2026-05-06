@@ -5,6 +5,54 @@ namespace pseudoCPU.Bootstrap.Tests;
 public class BootstrapCpuTests
 {
     [Trait("Category", "InstructionSlice")]
+    [Fact]
+    public void LoadProgramInitializesStackPointerToFf()
+    {
+        var cpu = new BootstrapCpu();
+
+        cpu.LoadProgram([0x00], 0x0600);
+
+        Assert.Equal(0xFF, cpu.SP);
+        Assert.Equal(0x0600, cpu.PC);
+    }
+
+    [Trait("Category", "InstructionSlice")]
+    [Fact]
+    public void StackPushAndPopUsePage0100AndWrapAround()
+    {
+        var cpu = new BootstrapCpu();
+
+        cpu.LoadProgram([0x00]);
+
+        cpu.PushByte(0xAA);
+        Assert.Equal(0xFE, cpu.SP);
+        Assert.Equal(0xAA, cpu.ReadByte(0x01FF));
+
+        cpu.PushByte(0xBB);
+        Assert.Equal(0xFD, cpu.SP);
+        Assert.Equal(0xBB, cpu.ReadByte(0x01FE));
+
+        Assert.Equal(0xBB, cpu.PopByte());
+        Assert.Equal(0xFE, cpu.SP);
+        Assert.Equal(0xAA, cpu.PopByte());
+        Assert.Equal(0xFF, cpu.SP);
+
+        for (var value = 0; value < 256; value++)
+        {
+            cpu.PushByte((byte)value);
+        }
+
+        Assert.Equal(0xFF, cpu.SP);
+        Assert.Equal(0xFF, cpu.ReadByte(0x0100));
+        Assert.Equal(0x00, cpu.ReadByte(0x01FF));
+
+        cpu.PushByte(0xCC);
+
+        Assert.Equal(0xFE, cpu.SP);
+        Assert.Equal(0xCC, cpu.ReadByte(0x01FF));
+    }
+
+    [Trait("Category", "InstructionSlice")]
     [Theory]
     [InlineData(0x00, true, false)]
     [InlineData(0x80, false, true)]
@@ -269,6 +317,71 @@ public class BootstrapCpuTests
         Assert.False(cpu.Carry);
         Assert.Equal(0x01, cpu.ReadByte(0x2000));
         Assert.Equal(0x0407, cpu.PC);
+    }
+
+    [Trait("Category", "ControlFlow")]
+    [Fact]
+    public void JsrAbsolutePushesReturnAddressAndJumpsToTarget()
+    {
+        var cpu = new BootstrapCpu();
+
+        cpu.LoadProgram([0x20, 0x34, 0x12, 0x00], 0x0600);
+
+        cpu.Step();
+
+        Assert.Equal(0x1234, cpu.PC);
+        Assert.Equal(0xFD, cpu.SP);
+        Assert.Equal(0x06, cpu.ReadByte(0x01FF));
+        Assert.Equal(0x02, cpu.ReadByte(0x01FE));
+    }
+
+    [Trait("Category", "ControlFlow")]
+    [Fact]
+    public void RtsPopsReturnAddressAndResumesAtNextInstruction()
+    {
+        var cpu = new BootstrapCpu();
+
+        cpu.LoadProgram([0x20, 0x06, 0x06, 0x00, 0x00, 0x00, 0x60, 0x00], 0x0600);
+
+        cpu.Step();
+        cpu.Step();
+
+        Assert.Equal(0x0603, cpu.PC);
+        Assert.Equal(0xFF, cpu.SP);
+    }
+
+    [Trait("Category", "ControlFlow")]
+    [Fact]
+    public void JsrAndRtsReturnToInstructionAfterCall()
+    {
+        var cpu = new BootstrapCpu();
+
+        cpu.LoadProgram([0x20, 0x06, 0x06, 0xA9, 0x42, 0x00, 0xA2, 0x05, 0x60], 0x0600);
+
+        cpu.RunUntilHalt();
+
+        Assert.True(cpu.IsHalted);
+        Assert.Equal(0x42, cpu.A);
+        Assert.Equal(0x05, cpu.X);
+        Assert.Equal(0xFF, cpu.SP);
+        Assert.Equal(0x0606, cpu.PC);
+    }
+
+    [Trait("Category", "ControlFlow")]
+    [Fact]
+    public void NestedSubroutinesPreserveStackDiscipline()
+    {
+        var cpu = new BootstrapCpu();
+
+        cpu.LoadProgram([0x20, 0x04, 0x06, 0x00, 0xA2, 0x01, 0x20, 0x0B, 0x06, 0xE8, 0x60, 0xA9, 0xAA, 0x60], 0x0600);
+
+        cpu.RunUntilHalt();
+
+        Assert.True(cpu.IsHalted);
+        Assert.Equal(0xAA, cpu.A);
+        Assert.Equal(0x02, cpu.X);
+        Assert.Equal(0xFF, cpu.SP);
+        Assert.Equal(0x0604, cpu.PC);
     }
 
     [Trait("Category", "ControlFlow")]

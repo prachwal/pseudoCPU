@@ -47,6 +47,43 @@ public class BootstrapAssemblerTests
         Assert.Equal(0x0408, cpu.PC);
     }
 
+    [Trait("Category", "Assembler")]
+    [Fact]
+    public void AssemblesJsrAndRtsToExpectedBytes()
+    {
+        const string source = """
+            JSR $1234
+            RTS
+            """;
+
+        var bytes = BootstrapAssembler.Assemble(source);
+
+        Assert.Equal([0x20, 0x34, 0x12, 0x60], bytes);
+    }
+
+    [Trait("Category", "AsmExecution")]
+    [Fact]
+    public void AssemblesAndRunsSubroutineProgramToExpectedCpuState()
+    {
+        const string source = """
+            JSR $0406
+            LDA #$2A
+            BRK
+            LDX #$05
+            RTS
+            """;
+
+        var cpu = new BootstrapCpu();
+        cpu.LoadProgram(BootstrapAssembler.Assemble(source), 0x0400);
+        cpu.Run();
+
+        Assert.True(cpu.IsHalted);
+        Assert.Equal(0x2A, cpu.A);
+        Assert.Equal(0x05, cpu.X);
+        Assert.Equal(0xFF, cpu.SP);
+        Assert.Equal(0x0406, cpu.PC);
+    }
+
 
     [Trait("Category", "ControlFlow")]
     [Fact]

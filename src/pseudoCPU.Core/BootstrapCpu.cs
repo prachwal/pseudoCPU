@@ -2,6 +2,7 @@ namespace pseudoCPU.Core;
 
 public sealed class BootstrapCpu
 {
+    private const ushort StackPageBaseAddress = 0x0100;
     private readonly byte[] _memory = new byte[ushort.MaxValue + 1];
 
     public byte A { get; private set; }
@@ -9,6 +10,8 @@ public sealed class BootstrapCpu
     public byte X { get; private set; }
 
     public ushort PC { get; private set; }
+
+    public byte SP { get; private set; }
 
     public bool Zero { get; private set; }
 
@@ -31,6 +34,7 @@ public sealed class BootstrapCpu
         A = 0;
         X = 0;
         PC = startAddress;
+        SP = 0xFF;
         Zero = false;
         Negative = false;
         Carry = false;
@@ -86,6 +90,23 @@ public sealed class BootstrapCpu
 
         switch (BootstrapOpcodeDecoder.Decode(opcode))
         {
+            case BootstrapOpcode.JsrAbsolute:
+                {
+                    var targetAddress = FetchWord();
+                    var returnAddress = (ushort)(PC - 1);
+                    PushByte((byte)(returnAddress >> 8));
+                    PushByte((byte)(returnAddress & 0xFF));
+                    PC = targetAddress;
+                    break;
+                }
+            case BootstrapOpcode.Rts:
+                {
+                    var lowByte = PopByte();
+                    var highByte = PopByte();
+                    var returnAddress = (ushort)(lowByte | (highByte << 8));
+                    PC = unchecked((ushort)(returnAddress + 1));
+                    break;
+                }
             case BootstrapOpcode.LdaImmediate:
                 A = FetchByte();
                 UpdateZeroAndNegative(A);
@@ -153,7 +174,26 @@ public sealed class BootstrapCpu
 
     public void WriteByte(ushort address, byte value) => _memory[address] = value;
 
+    public void PushByte(byte value)
+    {
+        _memory[GetStackAddress(SP)] = value;
+        SP--;
+    }
+
+    public byte PopByte()
+    {
+        SP++;
+        return _memory[GetStackAddress(SP)];
+    }
+
     private byte FetchByte() => _memory[PC++];
+
+    private ushort FetchWord()
+    {
+        var lowByte = FetchByte();
+        var highByte = FetchByte();
+        return (ushort)(lowByte | (highByte << 8));
+    }
 
     private void UpdateZeroAndNegative(byte value)
     {
@@ -187,4 +227,6 @@ public sealed class BootstrapCpu
         var offset = unchecked((sbyte)offsetByte);
         PC = unchecked((ushort)(PC + offset));
     }
+
+    private static ushort GetStackAddress(byte stackPointer) => (ushort)(StackPageBaseAddress | stackPointer);
 }

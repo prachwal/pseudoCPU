@@ -4,7 +4,7 @@ Ten plik przechowuje stan biezacego epica i informacje fazowe, ktorych nie nalez
 
 ## Active Epic
 - GitHub issue: #26
-- Status: active
+- Status: qc
 - Owner agent: `issue-planner`
 - Quality gate agent: `epic-qc`
 
@@ -19,6 +19,7 @@ Ten plik przechowuje stan biezacego epica i informacje fazowe, ktorych nie nalez
 - Zalecana kolejnosc wykonania: #27 -> #28 -> #29 -> #30 -> #31 -> #32 -> #33 -> #34 -> #35.
 - Task #35 jest obowiazkowa bramka `epic-qc`; epic nie moze zostac zamkniety bez komentarza `Epic QC Gate`.
 - Task #34 ma zamknac aktualizacje `docs/cpu-slice-map.md`, chaptera oraz snapshotu tego pliku po implementacji.
+- Implementacja taskow #27-#34 jest zakonczona; epic oczekuje na wynik taska QC #35.
 
 ## QC Feedback Loop
 1. `issue-planner` utrzymuje strukture epic -> taski.
@@ -31,7 +32,7 @@ Ten plik przechowuje stan biezacego epica i informacje fazowe, ktorych nie nalez
 - Narrow test command: `dotnet test tests/pseudoCPU.Bootstrap.Tests/pseudoCPU.Bootstrap.Tests.csproj --filter "FullyQualifiedName~Stack|FullyQualifiedName~Jsr|FullyQualifiedName~Rts"`
 - Build command: `dotnet build pseudoCPU.sln`
 - Format command: `dotnet format pseudoCPU.sln --verify-no-changes`
-- CLI smoke command: `dotnet run --project src/pseudoCPU.Cli -- run-asm --source examples/<phase-4-subroutine-example>.asm --start 0x0600 --max-steps 100 --trace`
+- CLI smoke command: `dotnet run --project src/pseudoCPU.Cli -- run-asm --source examples/jsr-rts-subroutine.asm --start 0x0600 --max-steps 100 --trace`
 - Latest QC result: TBD
 
 ## Follow-up Issues
