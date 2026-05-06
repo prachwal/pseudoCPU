@@ -35,7 +35,7 @@ Ta tabela jest glowna lista kontrolna realizacji chapterow. Planner musi aktuali
 | Done | Chapter | Epic Issue | Status | QC Verdict | Follow-up | Notes |
 |---|---|---:|---|---|---|---|
 | [ ] | Phase 3 quality control | #25 | active | TBD | TBD | Cleanup po fazie 3: Carry, trace/assembler drift, CLI summary i regresja testow. |
-| [ ] | Phase 4: 6502 stack page foundation and JSR/RTS subroutine flow | #26 | qc | TBD | TBD | Stack page `$0100-$01FF`, `SP`, push/pop semantics, `JSR abs`, `RTS`, assembler/CLI/docs and mandatory QC gate #35. |
+| [x] | Phase 4: 6502 stack page foundation and JSR/RTS subroutine flow | #26 | done | PASS | none | Stack page `$0100-$01FF`, `SP`, push/pop semantics, `JSR abs`, `RTS`, assembler/CLI/docs and mandatory QC gate #35. |
 
 ## Chapter Template
 
@@ -108,7 +108,7 @@ Skopiuj ten szablon dla kazdego nowego epica.
 | Chapter | Epic Issue | Status | Scope |
 |---|---:|---|---|
 | Phase 3 quality control | #25 | active | Carry semantics, trace/assembler drift, CLI summary and test regression cleanup |
-| Phase 4: 6502 stack page foundation and JSR/RTS subroutine flow | #26 | qc | Stack page `$0100-$01FF`, 8-bit `SP`, push/pop ordering, `JSR abs`, `RTS`, assembler/CLI/docs |
+| Phase 4: 6502 stack page foundation and JSR/RTS subroutine flow | #26 | done | Stack page `$0100-$01FF`, 8-bit `SP`, push/pop ordering, `JSR abs`, `RTS`, assembler/CLI/docs |
 
 ## Epic 25: Phase 3 quality control
 
@@ -192,18 +192,18 @@ Ten chapter opisuje epic stabilizacyjny po fazie 3. Jego celem nie jest rozbudow
 
 ### Epic Issue
 - Epic: #26
-- Status: qc
+- Status: done
 - Owner agent: `issue-planner`
 - Execution agent: `issue-executor`
 - Quality gate agent: `epic-qc`
 
 ### Completion Checklist Entry
-- Done: [ ]
+- Done: [x]
 - Chapter: Phase 4: 6502 stack page foundation and JSR/RTS subroutine flow
 - Epic issue: #26
-- Status: qc
-- QC verdict: TBD
-- Follow-up: TBD
+- Status: done
+- QC verdict: PASS
+- Follow-up: none
 
 ### Outcome
 Repo zyskuje bootstrapowy model stacka zgodny semantycznie z 6502 dla aktualnego zakresu: stack page `$0100-$01FF`, 8-bitowy `SP`, poprawne push/pop oraz obsluge `JSR abs` i `RTS`. Po domknieciu chaptera kolejne epiki moga dodawac instrukcje stackowe i przerwania bez zgadywania adresowania, inicjalizacji `SP` i kontraktu powrotu z podprogramu.
@@ -243,19 +243,19 @@ Ten chapter wprowadza pierwszy normalny model stacka 6502 do bootstrapowego pseu
 - [x] #32 - wsparcie assemblera dla `JSR` / `RTS` i ASM end-to-end.
 - [x] #33 - aktualizacja trace/CLI dla nowych mnemonikow.
 - [x] #34 - aktualizacja `docs/cpu-slice-map.md`, chaptera i snapshotu biezacego epica.
-- [ ] #35 - QC gate przez `epic-qc`.
+- [x] #35 - QC gate przez `epic-qc`.
 
 ### Acceptance Criteria
-- [ ] `BootstrapCpu` utrzymuje `SP` jako 8-bitowy rejestr i nie wychodzi ze stack page `$0100-$01FF`.
-- [ ] `LoadProgram` inicjalizuje `SP` na `$FF` i kontrakt jest zapisany w issue/chapterze.
-- [ ] Push zapisuje pod `$0100 + SP`, a potem dekrementuje `SP`; pop najpierw inkrementuje `SP`, a potem czyta z `$0100 + SP`.
-- [ ] `JSR abs` zapisuje poprawny adres powrotu i ustawia `PC` na cel wywolania.
-- [ ] `RTS` odtwarza adres powrotu ze stacka i wznawia wykonanie na instrukcji po `JSR`.
-- [ ] Istnieja testy na wrap-around stacka i na co najmniej jeden nested/sequential subroutine flow.
-- [ ] Assembler rozumie `JSR $addr` i `RTS`, a co najmniej jeden test ASM end-to-end pokrywa podprogram.
-- [ ] CLI trace, jesli pokazuje instrukcje, umie wypisac `JSR` i `RTS` bez driftu wobec assemblera.
-- [ ] `docs/cpu-slice-map.md` odzwierciedla nowy slice po implementacji.
-- [ ] Epic przechodzi `epic-qc`, a ewentualne follow-up issues sa jawnie zalinkowane.
+- [x] `BootstrapCpu` utrzymuje `SP` jako 8-bitowy rejestr i nie wychodzi ze stack page `$0100-$01FF`.
+- [x] `LoadProgram` inicjalizuje `SP` na `$FF` i kontrakt jest zapisany w issue/chapterze.
+- [x] Push zapisuje pod `$0100 + SP`, a potem dekrementuje `SP`; pop najpierw inkrementuje `SP`, a potem czyta z `$0100 + SP`.
+- [x] `JSR abs` zapisuje poprawny adres powrotu i ustawia `PC` na cel wywolania.
+- [x] `RTS` odtwarza adres powrotu ze stacka i wznawia wykonanie na instrukcji po `JSR`.
+- [x] Istnieja testy na wrap-around stacka i na co najmniej jeden nested/sequential subroutine flow.
+- [x] Assembler rozumie `JSR $addr` i `RTS`, a co najmniej jeden test ASM end-to-end pokrywa podprogram.
+- [x] CLI trace, jesli pokazuje instrukcje, umie wypisac `JSR` i `RTS` bez driftu wobec assemblera.
+- [x] `docs/cpu-slice-map.md` odzwierciedla nowy slice po implementacji.
+- [x] Epic przechodzi `epic-qc`, a ewentualne follow-up issues sa jawnie zalinkowane.
 
 ### Verification Strategy
 - Narrow tests:
@@ -270,18 +270,18 @@ Ten chapter wprowadza pierwszy normalny model stacka 6502 do bootstrapowego pseu
   - `dotnet run --project src/pseudoCPU.Cli -- run-asm --source examples/jsr-rts-subroutine.asm --start 0x0600 --max-steps 100 --trace`
 
 ### Documentation Updates
-- [ ] `docs/cpu-slice-map.md` po dodaniu `JSR abs`, `RTS` i stack foundation.
-- [ ] Ten chapter po przejsciu taskow i po QC gate.
-- [ ] `docs/current-epic.md` dla aktywnego stanu i snapshotu weryfikacji.
+- [x] `docs/cpu-slice-map.md` po dodaniu `JSR abs`, `RTS` i stack foundation.
+- [x] Ten chapter po przejsciu taskow i po QC gate.
+- [x] `docs/current-epic.md` dla aktywnego stanu i snapshotu weryfikacji.
 - [ ] ADR w `docs/adr/` tylko jesli implementacja wymusi trwala decyzje wykraczajaca poza chapter.
 
 ### QC Gate
-- QC issue/comment: #35
-- Verdict: TBD
+- QC issue/comment: https://github.com/prachwal/pseudoCPU/issues/26#issuecomment-4386834276
+- Verdict: PASS
 - Follow-up issues:
-  - TBD
+  - none
 
 ### Final Notes
-- Final status: qc
-- Remaining risks: off-by-one w adresie powrotu `JSR`/`RTS`, kolejnosc bajtow na stacku i drift miedzy assemblerem a trace CLI.
+- Final status: done
+- Remaining risks: none blocking after QC; future epics still need separate work for reset/interrupt flow and additional stack opcodes.
 - Permanent decisions: bootstrapowy kontrakt startu `SP` to `$FF` do czasu osobnego epica reset/interrupt; stack semantics maja pozostac wspolnym fundamentem dla przyszlych instrukcji stackowych.

@@ -4,7 +4,7 @@ Ten plik przechowuje stan biezacego epica i informacje fazowe, ktorych nie nalez
 
 ## Active Epic
 - GitHub issue: #26
-- Status: qc
+- Status: done
 - Owner agent: `issue-planner`
 - Quality gate agent: `epic-qc`
 
@@ -19,7 +19,7 @@ Ten plik przechowuje stan biezacego epica i informacje fazowe, ktorych nie nalez
 - Zalecana kolejnosc wykonania: #27 -> #28 -> #29 -> #30 -> #31 -> #32 -> #33 -> #34 -> #35.
 - Task #35 jest obowiazkowa bramka `epic-qc`; epic nie moze zostac zamkniety bez komentarza `Epic QC Gate`.
 - Task #34 ma zamknac aktualizacje `docs/cpu-slice-map.md`, chaptera oraz snapshotu tego pliku po implementacji.
-- Implementacja taskow #27-#34 jest zakonczona; epic oczekuje na wynik taska QC #35.
+- Implementacja taskow #27-#34 i QC gate #35 sa zakonczone; epic ma werdykt PASS i moze zostac zamkniety.
 
 ## QC Feedback Loop
 1. `issue-planner` utrzymuje strukture epic -> taski.
@@ -33,10 +33,10 @@ Ten plik przechowuje stan biezacego epica i informacje fazowe, ktorych nie nalez
 - Build command: `dotnet build pseudoCPU.sln`
 - Format command: `dotnet format pseudoCPU.sln --verify-no-changes`
 - CLI smoke command: `dotnet run --project src/pseudoCPU.Cli -- run-asm --source examples/jsr-rts-subroutine.asm --start 0x0600 --max-steps 100 --trace`
-- Latest QC result: TBD
+- Latest QC result: PASS
 
 ## Follow-up Issues
 - #17 - reference pattern for prior follow-up/task issue.
 - #25 - prior quality-control reference before phase 4.
 - #35 - planned QC gate task for the active epic.
-- New follow-up issues must be added here after `epic-qc` verification.
+- none for epic #26 (QC PASS, 2026-05-06).
