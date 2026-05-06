@@ -93,19 +93,13 @@ public static class BootstrapAssembler
                     bytes.Add((byte)BootstrapOpcode.Rts);
                     break;
                 case "LDA":
-                    RequireOperand(mnemonic, operand, '#');
-                    bytes.Add((byte)BootstrapOpcode.LdaImmediate);
-                    bytes.Add(ParseByteLiteral(operand[1..], mnemonic));
+                    bytes.AddRange(AssembleLda(operand));
                     break;
                 case "LDX":
-                    RequireOperand(mnemonic, operand, '#');
-                    bytes.Add((byte)BootstrapOpcode.LdxImmediate);
-                    bytes.Add(ParseByteLiteral(operand[1..], mnemonic));
+                    bytes.AddRange(AssembleLdx(operand));
                     break;
                 case "LDY":
-                    RequireOperand(mnemonic, operand, '#');
-                    bytes.Add((byte)BootstrapOpcode.LdyImmediate);
-                    bytes.Add(ParseByteLiteral(operand[1..], mnemonic));
+                    bytes.AddRange(AssembleLdy(operand));
                     break;
                 case "TAX":
                     RequireNoOperand(mnemonic, operand);
@@ -128,19 +122,13 @@ public static class BootstrapAssembler
                     bytes.Add((byte)BootstrapOpcode.Dex);
                     break;
                 case "STA":
-                    RequireOperand(mnemonic, operand);
-                    bytes.Add((byte)BootstrapOpcode.StaAbsolute);
-                    bytes.AddRange(ParseWordLiteral(operand, mnemonic));
+                    bytes.AddRange(AssembleSta(operand));
                     break;
                 case "STX":
-                    RequireOperand(mnemonic, operand);
-                    bytes.Add((byte)BootstrapOpcode.StxAbsolute);
-                    bytes.AddRange(ParseWordLiteral(operand, mnemonic));
+                    bytes.AddRange(AssembleStx(operand));
                     break;
                 case "STY":
-                    RequireOperand(mnemonic, operand);
-                    bytes.Add((byte)BootstrapOpcode.StyAbsolute);
-                    bytes.AddRange(ParseWordLiteral(operand, mnemonic));
+                    bytes.AddRange(AssembleSty(operand));
                     break;
                 case "CMP":
                     RequireOperand(mnemonic, operand, '#');
@@ -168,9 +156,7 @@ public static class BootstrapAssembler
                     bytes.Add(ParseByteLiteral(operand[1..], mnemonic));
                     break;
                 case "JMP":
-                    RequireOperand(mnemonic, operand);
-                    bytes.Add((byte)BootstrapOpcode.JmpAbsolute);
-                    bytes.AddRange(ParseWordLiteral(operand, mnemonic));
+                    bytes.AddRange(AssembleJmp(operand));
                     break;
                 case "BEQ":
                     RequireOperand(mnemonic, operand);
@@ -308,6 +294,317 @@ public static class BootstrapAssembler
         var value = ParseUnsignedLiteral(literal, 0xFFFF, mnemonic);
         yield return (byte)(value & 0xFF);
         yield return (byte)(value >> 8);
+    }
+
+    private static List<byte> AssembleLda(string operand)
+    {
+        if (operand.StartsWith("#", StringComparison.Ordinal))
+        {
+            return AssembleImmediate(operand, "LDA", BootstrapOpcode.LdaImmediate);
+        }
+
+        if (TryAssembleParenthesizedIndexedOperand("LDA", operand, BootstrapOpcode.LdaIndexedIndirect, BootstrapOpcode.LdaIndirectIndexed, out var bytes))
+        {
+            return bytes;
+        }
+
+        if (TryAssembleIndexedOperand("LDA", operand, 'X', BootstrapOpcode.LdaZeroPageX, BootstrapOpcode.LdaAbsoluteX, out bytes))
+        {
+            return bytes;
+        }
+
+        if (TryAssembleWordIndexedOperand("LDA", operand, 'Y', BootstrapOpcode.LdaAbsoluteY, out bytes))
+        {
+            return bytes;
+        }
+
+        if (TryAssembleZeroPageOperand("LDA", operand, BootstrapOpcode.LdaZeroPage, out bytes))
+        {
+            return bytes;
+        }
+
+        throw new NotSupportedException($"Unsupported bootstrap addressing mode for mnemonic 'LDA' with operand '{operand}'.");
+    }
+
+    private static List<byte> AssembleLdx(string operand)
+    {
+        if (operand.StartsWith("#", StringComparison.Ordinal))
+        {
+            return AssembleImmediate(operand, "LDX", BootstrapOpcode.LdxImmediate);
+        }
+
+        if (TryAssembleIndexedOperand("LDX", operand, 'Y', BootstrapOpcode.LdxZeroPageY, BootstrapOpcode.LdxAbsoluteY, out var bytes))
+        {
+            return bytes;
+        }
+
+        if (TryAssembleZeroPageOperand("LDX", operand, BootstrapOpcode.LdxZeroPage, out bytes))
+        {
+            return bytes;
+        }
+
+        throw new NotSupportedException($"Unsupported bootstrap addressing mode for mnemonic 'LDX' with operand '{operand}'.");
+    }
+
+    private static List<byte> AssembleLdy(string operand)
+    {
+        if (operand.StartsWith("#", StringComparison.Ordinal))
+        {
+            return AssembleImmediate(operand, "LDY", BootstrapOpcode.LdyImmediate);
+        }
+
+        if (TryAssembleIndexedOperand("LDY", operand, 'X', BootstrapOpcode.LdyZeroPageX, BootstrapOpcode.LdyAbsoluteX, out var bytes))
+        {
+            return bytes;
+        }
+
+        if (TryAssembleZeroPageOperand("LDY", operand, BootstrapOpcode.LdyZeroPage, out bytes))
+        {
+            return bytes;
+        }
+
+        throw new NotSupportedException($"Unsupported bootstrap addressing mode for mnemonic 'LDY' with operand '{operand}'.");
+    }
+
+    private static List<byte> AssembleSta(string operand)
+    {
+        if (TryAssembleParenthesizedIndexedOperand("STA", operand, BootstrapOpcode.StaIndexedIndirect, BootstrapOpcode.StaIndirectIndexed, out var bytes))
+        {
+            return bytes;
+        }
+
+        if (TryAssembleIndexedOperand("STA", operand, 'X', BootstrapOpcode.StaZeroPageX, BootstrapOpcode.StaAbsoluteX, out bytes))
+        {
+            return bytes;
+        }
+
+        if (TryAssembleWordIndexedOperand("STA", operand, 'Y', BootstrapOpcode.StaAbsoluteY, out bytes))
+        {
+            return bytes;
+        }
+
+        if (TryAssembleZeroPageOperand("STA", operand, BootstrapOpcode.StaZeroPage, out bytes))
+        {
+            return bytes;
+        }
+
+        if (TryAssembleWordOperand("STA", operand, BootstrapOpcode.StaAbsolute, out bytes))
+        {
+            return bytes;
+        }
+
+        throw new NotSupportedException($"Unsupported bootstrap addressing mode for mnemonic 'STA' with operand '{operand}'.");
+    }
+
+    private static List<byte> AssembleStx(string operand)
+    {
+        if (TryAssembleZeroPageIndexedOperand("STX", operand, 'Y', BootstrapOpcode.StxZeroPageY, out var bytes))
+        {
+            return bytes;
+        }
+
+        if (TryAssembleZeroPageOperand("STX", operand, BootstrapOpcode.StxZeroPage, out bytes))
+        {
+            return bytes;
+        }
+
+        if (TryAssembleWordOperand("STX", operand, BootstrapOpcode.StxAbsolute, out bytes))
+        {
+            return bytes;
+        }
+
+        throw new NotSupportedException($"Unsupported bootstrap addressing mode for mnemonic 'STX' with operand '{operand}'.");
+    }
+
+    private static List<byte> AssembleSty(string operand)
+    {
+        if (TryAssembleZeroPageIndexedOperand("STY", operand, 'X', BootstrapOpcode.StyZeroPageX, out var bytes))
+        {
+            return bytes;
+        }
+
+        if (TryAssembleZeroPageOperand("STY", operand, BootstrapOpcode.StyZeroPage, out bytes))
+        {
+            return bytes;
+        }
+
+        if (TryAssembleWordOperand("STY", operand, BootstrapOpcode.StyAbsolute, out bytes))
+        {
+            return bytes;
+        }
+
+        throw new NotSupportedException($"Unsupported bootstrap addressing mode for mnemonic 'STY' with operand '{operand}'.");
+    }
+
+    private static List<byte> AssembleJmp(string operand)
+    {
+        if (TryAssembleParenthesizedWordOperand("JMP", operand, BootstrapOpcode.JmpIndirect, out var bytes))
+        {
+            return bytes;
+        }
+
+        if (TryAssembleWordOperand("JMP", operand, BootstrapOpcode.JmpAbsolute, out bytes))
+        {
+            return bytes;
+        }
+
+        throw new NotSupportedException($"Unsupported bootstrap addressing mode for mnemonic 'JMP' with operand '{operand}'.");
+    }
+
+    private static List<byte> AssembleImmediate(string operand, string mnemonic, BootstrapOpcode opcode)
+    {
+        var bytes = new List<byte> { (byte)opcode, ParseByteLiteral(operand[1..], mnemonic) };
+        return bytes;
+    }
+
+    private static bool TryAssembleZeroPageOperand(string mnemonic, string operand, BootstrapOpcode zeroPageOpcode, out List<byte> bytes)
+    {
+        if (IsWordLiteral(operand))
+        {
+            bytes = [];
+            return false;
+        }
+
+        bytes = [(byte)zeroPageOpcode, ParseByteLiteral(operand, mnemonic)];
+        return true;
+    }
+
+    private static bool TryAssembleWordOperand(string mnemonic, string operand, BootstrapOpcode wordOpcode, out List<byte> bytes)
+    {
+        if (!IsWordLiteral(operand))
+        {
+            bytes = [];
+            return false;
+        }
+
+        bytes = [(byte)wordOpcode];
+        bytes.AddRange(ParseWordLiteral(operand, mnemonic));
+        return true;
+    }
+
+    private static bool TryAssembleIndexedOperand(string mnemonic, string operand, char indexRegister, BootstrapOpcode zeroPageOpcode, BootstrapOpcode wordOpcode, out List<byte> bytes)
+    {
+        var suffix = $",{indexRegister}";
+
+        if (!operand.EndsWith(suffix, StringComparison.OrdinalIgnoreCase))
+        {
+            bytes = [];
+            return false;
+        }
+
+        var addressOperand = operand[..^suffix.Length];
+
+        if (IsWordLiteral(addressOperand))
+        {
+            bytes = [(byte)wordOpcode];
+            bytes.AddRange(ParseWordLiteral(addressOperand, mnemonic));
+            return true;
+        }
+
+        bytes = [(byte)zeroPageOpcode, ParseByteLiteral(addressOperand, mnemonic)];
+        return true;
+    }
+
+    private static bool TryAssembleZeroPageIndexedOperand(string mnemonic, string operand, char indexRegister, BootstrapOpcode zeroPageOpcode, out List<byte> bytes)
+    {
+        var suffix = $",{indexRegister}";
+
+        if (!operand.EndsWith(suffix, StringComparison.OrdinalIgnoreCase))
+        {
+            bytes = [];
+            return false;
+        }
+
+        var addressOperand = operand[..^suffix.Length];
+
+        if (IsWordLiteral(addressOperand))
+        {
+            bytes = [];
+            return false;
+        }
+
+        bytes = [(byte)zeroPageOpcode, ParseByteLiteral(addressOperand, mnemonic)];
+        return true;
+    }
+
+    private static bool TryAssembleWordIndexedOperand(string mnemonic, string operand, char indexRegister, BootstrapOpcode wordOpcode, out List<byte> bytes)
+    {
+        var suffix = $",{indexRegister}";
+
+        if (!operand.EndsWith(suffix, StringComparison.OrdinalIgnoreCase))
+        {
+            bytes = [];
+            return false;
+        }
+
+        var addressOperand = operand[..^suffix.Length];
+
+        if (!IsWordLiteral(addressOperand))
+        {
+            bytes = [];
+            return false;
+        }
+
+        bytes = [(byte)wordOpcode];
+        bytes.AddRange(ParseWordLiteral(addressOperand, mnemonic));
+        return true;
+    }
+
+    private static bool TryAssembleParenthesizedIndexedOperand(string mnemonic, string operand, BootstrapOpcode indexedIndirectOpcode, BootstrapOpcode indirectIndexedOpcode, out List<byte> bytes)
+    {
+        if (operand.StartsWith("(", StringComparison.Ordinal) && operand.EndsWith(",X)", StringComparison.OrdinalIgnoreCase))
+        {
+            var addressOperand = operand[1..^3];
+            bytes = [(byte)indexedIndirectOpcode, ParseByteLiteral(addressOperand, mnemonic)];
+            return true;
+        }
+
+        if (operand.StartsWith("(", StringComparison.Ordinal) && operand.EndsWith("),Y", StringComparison.OrdinalIgnoreCase))
+        {
+            var addressOperand = operand[1..^3];
+            bytes = [(byte)indirectIndexedOpcode, ParseByteLiteral(addressOperand, mnemonic)];
+            return true;
+        }
+
+        bytes = [];
+        return false;
+    }
+
+    private static bool TryAssembleParenthesizedWordOperand(string mnemonic, string operand, BootstrapOpcode opcode, out List<byte> bytes)
+    {
+        if (!operand.StartsWith("(", StringComparison.Ordinal) || !operand.EndsWith(")", StringComparison.Ordinal))
+        {
+            bytes = [];
+            return false;
+        }
+
+        var addressOperand = operand[1..^1];
+        bytes = [(byte)opcode];
+        bytes.AddRange(ParseWordLiteral(addressOperand, mnemonic));
+        return true;
+    }
+
+    private static bool IsWordLiteral(string literal)
+    {
+        var digits = GetLiteralDigits(literal);
+        return digits.Length > 2;
+    }
+
+    private static string GetLiteralDigits(string literal)
+    {
+        var trimmed = literal.Trim();
+
+        if (trimmed.StartsWith("$", StringComparison.Ordinal))
+        {
+            return trimmed[1..];
+        }
+
+        if (trimmed.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
+        {
+            return trimmed[2..];
+        }
+
+        return trimmed;
     }
 
     private static sbyte ParseRelativeOffset(string literal, string mnemonic)
