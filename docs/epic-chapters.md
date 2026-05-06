@@ -37,7 +37,7 @@ Ta tabela jest glowna lista kontrolna realizacji chapterow. Planner musi aktuali
 | Done | Chapter | Epic Issue | Status | QC Verdict | Follow-up | Notes |
 |---|---|---:|---|---|---|---|
 | [x] | Phase 4: 6502 stack page foundation and JSR/RTS subroutine flow | #26 | done | PASS | none | Stack page `$0100-$01FF`, `SP`, push/pop semantics, `JSR abs`, `RTS`, assembler/CLI/docs and mandatory QC gate #35. |
-| [ ] | Phase 5: 6502 stack opcode slice PHA/PLA/PHP/PLP | #36 | qc | TBD | TBD | Stack opcodes `PHA`, `PLA`, `PHP`, `PLP`, bootstrap status byte contract, assembler/CLI/docs and mandatory QC gate #44. |
+| [x] | Phase 5: 6502 stack opcode slice PHA/PLA/PHP/PLP | #36 | done | PASS_WITH_FOLLOW_UP | #45 | Stack opcodes `PHA`, `PLA`, `PHP`, `PLP`, bootstrap status byte contract, assembler/CLI/docs and mandatory QC gate #44. |
 
 ## QC References
 
@@ -118,7 +118,7 @@ Skopiuj ten szablon dla kazdego nowego epica.
 | Chapter | Epic Issue | Status | Scope |
 |---|---:|---|---|
 | Phase 4: 6502 stack page foundation and JSR/RTS subroutine flow | #26 | done | Stack page `$0100-$01FF`, 8-bit `SP`, push/pop ordering, `JSR abs`, `RTS`, assembler/CLI/docs |
-| Phase 5: 6502 stack opcode slice PHA/PLA/PHP/PLP | #36 | qc | `PHA`, `PLA`, `PHP`, `PLP`, bootstrap status byte contract, assembler/CLI/docs |
+| Phase 5: 6502 stack opcode slice PHA/PLA/PHP/PLP | #36 | done | `PHA`, `PLA`, `PHP`, `PLP`, bootstrap status byte contract, assembler/CLI/docs |
 
 ## QC Reference 25: Phase 3 quality control
 
@@ -209,18 +209,18 @@ Repo zyskuje bootstrapowy model stacka zgodny semantycznie z 6502 dla aktualnego
 
 ### Epic Issue
 - Epic: #36
-- Status: qc
+- Status: done
 - Owner agent: `issue-planner`
 - Execution agent: `issue-executor`
 - Quality gate agent: `epic-qc`
 
 ### Completion Checklist Entry
-- Done: [ ]
+- Done: [x]
 - Chapter: Phase 5: 6502 stack opcode slice PHA/PLA/PHP/PLP
 - Epic issue: #36
-- Status: qc
-- QC verdict: TBD
-- Follow-up: TBD
+- Status: done
+- QC verdict: PASS_WITH_FOLLOW_UP
+- Follow-up: #45
 
 ### Outcome
 Repo dodaje drugi stackowy slice 6502 na fundamencie #26: `PHA`, `PLA`, `PHP`, `PLP`, ich testy CPU, assembler, trace/CLI i dokumentacje. Najwazniejszym warunkiem gotowosci jest jawny bootstrapowy kontrakt status byte dla `PHP` / `PLP`, zdefiniowany przed implementacja.
@@ -262,7 +262,7 @@ Ten chapter rozszerza gotowy model stacka o podstawowe instrukcje odkładania i 
 - [x] #41 - extend assembler for PHA/PLA/PHP/PLP and add ASM end-to-end coverage.
 - [x] #42 - update CLI trace for stack opcode visibility.
 - [x] #43 - update slice map and chapter documentation for stack opcode slice.
-- [ ] #44 - QC gate przez `epic-qc`.
+- [x] #44 - QC gate przez `epic-qc`.
 
 ### Acceptance Criteria
 - [x] Bootstrap status byte contract for `PHP` / `PLP` is documented before implementation.
@@ -275,7 +275,7 @@ Ten chapter rozszerza gotowy model stacka o podstawowe instrukcje odkładania i 
 - [x] At least one assembler-driven stack opcode program is covered by tests.
 - [x] Trace/CLI remains aligned with implemented instruction set and new mnemonics.
 - [x] `docs/cpu-slice-map.md`, `docs/current-epic.md` and `docs/epic-chapters.md` are updated.
-- [ ] Epic passes `epic-qc`, a ewentualne follow-up issues sa jawnie zalinkowane.
+- [x] Epic passes `epic-qc`, a ewentualne follow-up issues sa jawnie zalinkowane.
 
 ### Verification Strategy
 - Narrow tests:
@@ -291,17 +291,17 @@ Ten chapter rozszerza gotowy model stacka o podstawowe instrukcje odkładania i 
 
 ### Documentation Updates
 - [x] `docs/cpu-slice-map.md` po dodaniu `PHA`, `PLA`, `PHP`, `PLP`.
-- [ ] Ten chapter po przejsciu taskow i po QC gate.
+- [x] Ten chapter po przejsciu taskow i po QC gate.
 - [x] `docs/current-epic.md` dla aktywnego stanu i snapshotu weryfikacji.
 - [ ] ADR w `docs/adr/`, jesli status byte contract okaze sie decyzja wykraczajaca poza chapter.
 
 ### QC Gate
-- QC issue/comment: #44
-- Verdict: TBD
+- QC issue/comment: https://github.com/prachwal/pseudoCPU/issues/36#issuecomment-4387471999
+- Verdict: PASS_WITH_FOLLOW_UP
 - Follow-up issues:
-  - TBD
+  - #45 - drift dokumentacji w `docs/pseudoCPU-processor-guide.md` po epikach #26 i #36.
 
 ### Final Notes
-- Final status: qc
-- Remaining risks: status byte contract moze spowodowac drift do pelnego status register; nalezy utrzymac bootstrapowy zakres.
-- Permanent decisions: TBD after #37 and QC.
+- Final status: done
+- Remaining risks: `docs/pseudoCPU-processor-guide.md` pozostaje niespójny z wdrożonym stack slice do czasu zamknięcia #45.
+- Permanent decisions: bootstrapowy status byte pozostaje ograniczony do `Carry` bit 0, `Zero` bit 1 i `Negative` bit 7; bity 2-6 pozostają zarezerwowane/ignorowane do osobnego epica na pełny status register.

@@ -4,7 +4,7 @@ Ten plik przechowuje stan biezacego epica i informacje fazowe, ktorych nie nalez
 
 ## Active Epic
 - GitHub issue: #36
-- Status: qc
+- Status: done
 - Owner agent: `issue-planner`
 - Quality gate agent: `epic-qc`
 
@@ -21,7 +21,7 @@ Ten plik przechowuje stan biezacego epica i informacje fazowe, ktorych nie nalez
 - Task #44 jest obowiazkowa bramka `epic-qc`; epic nie moze zostac zamkniety bez komentarza `Epic QC Gate`.
 - Task #43 ma zamknac aktualizacje `docs/cpu-slice-map.md`, chaptera oraz snapshotu tego pliku po implementacji.
 - Task #37 zapisuje bootstrapowy kontrakt status byte: `Carry` = bit 0, `Zero` = bit 1, `Negative` = bit 7, a bity 2-6 sa zarezerwowane / ignorowane; `PHP` zapisuje tylko ten snapshot, a `PLP` odtwarza wylacznie wspierane flagi.
-- Implementacja taskow #37-#43 jest zakonczona; epic oczekuje na wynik taska QC #44.
+- Implementacja taskow #37-#43 jest zakonczona; QC task #44 zakonczyl epic werdyktem `PASS_WITH_FOLLOW_UP` z follow-upem #45.
 
 ## QC Feedback Loop
 1. `issue-planner` utrzymuje strukture chapter -> epic -> taski.
@@ -36,11 +36,11 @@ Ten plik przechowuje stan biezacego epica i informacje fazowe, ktorych nie nalez
 - Build command: `dotnet build pseudoCPU.sln`
 - Format command: `dotnet format pseudoCPU.sln --verify-no-changes`
 - CLI smoke command: `dotnet run --project src/pseudoCPU.Cli -- run-asm --source examples/stack-opcodes.asm --start 0x0600 --max-steps 100 --trace`
-- Latest QC result: TBD
+- Latest QC result: PASS_WITH_FOLLOW_UP (#45)
 
 ## QC Gate
-- #44 - planned QC gate task for active epic #36.
+- #44 - completed QC gate task for active epic #36.
 
 ## Follow-up Issues
-- none yet for epic #36.
-- New follow-up issues must be added here after `epic-qc` verification.
+- #45 - sync `docs/pseudoCPU-processor-guide.md` with the implemented stack slice, `SP` model and current supported opcodes.
+- Epic QC verdict recorded in comment: https://github.com/prachwal/pseudoCPU/issues/36#issuecomment-4387471999
